@@ -1,0 +1,15 @@
+# --- Week 1: PDF parsing, chunking, config ---
+pymupdf
+pdfplumber
+pandas
+pyyaml
+python-dotenv
+tqdm
+requests
+
+# --- Week 1: database (pgvector) ---
+psycopg[binary]
+pgvector
+
+# --- Week 1: LLM ---
+google-genai

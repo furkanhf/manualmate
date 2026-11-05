@@ -1,0 +1,16 @@
+# secrets
+.env
+# data (too large / not ours to publish)
+data/raw/*
+data/processed/*
+data/chunks/*
+!data/**/.gitkeep
+eval/image_queries/*.jpg
+eval/image_queries/*.png
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.conda/
