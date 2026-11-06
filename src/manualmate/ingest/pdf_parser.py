@@ -44,6 +44,10 @@ ODD_SPACES = re.compile("[\u00a0\u2000-\u200a\u202f\u205f\u3000\t]")
 # A word broken at the end of a line: "instal-" + "lation".
 HYPHEN_BREAK = re.compile(r"([a-z])-\s+([a-z])")
 MULTI_SPACE = re.compile(r" {2,}")
+# Some PDFs (the Daikin manuals) store "fi"/"fl" as one ligature glyph and the
+# text comes out with a space after it: "fi lter", "airfl ow", "effi cient".
+LIGATURE_GAP = re.compile(r"\b([A-Za-z]*?)(ffi|ffl|fi|fl) ([a-z]+)")
+LIGATURE_MIN = 20   # fix only manuals with at least this many gaps
 ONLY_NUMBER = re.compile(r"^\s*\d{1,4}\s*$")   # a bare page number
 
 
@@ -165,8 +169,8 @@ def parse_pdf(pdf_path: Path, meta: dict) -> list[dict]:
 
     margin_repeats, stamps = find_repeated_lines(pages_blocks)
 
-    records = []
-    for page_no, blocks in enumerate(pages_blocks, start=1):
+    page_texts = []
+    for blocks in pages_blocks:
         paragraphs = []
         for block in blocks:
             kept = [
@@ -176,7 +180,16 @@ def parse_pdf(pdf_path: Path, meta: dict) -> list[dict]:
             paragraph = join_block(kept)
             if paragraph:
                 paragraphs.append(paragraph)
-        text = "\n".join(paragraphs)
+        page_texts.append("\n".join(paragraphs))
+
+    # Join broken ligatures only in a manual where the problem is common.
+    # In other manuals a match is usually a real word ("burfi in").
+    gaps = sum(len(LIGATURE_GAP.findall(text)) for text in page_texts)
+    if gaps >= LIGATURE_MIN:
+        page_texts = [LIGATURE_GAP.sub(r"\1\2\3", text) for text in page_texts]
+
+    records = []
+    for page_no, text in enumerate(page_texts, start=1):
         records.append({
             "manual_id": meta["manual_id"],
             "brand": meta["brand"],

@@ -1,0 +1,50 @@
+{"id": "q001", "question": "How often should I wash the filter of my Samsung split AC, and how do I clean it?", "manual_id": "ac_001", "pages": [9], "category": "ac", "type": "how-to"}
+{"id": "q002", "question": "My Samsung AC indoor unit smells musty. Does it have a self-cleaning option?", "manual_id": "ac_001", "pages": [8], "category": "ac", "type": "feature"}
+{"id": "q003", "question": "The outdoor unit of my Daikin FTKS35 is noisy at night. How can I make it quieter?", "manual_id": "ac_002", "pages": [19], "category": "ac", "type": "feature"}
+{"id": "q004", "question": "My Daikin FTKS air conditioner shows code U0. What does it mean?", "manual_id": "ac_002", "pages": [40], "category": "ac", "type": "error-code"}
+{"id": "q005", "question": "On my Daikin FTXS L series AC, the breaker trips when I run the AC with other appliances. Is there a low-power mode?", "manual_id": "ac_004", "pages": [20], "category": "ac", "type": "feature"}
+{"id": "q006", "question": "My Daikin FTXS L series AC is not cooling well. What should I check?", "manual_id": "ac_004", "pages": [38], "category": "ac", "type": "troubleshooting"}
+{"id": "q007", "question": "How do I stop mould and bad smell inside my Daikin FTXZ Ururu Sarara AC?", "manual_id": "ac_003", "pages": [28], "category": "ac", "type": "maintenance"}
+{"id": "q008", "question": "The orange timer lamp on my Daikin FTXZ indoor unit is blinking. What does it mean?", "manual_id": "ac_003", "pages": [37], "category": "ac", "type": "troubleshooting"}
+{"id": "q009", "question": "How do I reduce the humidity in my room with the Daikin FTXZ without making it too cold?", "manual_id": "ac_003", "pages": [12], "category": "ac", "type": "how-to"}
+{"id": "q010", "question": "Can I set different on and off times for each day of the week on my Daikin FTXS L series AC?", "manual_id": "ac_004", "pages": [23, 24], "category": "ac", "type": "how-to"}
+{"id": "q011", "question": "My IFB Senator washing machine shows 'tAP' on the display. What should I do?", "manual_id": "wm_001", "pages": [74], "category": "washing-machine", "type": "error-code"}
+{"id": "q012", "question": "Water fills very slowly in my IFB front load washer. How do I clean the inlet hose filter?", "manual_id": "wm_001", "pages": [60], "category": "washing-machine", "type": "maintenance"}
+{"id": "q013", "question": "Why won't the door of my IFB washing machine open after the wash?", "manual_id": "wm_001", "pages": [30, 73], "category": "washing-machine", "type": "troubleshooting"}
+{"id": "q014", "question": "My Samsung front load washer is not draining the water. What should I check?", "manual_id": "wm_002", "pages": [62], "category": "washing-machine", "type": "troubleshooting"}
+{"id": "q015", "question": "Can I set my Samsung washing machine so that the wash finishes at a later time?", "manual_id": "wm_002", "pages": [43], "category": "washing-machine", "type": "feature"}
+{"id": "q016", "question": "My LG front load washing machine shows OE. How do I fix it?", "manual_id": "wm_003", "pages": [36], "category": "washing-machine", "type": "error-code"}
+{"id": "q017", "question": "How do I clean the drum of my LG FHM1408 washing machine?", "manual_id": "wm_003", "pages": [31], "category": "washing-machine", "type": "maintenance"}
+{"id": "q018", "question": "My Bosch washing machine makes a rattling noise and does not drain. How do I clean the pump?", "manual_id": "wm_004", "pages": [34, 35], "category": "washing-machine", "type": "maintenance"}
+{"id": "q019", "question": "How do I cancel a wash programme midway on my Bosch WAJ20180ZA and open the door?", "manual_id": "wm_004", "pages": [30], "category": "washing-machine", "type": "how-to"}
+{"id": "q020", "question": "The water pressure is low in my Bosch washing machine. How do I clean the water inlet filter?", "manual_id": "wm_004", "pages": [37, 38], "category": "washing-machine", "type": "maintenance"}
+{"id": "q021", "question": "What fridge temperature range can I set on my Samsung RF9000 refrigerator?", "manual_id": "rf_001", "pages": [42], "category": "refrigerator", "type": "spec"}
+{"id": "q022", "question": "Water comes out very slowly from the dispenser of my Samsung French door fridge. Why?", "manual_id": "rf_001", "pages": [84], "category": "refrigerator", "type": "troubleshooting"}
+{"id": "q023", "question": "My Samsung refrigerator makes clicking and bubbling sounds. Is that normal?", "manual_id": "rf_001", "pages": [88, 89], "category": "refrigerator", "type": "troubleshooting"}
+{"id": "q024", "question": "How do I change the fridge temperature on my Bosch KGN fridge-freezer?", "manual_id": "rf_002", "pages": [15], "category": "refrigerator", "type": "how-to"}
+{"id": "q025", "question": "I am putting a lot of fresh food in my Bosch KGN freezer. Should I switch on a special mode first?", "manual_id": "rf_002", "pages": [16], "category": "refrigerator", "type": "feature"}
+{"id": "q026", "question": "Which foods can I freeze in my Bosch KGN freezer, and how should I prepare vegetables?", "manual_id": "rf_002", "pages": [19], "category": "refrigerator", "type": "how-to"}
+{"id": "q027", "question": "I am going away for a long trip. Does my Bosch KGN56 fridge have an energy-saving mode for that?", "manual_id": "rf_004", "pages": [18], "category": "refrigerator", "type": "feature"}
+{"id": "q028", "question": "My Bosch KGN56 freezer does not reach the set temperature and has ice build-up. What can I do?", "manual_id": "rf_004", "pages": [27], "category": "refrigerator", "type": "troubleshooting"}
+{"id": "q029", "question": "My Bosch KGN56 fridge makes rattling noises. What can cause this?", "manual_id": "rf_004", "pages": [28], "category": "refrigerator", "type": "troubleshooting"}
+{"id": "q030", "question": "How should I dispose of my old Whirlpool NEO refrigerator?", "manual_id": "rf_003", "pages": [8], "category": "refrigerator", "type": "other"}
+{"id": "q031", "question": "How do I steam clean the inside of my IFB 30BRC2 microwave?", "manual_id": "mw_001", "pages": [38], "category": "microwave", "type": "maintenance"}
+{"id": "q032", "question": "I want to preheat my IFB convection microwave to 170 degrees and then bake a cake. How do I do that?", "manual_id": "mw_001", "pages": [13], "category": "microwave", "type": "how-to"}
+{"id": "q033", "question": "My IFB microwave smells of fish. Can I remove the smell?", "manual_id": "mw_001", "pages": [39], "category": "microwave", "type": "feature"}
+{"id": "q034", "question": "How do I lock the buttons of my Samsung MC28H5025 microwave so my kids cannot use it?", "manual_id": "mw_002", "pages": [44], "category": "microwave", "type": "feature"}
+{"id": "q035", "question": "The clock is not showing on my Samsung microwave display. Why?", "manual_id": "mw_002", "pages": [58], "category": "microwave", "type": "troubleshooting"}
+{"id": "q036", "question": "My LG microwave does not start at all. What could be wrong?", "manual_id": "mw_003", "pages": [226], "category": "microwave", "type": "troubleshooting"}
+{"id": "q037", "question": "Can I make ghee in my LG MC2846 microwave?", "manual_id": "mw_003", "pages": [24], "category": "microwave", "type": "feature"}
+{"id": "q038", "question": "How do I turn off the child lock on my LG microwave?", "manual_id": "mw_003", "pages": [20], "category": "microwave", "type": "how-to"}
+{"id": "q039", "question": "What should I be careful about when defrosting meat with bones in my Panasonic NN-ST64 microwave?", "manual_id": "mw_004", "pages": [20], "category": "microwave", "type": "how-to"}
+{"id": "q040", "question": "When I use my Panasonic microwave, my Wi-Fi and TV get interference. Is the oven faulty?", "manual_id": "mw_004", "pages": [30], "category": "microwave", "type": "troubleshooting"}
+{"id": "q041", "question": "How do I update the firmware of my D-Link DIR-825 router with a file I downloaded?", "manual_id": "rt_001", "pages": [204, 205], "category": "router", "type": "how-to"}
+{"id": "q042", "question": "I want a separate Wi-Fi network for visitors on my D-Link DIR-825 that cannot see my home devices. How?", "manual_id": "rt_001", "pages": [59, 118], "category": "router", "type": "how-to"}
+{"id": "q043", "question": "How can I back up the settings of my D-Link router before I reset it?", "manual_id": "rt_001", "pages": [203], "category": "router", "type": "how-to"}
+{"id": "q044", "question": "I forgot the admin password of my Netgear R6350. How do I reset it to factory settings?", "manual_id": "rt_002", "pages": [141], "category": "router", "type": "troubleshooting"}
+{"id": "q045", "question": "How can I block some websites for my kids on my Netgear R6350 router?", "manual_id": "rt_002", "pages": [72, 73], "category": "router", "type": "how-to"}
+{"id": "q046", "question": "I want to host a game server at home behind my Netgear router. How do I open a port for it?", "manual_id": "rt_002", "pages": [178], "category": "router", "type": "how-to"}
+{"id": "q047", "question": "I forgot the Wi-Fi password of my TP-Link Archer C6. How can I find it?", "manual_id": "rt_003", "pages": [83], "category": "router", "type": "troubleshooting"}
+{"id": "q048", "question": "How long do I hold the reset button on my TP-Link Archer C6 to restore factory settings?", "manual_id": "rt_003", "pages": [10], "category": "router", "type": "spec"}
+{"id": "q049", "question": "How do I factory reset my Tenda AC10 router with the button?", "manual_id": "rt_004", "pages": [133], "category": "router", "type": "how-to"}
+{"id": "q050", "question": "Can I block YouTube and Instagram on my daughter's phone at certain times with my Tenda AC10?", "manual_id": "rt_004", "pages": [74, 75], "category": "router", "type": "how-to"}
