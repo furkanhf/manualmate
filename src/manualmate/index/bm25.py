@@ -30,6 +30,7 @@ import re
 import unicodedata
 from pathlib import Path
 
+import numpy as np
 from rank_bm25 import BM25Okapi
 
 # BM25 settings. These are the usual values; we do not tune them yet.
@@ -122,13 +123,22 @@ class BM25Index:
         ).fetchall()
         return cls([dict(zip(RESULT_KEYS, row)) for row in rows])
 
-    def search(self, question: str, k: int = 5) -> list[dict]:
+    def search(self, question: str, k: int = 5,
+               manual_ids: list[str] | None = None) -> list[dict]:
         """Return the k best chunks for the question, best first.
+
+        manual_ids: search only in these manuals (from the router). None = all.
+        IDF (how rare a word is) still comes from ALL chunks, so the scores
+        are the same as without the filter; only other manuals are removed.
 
         Chunks with score 0 (no word in common) are not returned, so the
         list can be shorter than k.
         """
         scores = self.bm25.get_scores(tokenize(question))
+        if manual_ids:
+            allowed = set(manual_ids)
+            mask = np.array([c["manual_id"] in allowed for c in self.chunks])
+            scores = np.where(mask, scores, 0.0)
         best = scores.argsort()[::-1][:k]
         return [{**self.chunks[i], "score": float(scores[i])}
                 for i in best if scores[i] > 0]

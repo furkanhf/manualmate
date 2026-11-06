@@ -1,0 +1,10 @@
+{"id": "c01", "question": "My fridge makes a clicking noise. Is that normal?", "expect": "ask", "manual_ids": ["rf_001", "rf_002", "rf_003", "rf_004"]}
+{"id": "c02", "question": "My Samsung washer is not draining. What should I check?", "expect": "answer", "manual_ids": ["wm_002"]}
+{"id": "c03", "question": "My Bosch fridge has ice build-up in the freezer. What can I do?", "expect": "ask", "manual_ids": ["rf_002", "rf_004"]}
+{"id": "c04", "question": "How do I reset my router to factory settings?", "expect": "ask", "manual_ids": ["rt_001", "rt_002", "rt_003", "rt_004"]}
+{"id": "c05", "question": "My LG microwave does not heat the food. What is wrong?", "expect": "answer", "manual_ids": ["mw_003"]}
+{"id": "c06", "question": "How do I set the clock on the remote of my Daikin AC?", "expect": "ask", "manual_ids": ["ac_002", "ac_003", "ac_004"]}
+{"id": "c07", "question": "How do I clean the filter?", "expect": "ask", "manual_ids": ["ac_001", "ac_002", "ac_003", "ac_004", "mw_001", "mw_002", "mw_003", "mw_004", "rf_001", "rf_002", "rf_003", "rf_004", "rt_001", "rt_002", "rt_003", "rt_004", "wm_001", "wm_002", "wm_003", "wm_004"]}
+{"id": "c08", "question": "The door of my IFB washing machine is locked after the wash. How do I open it?", "expect": "answer", "manual_ids": ["wm_001"]}
+{"id": "c09", "question": "Does my Panasonic oven have an automatic defrost mode?", "expect": "answer", "manual_ids": ["mw_004"]}
+{"id": "c10", "question": "My Daikin FTKS35 makes a loud noise when it starts. Is that normal?", "expect": "ask", "manual_ids": ["ac_002", "ac_004"]}

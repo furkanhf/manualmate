@@ -53,15 +53,17 @@ def rrf_fuse(result_lists: dict[str, list[dict]], k: int = 5,
 
 def search_by_vector(conn: psycopg.Connection, bm25_index: BM25Index,
                      question: str, vector: np.ndarray, k: int = 5,
-                     candidates: int = CANDIDATES) -> list[dict]:
+                     candidates: int = CANDIDATES,
+                     manual_ids: list[str] | None = None) -> list[dict]:
     """Hybrid search when the question vector is already computed (eval)."""
     return rrf_fuse({
-        "dense": dense_search_by_vector(conn, vector, k=candidates),
-        "bm25": bm25_index.search(question, k=candidates),
+        "dense": dense_search_by_vector(conn, vector, k=candidates, manual_ids=manual_ids),
+        "bm25": bm25_index.search(question, k=candidates, manual_ids=manual_ids),
     }, k=k)
 
 
 def search(conn: psycopg.Connection, bm25_index: BM25Index, question: str,
-           k: int = 5) -> list[dict]:
+           k: int = 5, manual_ids: list[str] | None = None) -> list[dict]:
     """Embed the question with bge-m3, then run hybrid search."""
-    return search_by_vector(conn, bm25_index, question, embed_query(question), k)
+    return search_by_vector(conn, bm25_index, question, embed_query(question), k,
+                            manual_ids=manual_ids)

@@ -13,6 +13,10 @@ Run (--method: dense, bm25 or hybrid; --name defaults to the method):
     python scripts/run_eval.py --method dense --name dense_baseline
     python scripts/run_eval.py --method bm25      (no bge-m3 needed: laptop is OK)
     python scripts/run_eval.py --method hybrid    (needs bge-m3: run on Colab)
+    python scripts/run_eval.py --method routed    (parse -> route -> dense in scope)
+    python scripts/run_eval.py --method routed --query-text full
+        --query-text issue (default): search with the question WITHOUT brand and
+        model words. full: search with the whole question.
 The results are saved to eval/results/<date>_<name>.json
 """
 
@@ -28,12 +32,14 @@ from manualmate.index.bm25 import BM25Index
 from manualmate.index.db import get_connection
 from manualmate.index.embedder import MODEL_NAME, embed_texts
 from manualmate.retrieve import dense, hybrid
+from manualmate.retrieve.query_parser import parse
+from manualmate.retrieve.router import route
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 QUERIES_PATH = PROJECT_ROOT / "eval" / "text_queries.jsonl"
 RESULTS_DIR = PROJECT_ROOT / "eval" / "results"
 KS = [1, 3, 5, 10]
-METHODS = ["dense", "bm25", "hybrid"]
+METHODS = ["dense", "bm25", "hybrid", "routed", "routed_hybrid"]
 
 
 def first_hit_rank(results: list[dict], query: dict) -> int | None:
@@ -49,15 +55,31 @@ def main() -> None:
     parser.add_argument("--method", choices=METHODS, default="dense")
     parser.add_argument("--name", default=None,
                         help="name of the results file (default: the method)")
+    parser.add_argument("--query-text", choices=["issue", "full"], default="issue",
+                        help="routed methods: search text without brand/model words "
+                             "(issue) or the whole question (full)")
     args = parser.parse_args()
-    args.name = args.name or args.method
+    routed = args.method.startswith("routed")
+    args.name = args.name or (f"{args.method}_{args.query_text}" if routed else args.method)
 
     with open(QUERIES_PATH, encoding="utf-8") as f:
         queries = [json.loads(line) for line in f if line.strip()]
 
-    # Only dense and hybrid need bge-m3. BM25 alone runs without torch.
-    if args.method in ("dense", "hybrid"):
-        vectors = embed_texts([q["question"] for q in queries], show_progress=False)
+    # Routed methods: parse each question, pick the manuals, and (by default)
+    # search with the issue text only.
+    for q in queries:
+        if routed:
+            parsed = parse(q["question"])
+            r = route(parsed)
+            q["_scope"], q["_route"] = r.manual_ids, f"{r.reason}: {','.join(r.manual_ids)}"
+            q["_parsed"] = parsed.summary()
+            q["_text"] = parsed.issue if args.query_text == "issue" else q["question"]
+        else:
+            q["_scope"], q["_route"], q["_parsed"], q["_text"] = None, None, None, q["question"]
+
+    # Only BM25 alone runs without bge-m3 (no torch needed).
+    if args.method != "bm25":
+        vectors = embed_texts([q["_text"] for q in queries], show_progress=False)
     else:
         vectors = [None] * len(queries)
     max_k = max(KS)
@@ -65,17 +87,18 @@ def main() -> None:
     per_query = []
     with get_connection() as conn:
         bm25_index = None
-        if args.method in ("bm25", "hybrid"):
+        if args.method in ("bm25", "hybrid", "routed_hybrid"):
             bm25_index = BM25Index.from_db(conn)
             print(f"BM25 index: {len(bm25_index)} chunks")
         for query, vector in zip(queries, vectors):
-            if args.method == "dense":
-                results = dense.search_by_vector(conn, vector, k=max_k)
+            scope = query["_scope"]
+            if args.method in ("dense", "routed"):
+                results = dense.search_by_vector(conn, vector, k=max_k, manual_ids=scope)
             elif args.method == "bm25":
-                results = bm25_index.search(query["question"], k=max_k)
+                results = bm25_index.search(query["_text"], k=max_k)
             else:
-                results = hybrid.search_by_vector(conn, bm25_index, query["question"],
-                                                  vector, k=max_k)
+                results = hybrid.search_by_vector(conn, bm25_index, query["_text"],
+                                                  vector, k=max_k, manual_ids=scope)
             rank = first_hit_rank(results, query)
             per_query.append({
                 "id": query["id"],
@@ -88,6 +111,9 @@ def main() -> None:
                                       for r in results[:5]),
                 "top5": [f"{r['manual_id']} p{r['page']} ({r['score']:.3f})"
                          for r in results[:5]],
+                "route": query["_route"],
+                "parsed": query["_parsed"],
+                "search_text": query["_text"],
             })
 
     n = len(per_query)
@@ -105,6 +131,11 @@ def main() -> None:
     }
 
     # --- Print ---------------------------------------------------------------
+    if routed:
+        in_scope = sum(q["manual_id"] in q["_scope"] for q in queries) / len(queries)
+        single = sum(len(q["_scope"]) == 1 and q["manual_id"] in q["_scope"]
+                     for q in queries) / len(queries)
+        metrics["route_in_scope"], metrics["route_single"] = in_scope, single
     print(f"\nRun: {args.name}   method: {args.method}   model: {MODEL_NAME}"
           f"   questions: {n}\n")
     for key, value in metrics.items():
@@ -118,6 +149,8 @@ def main() -> None:
         got = q["top5"][0] if q["top5"] else "(nothing)"
         print(f"  {q['id']} expected {q['expected']:<16} got {got}"
               f"   | {q['question'][:60]}")
+        if q["route"]:
+            print(f"        route {q['route']}   | search: {q['search_text'][:60]}")
 
     # --- Save ----------------------------------------------------------------
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -127,6 +160,7 @@ def main() -> None:
         json.dump({
             "name": args.name,
             "method": args.method,
+            "query_text": args.query_text if routed else None,
             "model": MODEL_NAME,
             "date": stamp,
             "n_questions": n,

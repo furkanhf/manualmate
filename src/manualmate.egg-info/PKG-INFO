@@ -1,5 +1,0 @@
-Metadata-Version: 2.4
-Name: manualmate
-Version: 0.1.0
-Summary: Multimodal, multilingual RAG assistant for product manuals
-Requires-Python: >=3.10

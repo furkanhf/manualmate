@@ -1,0 +1,150 @@
+# Names that users type for each manual. The query parser (retrieve/query_parser.py)
+# uses this file to find WHICH manual a question is about.
+#
+# How model names match (all text is lowercased; "-", "/", "." and spaces are removed):
+#   - A model alias matches a word of the question if they are equal, or if one starts
+#     with the other and the shorter one has at least 4 characters.
+#     Example: alias "ftks35kvma" matches the user word "ftks35" and "ftks35kvma".
+#   - Two neighbouring words are also tried together: "archer c6" -> "archerc6".
+#   - The LONGEST match wins. "kgn56" (rf_004) beats "kgn" (rf_002).
+#   - If two manuals have the same best match (user wrote "ftks35", which is in both
+#     Daikin K and L manuals), the router returns both and asks the user.
+#
+# Add a new manual: copy one block, change the id, brand, category and models.
+# Model names come from the cover page of the manual (the model list on page 1).
+
+categories:
+  ac: [ac, a/c, air conditioner, air conditioners, air con, aircon, split ac, split, inverter ac]
+  washing-machine: [washing machine, washer, front load, front loader, top load]
+  refrigerator: [refrigerator, fridge, fridge-freezer, freezer, french door]
+  microwave: [microwave, microwave oven, convection oven, oven]
+  router: [router, wifi router, wi-fi router, modem, wireless router]
+
+brands:
+  samsung: [samsung]
+  lg: [lg]
+  ifb: [ifb]
+  bosch: [bosch]
+  daikin: [daikin]
+  whirlpool: [whirlpool]
+  panasonic: [panasonic]
+  d-link: [d-link, dlink]
+  netgear: [netgear]
+  tp-link: [tp-link, tplink]
+  tenda: [tenda]
+
+manuals:
+  # --- AC -------------------------------------------------------------------
+  ac_001:
+    brand: samsung
+    category: ac
+    name: Samsung AR**BY split AC
+    models: [ar-by, arby, ar9500t]
+  ac_002:
+    brand: daikin
+    category: ac
+    name: Daikin FTKS/FTXS K series
+    models: [ftks-k, ftxs-k, k series, ftks20kvma, ftks25kvma, ftks35kvma, ctks20kvma,
+             ftxs20kvma, ftxs25kvma, ftxs35kvma, ftxs46kvma, ctxs20kvma,
+             ftks, ftxs, ftks20, ftks25, ftks35, ftxs20, ftxs25, ftxs35, ftxs46]
+  ac_003:
+    brand: daikin
+    category: ac
+    name: Daikin FTXZ Ururu Sarara
+    models: [ftxz, ftxz25nv1b, ftxz35nv1b, ftxz50nv1b, ururu sarara, ururu]
+  ac_004:
+    brand: daikin
+    category: ac
+    name: Daikin FTKS/FTXS L series
+    models: [ftks-l, ftxs-l, l series, ftks20lvma, ftks25lvma, ftks35lvma, ftks46lvma,
+             ftxs20lvma, ftxs25lvma, ftxs35lvma, ftxs46lvma,
+             ftks, ftxs, ftks20, ftks25, ftks35, ftks46, ftxs20, ftxs25, ftxs35, ftxs46]
+
+  # --- Washing machine ------------------------------------------------------
+  wm_001:
+    brand: ifb
+    category: washing-machine
+    name: IFB Senator / Serena / Elite / Executive front load
+    models: [senator, serena, elite, executive, 7012k, 7012hk, 8012k, 8014k, 9014k,
+             1014k, 1014kh, 1114kh, mbn-8014k, senator-mbn-8014k]
+  wm_002:
+    brand: samsung
+    category: washing-machine
+    name: Samsung WW70T/WW80T/WW90T
+    models: [ww80t, ww70t, ww90t, ww8t, ww7t, ww9t]
+  wm_003:
+    brand: lg
+    category: washing-machine
+    name: LG FHM1408 / FHM1409
+    models: [fhm1408, fhm1409, fhm1408bdl, fhm]
+  wm_004:
+    brand: bosch
+    category: washing-machine
+    name: Bosch WAJ20180ZA / WAJ2018SZA
+    models: [waj20180za, waj2018sza, waj20180, waj2018, waj]
+
+  # --- Refrigerator ---------------------------------------------------------
+  rf_001:
+    brand: samsung
+    category: refrigerator
+    name: Samsung RF9000 French door
+    models: [rf9000, rf9000f, rf90]
+  rf_002:
+    brand: bosch
+    category: refrigerator
+    name: Bosch KGN.. fridge-freezer
+    models: [kgn]
+  rf_003:
+    brand: whirlpool
+    category: refrigerator
+    name: Whirlpool NEO IC255/275/305/355/375
+    models: [neo, neo-ic355, ic255, ic275, ic305, ic355, ic375]
+  rf_004:
+    brand: bosch
+    category: refrigerator
+    name: Bosch KGN56 fridge-freezer
+    models: [kgn56]
+
+  # --- Microwave ------------------------------------------------------------
+  mw_001:
+    brand: ifb
+    category: microwave
+    name: IFB 30BRC2 convection microwave
+    models: [30brc2, 30brc]
+  mw_002:
+    brand: samsung
+    category: microwave
+    name: Samsung MC28H5025
+    models: [mc28h5025, mc28h5025vk, mc28h, mc28]
+  mw_003:
+    brand: lg
+    category: microwave
+    name: LG MC2846 (BD/BV/SL/BG/BR)
+    models: [mc2846, mc2846bg, mc2846bd, mc2846bv, mc2846sl, mc2846br]
+  mw_004:
+    brand: panasonic
+    category: microwave
+    name: Panasonic NN-ST64QW
+    models: [nn-st64, nn-st64qw, st64, nnst64]
+
+  # --- Router ---------------------------------------------------------------
+  rt_001:
+    brand: d-link
+    category: router
+    name: D-Link DIR-825/AC
+    models: [dir-825, dir-825-ac, dir825]
+  rt_002:
+    brand: netgear
+    category: router
+    name: Netgear R6350 (AC1750)
+    models: [r6350]
+  rt_003:
+    brand: tp-link
+    category: router
+    name: TP-Link Archer C6 / A6
+    models: [archer c6, archer a6, archer-c6, archerc6, archera6]
+  rt_004:
+    brand: tenda
+    category: router
+    name: Tenda AC10
+    models: [ac10]
