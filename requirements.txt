@@ -13,3 +13,9 @@ pgvector
 
 # --- Week 1: LLM ---
 google-genai
+
+# --- Week 1: embeddings (bge-m3) ---
+# torch is NOT listed here: Colab already has the GPU version, and on the
+# laptop install the CPU version with:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+sentence-transformers==6.2.0
