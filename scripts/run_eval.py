@@ -9,8 +9,10 @@ Recall@K = hits / number of questions.
 MRR      = mean of 1/rank of the first correct chunk (0 if none in top 10).
 Manual@5 = the correct MANUAL is in the top 5 (page can be wrong).
 
-Run:
-    python scripts/run_eval.py --name dense_baseline
+Run (--method: dense, bm25 or hybrid; --name defaults to the method):
+    python scripts/run_eval.py --method dense --name dense_baseline
+    python scripts/run_eval.py --method bm25      (no bge-m3 needed: laptop is OK)
+    python scripts/run_eval.py --method hybrid    (needs bge-m3: run on Colab)
 The results are saved to eval/results/<date>_<name>.json
 """
 
@@ -22,14 +24,16 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
+from manualmate.index.bm25 import BM25Index
 from manualmate.index.db import get_connection
 from manualmate.index.embedder import MODEL_NAME, embed_texts
-from manualmate.retrieve.dense import search_by_vector
+from manualmate.retrieve import dense, hybrid
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 QUERIES_PATH = PROJECT_ROOT / "eval" / "text_queries.jsonl"
 RESULTS_DIR = PROJECT_ROOT / "eval" / "results"
 KS = [1, 3, 5, 10]
+METHODS = ["dense", "bm25", "hybrid"]
 
 
 def first_hit_rank(results: list[dict], query: dict) -> int | None:
@@ -42,19 +46,36 @@ def first_hit_rank(results: list[dict], query: dict) -> int | None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--name", default="dense_baseline")
+    parser.add_argument("--method", choices=METHODS, default="dense")
+    parser.add_argument("--name", default=None,
+                        help="name of the results file (default: the method)")
     args = parser.parse_args()
+    args.name = args.name or args.method
 
     with open(QUERIES_PATH, encoding="utf-8") as f:
         queries = [json.loads(line) for line in f if line.strip()]
 
-    vectors = embed_texts([q["question"] for q in queries], show_progress=False)
+    # Only dense and hybrid need bge-m3. BM25 alone runs without torch.
+    if args.method in ("dense", "hybrid"):
+        vectors = embed_texts([q["question"] for q in queries], show_progress=False)
+    else:
+        vectors = [None] * len(queries)
     max_k = max(KS)
 
     per_query = []
     with get_connection() as conn:
+        bm25_index = None
+        if args.method in ("bm25", "hybrid"):
+            bm25_index = BM25Index.from_db(conn)
+            print(f"BM25 index: {len(bm25_index)} chunks")
         for query, vector in zip(queries, vectors):
-            results = search_by_vector(conn, vector, k=max_k)
+            if args.method == "dense":
+                results = dense.search_by_vector(conn, vector, k=max_k)
+            elif args.method == "bm25":
+                results = bm25_index.search(query["question"], k=max_k)
+            else:
+                results = hybrid.search_by_vector(conn, bm25_index, query["question"],
+                                                  vector, k=max_k)
             rank = first_hit_rank(results, query)
             per_query.append({
                 "id": query["id"],
@@ -84,7 +105,8 @@ def main() -> None:
     }
 
     # --- Print ---------------------------------------------------------------
-    print(f"\nRun: {args.name}   model: {MODEL_NAME}   questions: {n}\n")
+    print(f"\nRun: {args.name}   method: {args.method}   model: {MODEL_NAME}"
+          f"   questions: {n}\n")
     for key, value in metrics.items():
         print(f"  {key:<10} {value:.2f}")
     print("\nRecall@5 by category:")
@@ -93,7 +115,8 @@ def main() -> None:
     misses = [q for q in per_query if not q["rank"] or q["rank"] > 5]
     print(f"\nMisses at top 5 ({len(misses)}):")
     for q in misses:
-        print(f"  {q['id']} expected {q['expected']:<16} got {q['top5'][0]}"
+        got = q["top5"][0] if q["top5"] else "(nothing)"
+        print(f"  {q['id']} expected {q['expected']:<16} got {got}"
               f"   | {q['question'][:60]}")
 
     # --- Save ----------------------------------------------------------------
@@ -103,6 +126,7 @@ def main() -> None:
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump({
             "name": args.name,
+            "method": args.method,
             "model": MODEL_NAME,
             "date": stamp,
             "n_questions": n,
