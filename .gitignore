@@ -4,6 +4,7 @@
 data/raw/*
 data/processed/*
 data/chunks/*
+data/scanned/*
 !data/**/.gitkeep
 eval/image_queries/*.jpg
 eval/image_queries/*.png
