@@ -1,0 +1,823 @@
+{
+  "name": "dense_baseline",
+  "model": "BAAI/bge-m3",
+  "date": "2026-11-06_1431",
+  "n_questions": 50,
+  "metrics": {
+    "recall@1": 0.36,
+    "recall@3": 0.62,
+    "recall@5": 0.72,
+    "recall@10": 0.78,
+    "mrr@10": 0.5156666666666667,
+    "manual@5": 0.98
+  },
+  "recall@5_by_category": {
+    "ac": 0.8,
+    "microwave": 0.6,
+    "refrigerator": 0.7,
+    "router": 0.8,
+    "washing-machine": 0.7
+  },
+  "per_query": [
+    {
+      "id": "q001",
+      "category": "ac",
+      "type": "how-to",
+      "question": "How often should I wash the filter of my Samsung split AC, and how do I clean it?",
+      "expected": "ac_001 p[9]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_001 p9 (0.624)",
+        "rf_001 p63 (0.611)",
+        "ac_002 p33 (0.607)",
+        "ac_004 p33 (0.605)",
+        "wm_003 p32 (0.605)"
+      ]
+    },
+    {
+      "id": "q002",
+      "category": "ac",
+      "type": "feature",
+      "question": "My Samsung AC indoor unit smells musty. Does it have a self-cleaning option?",
+      "expected": "ac_001 p[8]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_001 p63 (0.603)",
+        "ac_001 p8 (0.599)",
+        "ac_002 p38 (0.593)",
+        "mw_002 p9 (0.590)",
+        "wm_003 p32 (0.574)"
+      ]
+    },
+    {
+      "id": "q003",
+      "category": "ac",
+      "type": "feature",
+      "question": "The outdoor unit of my Daikin FTKS35 is noisy at night. How can I make it quieter?",
+      "expected": "ac_002 p[19]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_002 p19 (0.648)",
+        "ac_004 p19 (0.642)",
+        "ac_004 p29 (0.595)",
+        "ac_002 p29 (0.593)",
+        "ac_003 p26 (0.591)"
+      ]
+    },
+    {
+      "id": "q004",
+      "category": "ac",
+      "type": "error-code",
+      "question": "My Daikin FTKS air conditioner shows code U0. What does it mean?",
+      "expected": "ac_002 p[40]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_004 p40 (0.559)",
+        "ac_002 p40 (0.559)",
+        "ac_004 p40 (0.559)",
+        "ac_002 p40 (0.559)",
+        "ac_003 p41 (0.552)"
+      ]
+    },
+    {
+      "id": "q005",
+      "category": "ac",
+      "type": "feature",
+      "question": "On my Daikin FTXS L series AC, the breaker trips when I run the AC with other appliances. Is there a low-power mode?",
+      "expected": "ac_004 p[20]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_002 p20 (0.552)",
+        "ac_004 p20 (0.544)",
+        "wm_003 p38 (0.536)",
+        "rf_004 p24 (0.534)",
+        "ac_002 p1 (0.526)"
+      ]
+    },
+    {
+      "id": "q006",
+      "category": "ac",
+      "type": "troubleshooting",
+      "question": "My Daikin FTXS L series AC is not cooling well. What should I check?",
+      "expected": "ac_004 p[38]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_002 p1 (0.575)",
+        "rf_004 p24 (0.568)",
+        "ac_004 p1 (0.565)",
+        "rf_002 p22 (0.564)",
+        "ac_002 p38 (0.553)"
+      ]
+    },
+    {
+      "id": "q007",
+      "category": "ac",
+      "type": "maintenance",
+      "question": "How do I stop mould and bad smell inside my Daikin FTXZ Ururu Sarara AC?",
+      "expected": "ac_003 p[28]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_003 p28 (0.594)",
+        "wm_003 p32 (0.551)",
+        "ac_003 p46 (0.538)",
+        "ac_003 p44 (0.534)",
+        "ac_003 p7 (0.527)"
+      ]
+    },
+    {
+      "id": "q008",
+      "category": "ac",
+      "type": "troubleshooting",
+      "question": "The orange timer lamp on my Daikin FTXZ indoor unit is blinking. What does it mean?",
+      "expected": "ac_003 p[37]",
+      "rank": 3,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_003 p6 (0.607)",
+        "ac_003 p41 (0.601)",
+        "ac_003 p37 (0.596)",
+        "ac_003 p19 (0.588)",
+        "ac_003 p19 (0.583)"
+      ]
+    },
+    {
+      "id": "q009",
+      "category": "ac",
+      "type": "how-to",
+      "question": "How do I reduce the humidity in my room with the Daikin FTXZ without making it too cold?",
+      "expected": "ac_003 p[12]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_003 p13 (0.580)",
+        "rf_001 p6 (0.562)",
+        "ac_003 p2 (0.540)",
+        "ac_004 p12 (0.524)",
+        "ac_002 p12 (0.524)"
+      ]
+    },
+    {
+      "id": "q010",
+      "category": "ac",
+      "type": "how-to",
+      "question": "Can I set different on and off times for each day of the week on my Daikin FTXS L series AC?",
+      "expected": "ac_004 p[23, 24]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_004 p23 (0.590)",
+        "ac_002 p23 (0.590)",
+        "ac_004 p25 (0.553)",
+        "ac_002 p25 (0.553)",
+        "ac_004 p24 (0.553)"
+      ]
+    },
+    {
+      "id": "q011",
+      "category": "washing-machine",
+      "type": "error-code",
+      "question": "My IFB Senator washing machine shows 'tAP' on the display. What should I do?",
+      "expected": "wm_001 p[74]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_001 p74 (0.645)",
+        "wm_001 p36 (0.598)",
+        "wm_001 p37 (0.564)",
+        "wm_001 p66 (0.562)",
+        "wm_001 p64 (0.561)"
+      ]
+    },
+    {
+      "id": "q012",
+      "category": "washing-machine",
+      "type": "maintenance",
+      "question": "Water fills very slowly in my IFB front load washer. How do I clean the inlet hose filter?",
+      "expected": "wm_001 p[60]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_001 p60 (0.663)",
+        "wm_003 p32 (0.663)",
+        "wm_004 p37 (0.658)",
+        "wm_001 p66 (0.657)",
+        "wm_001 p67 (0.654)"
+      ]
+    },
+    {
+      "id": "q013",
+      "category": "washing-machine",
+      "type": "troubleshooting",
+      "question": "Why won't the door of my IFB washing machine open after the wash?",
+      "expected": "wm_001 p[30, 73]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_001 p64 (0.720)",
+        "wm_001 p73 (0.668)",
+        "wm_001 p74 (0.655)",
+        "wm_001 p65 (0.651)",
+        "wm_001 p76 (0.616)"
+      ]
+    },
+    {
+      "id": "q014",
+      "category": "washing-machine",
+      "type": "troubleshooting",
+      "question": "My Samsung front load washer is not draining the water. What should I check?",
+      "expected": "wm_002 p[62]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_003 p39 (0.667)",
+        "wm_001 p66 (0.667)",
+        "rf_001 p63 (0.658)",
+        "wm_002 p10 (0.656)",
+        "wm_002 p16 (0.650)"
+      ]
+    },
+    {
+      "id": "q015",
+      "category": "washing-machine",
+      "type": "feature",
+      "question": "Can I set my Samsung washing machine so that the wash finishes at a later time?",
+      "expected": "wm_002 p[43]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_002 p43 (0.693)",
+        "wm_001 p38 (0.650)",
+        "wm_003 p28 (0.635)",
+        "wm_001 p36 (0.623)",
+        "wm_003 p29 (0.622)"
+      ]
+    },
+    {
+      "id": "q016",
+      "category": "washing-machine",
+      "type": "error-code",
+      "question": "My LG front load washing machine shows OE. How do I fix it?",
+      "expected": "wm_003 p[36]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_003 p36 (0.649)",
+        "wm_001 p76 (0.635)",
+        "wm_003 p35 (0.632)",
+        "wm_003 p35 (0.623)",
+        "wm_001 p74 (0.620)"
+      ]
+    },
+    {
+      "id": "q017",
+      "category": "washing-machine",
+      "type": "maintenance",
+      "question": "How do I clean the drum of my LG FHM1408 washing machine?",
+      "expected": "wm_003 p[31]",
+      "rank": null,
+      "manual_in_top5": false,
+      "top5": [
+        "wm_002 p51 (0.694)",
+        "wm_002 p39 (0.679)",
+        "wm_002 p39 (0.629)",
+        "wm_004 p33 (0.622)",
+        "wm_002 p12 (0.617)"
+      ]
+    },
+    {
+      "id": "q018",
+      "category": "washing-machine",
+      "type": "maintenance",
+      "question": "My Bosch washing machine makes a rattling noise and does not drain. How do I clean the pump?",
+      "expected": "wm_004 p[34, 35]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_003 p37 (0.638)",
+        "wm_004 p44 (0.629)",
+        "wm_001 p67 (0.628)",
+        "wm_001 p71 (0.627)",
+        "wm_004 p36 (0.625)"
+      ]
+    },
+    {
+      "id": "q019",
+      "category": "washing-machine",
+      "type": "how-to",
+      "question": "How do I cancel a wash programme midway on my Bosch WAJ20180ZA and open the door?",
+      "expected": "wm_004 p[30]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_002 p46 (0.632)",
+        "wm_004 p30 (0.629)",
+        "wm_004 p1 (0.623)",
+        "wm_001 p64 (0.614)",
+        "wm_001 p30 (0.609)"
+      ]
+    },
+    {
+      "id": "q020",
+      "category": "washing-machine",
+      "type": "maintenance",
+      "question": "The water pressure is low in my Bosch washing machine. How do I clean the water inlet filter?",
+      "expected": "wm_004 p[37, 38]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_004 p37 (0.649)",
+        "wm_004 p38 (0.645)",
+        "wm_001 p60 (0.644)",
+        "wm_003 p32 (0.632)",
+        "wm_001 p67 (0.627)"
+      ]
+    },
+    {
+      "id": "q021",
+      "category": "refrigerator",
+      "type": "spec",
+      "question": "What fridge temperature range can I set on my Samsung RF9000 refrigerator?",
+      "expected": "rf_001 p[42]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_001 p21 (0.595)",
+        "rf_004 p19 (0.576)",
+        "rf_002 p15 (0.575)",
+        "rf_004 p16 (0.574)",
+        "rf_002 p17 (0.569)"
+      ]
+    },
+    {
+      "id": "q022",
+      "category": "refrigerator",
+      "type": "troubleshooting",
+      "question": "Water comes out very slowly from the dispenser of my Samsung French door fridge. Why?",
+      "expected": "rf_001 p[84]",
+      "rank": 4,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_001 p85 (0.637)",
+        "rf_001 p80 (0.626)",
+        "rf_001 p64 (0.614)",
+        "rf_001 p84 (0.613)",
+        "rf_001 p80 (0.580)"
+      ]
+    },
+    {
+      "id": "q023",
+      "category": "refrigerator",
+      "type": "troubleshooting",
+      "question": "My Samsung refrigerator makes clicking and bubbling sounds. Is that normal?",
+      "expected": "rf_001 p[88, 89]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_001 p68 (0.669)",
+        "rf_001 p88 (0.667)",
+        "rf_001 p89 (0.646)",
+        "rf_002 p25 (0.631)",
+        "wm_003 p36 (0.609)"
+      ]
+    },
+    {
+      "id": "q024",
+      "category": "refrigerator",
+      "type": "how-to",
+      "question": "How do I change the fridge temperature on my Bosch KGN fridge-freezer?",
+      "expected": "rf_002 p[15]",
+      "rank": 6,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_002 p1 (0.628)",
+        "rf_004 p1 (0.625)",
+        "rf_004 p16 (0.622)",
+        "rf_001 p42 (0.620)",
+        "rf_004 p16 (0.609)"
+      ]
+    },
+    {
+      "id": "q025",
+      "category": "refrigerator",
+      "type": "feature",
+      "question": "I am putting a lot of fresh food in my Bosch KGN freezer. Should I switch on a special mode first?",
+      "expected": "rf_002 p[16]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_004 p18 (0.607)",
+        "rf_001 p42 (0.598)",
+        "rf_004 p13 (0.586)",
+        "rf_004 p17 (0.578)",
+        "rf_002 p15 (0.574)"
+      ]
+    },
+    {
+      "id": "q026",
+      "category": "refrigerator",
+      "type": "how-to",
+      "question": "Which foods can I freeze in my Bosch KGN freezer, and how should I prepare vegetables?",
+      "expected": "rf_002 p[19]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_002 p19 (0.582)",
+        "rf_004 p20 (0.575)",
+        "mw_004 p37 (0.574)",
+        "rf_004 p1 (0.571)",
+        "rf_002 p1 (0.570)"
+      ]
+    },
+    {
+      "id": "q027",
+      "category": "refrigerator",
+      "type": "feature",
+      "question": "I am going away for a long trip. Does my Bosch KGN56 fridge have an energy-saving mode for that?",
+      "expected": "rf_004 p[18]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_004 p18 (0.563)",
+        "rf_004 p1 (0.544)",
+        "rf_004 p13 (0.515)",
+        "rf_004 p8 (0.514)",
+        "rf_001 p6 (0.505)"
+      ]
+    },
+    {
+      "id": "q028",
+      "category": "refrigerator",
+      "type": "troubleshooting",
+      "question": "My Bosch KGN56 freezer does not reach the set temperature and has ice build-up. What can I do?",
+      "expected": "rf_004 p[27]",
+      "rank": 3,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_002 p24 (0.631)",
+        "rf_004 p1 (0.630)",
+        "rf_004 p27 (0.621)",
+        "rf_004 p26 (0.609)",
+        "rf_004 p28 (0.605)"
+      ]
+    },
+    {
+      "id": "q029",
+      "category": "refrigerator",
+      "type": "troubleshooting",
+      "question": "My Bosch KGN56 fridge makes rattling noises. What can cause this?",
+      "expected": "rf_004 p[28]",
+      "rank": 4,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_001 p89 (0.608)",
+        "rf_004 p1 (0.589)",
+        "rf_001 p83 (0.585)",
+        "rf_004 p28 (0.581)",
+        "wm_003 p36 (0.579)"
+      ]
+    },
+    {
+      "id": "q030",
+      "category": "refrigerator",
+      "type": "other",
+      "question": "How should I dispose of my old Whirlpool NEO refrigerator?",
+      "expected": "rf_003 p[8]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_002 p27 (0.600)",
+        "rf_003 p8 (0.589)",
+        "rf_004 p29 (0.581)",
+        "rf_001 p76 (0.574)",
+        "rf_003 p9 (0.570)"
+      ]
+    },
+    {
+      "id": "q031",
+      "category": "microwave",
+      "type": "maintenance",
+      "question": "How do I steam clean the inside of my IFB 30BRC2 microwave?",
+      "expected": "mw_001 p[38]",
+      "rank": 4,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_004 p31 (0.628)",
+        "mw_001 p40 (0.615)",
+        "mw_004 p31 (0.606)",
+        "mw_001 p38 (0.599)",
+        "wm_003 p32 (0.591)"
+      ]
+    },
+    {
+      "id": "q032",
+      "category": "microwave",
+      "type": "how-to",
+      "question": "I want to preheat my IFB convection microwave to 170 degrees and then bake a cake. How do I do that?",
+      "expected": "mw_001 p[13]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_001 p13 (0.708)",
+        "mw_001 p14 (0.677)",
+        "mw_004 p83 (0.642)",
+        "mw_002 p56 (0.637)",
+        "mw_004 p79 (0.634)"
+      ]
+    },
+    {
+      "id": "q033",
+      "category": "microwave",
+      "type": "feature",
+      "question": "My IFB microwave smells of fish. Can I remove the smell?",
+      "expected": "mw_001 p[39]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_001 p40 (0.590)",
+        "mw_003 p28 (0.581)",
+        "mw_003 p43 (0.580)",
+        "mw_003 p38 (0.575)",
+        "mw_003 p34 (0.574)"
+      ]
+    },
+    {
+      "id": "q034",
+      "category": "microwave",
+      "type": "feature",
+      "question": "How do I lock the buttons of my Samsung MC28H5025 microwave so my kids cannot use it?",
+      "expected": "mw_002 p[44]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_002 p44 (0.666)",
+        "mw_001 p38 (0.638)",
+        "mw_002 p61 (0.633)",
+        "mw_003 p19 (0.615)",
+        "wm_002 p43 (0.614)"
+      ]
+    },
+    {
+      "id": "q035",
+      "category": "microwave",
+      "type": "troubleshooting",
+      "question": "The clock is not showing on my Samsung microwave display. Why?",
+      "expected": "mw_002 p[58]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_002 p12 (0.664)",
+        "mw_003 p225 (0.607)",
+        "mw_002 p61 (0.606)",
+        "mw_002 p1 (0.592)",
+        "rf_001 p91 (0.586)"
+      ]
+    },
+    {
+      "id": "q036",
+      "category": "microwave",
+      "type": "troubleshooting",
+      "question": "My LG microwave does not start at all. What could be wrong?",
+      "expected": "mw_003 p[226]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_003 p226 (0.661)",
+        "mw_003 p225 (0.646)",
+        "mw_004 p30 (0.611)",
+        "mw_004 p30 (0.599)",
+        "mw_002 p59 (0.588)"
+      ]
+    },
+    {
+      "id": "q037",
+      "category": "microwave",
+      "type": "feature",
+      "question": "Can I make ghee in my LG MC2846 microwave?",
+      "expected": "mw_003 p[24]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_003 p157 (0.567)",
+        "mw_003 p123 (0.562)",
+        "mw_002 p22 (0.559)",
+        "mw_003 p198 (0.555)",
+        "mw_003 p74 (0.548)"
+      ]
+    },
+    {
+      "id": "q038",
+      "category": "microwave",
+      "type": "how-to",
+      "question": "How do I turn off the child lock on my LG microwave?",
+      "expected": "mw_003 p[20]",
+      "rank": 10,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_002 p44 (0.679)",
+        "mw_001 p38 (0.676)",
+        "wm_004 p31 (0.672)",
+        "wm_002 p43 (0.666)",
+        "mw_003 p19 (0.654)"
+      ]
+    },
+    {
+      "id": "q039",
+      "category": "microwave",
+      "type": "how-to",
+      "question": "What should I be careful about when defrosting meat with bones in my Panasonic NN-ST64 microwave?",
+      "expected": "mw_004 p[20]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_004 p20 (0.609)",
+        "mw_004 p8 (0.578)",
+        "mw_004 p8 (0.576)",
+        "mw_004 p57 (0.574)",
+        "mw_004 p8 (0.569)"
+      ]
+    },
+    {
+      "id": "q040",
+      "category": "microwave",
+      "type": "troubleshooting",
+      "question": "When I use my Panasonic microwave, my Wi-Fi and TV get interference. Is the oven faulty?",
+      "expected": "mw_004 p[30]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_004 p30 (0.724)",
+        "mw_001 p4 (0.679)",
+        "mw_003 p17 (0.675)",
+        "mw_004 p2 (0.647)",
+        "mw_004 p30 (0.642)"
+      ]
+    },
+    {
+      "id": "q041",
+      "category": "router",
+      "type": "how-to",
+      "question": "How do I update the firmware of my D-Link DIR-825 router with a file I downloaded?",
+      "expected": "rt_001 p[204, 205]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_001 p205 (0.679)",
+        "rt_001 p204 (0.667)",
+        "rt_002 p136 (0.639)",
+        "rt_003 p71 (0.638)",
+        "rt_002 p136 (0.636)"
+      ]
+    },
+    {
+      "id": "q042",
+      "category": "router",
+      "type": "how-to",
+      "question": "I want a separate Wi-Fi network for visitors on my D-Link DIR-825 that cannot see my home devices. How?",
+      "expected": "rt_001 p[59, 118]",
+      "rank": null,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_001 p6 (0.681)",
+        "rt_003 p37 (0.639)",
+        "rt_003 p35 (0.629)",
+        "rt_001 p6 (0.616)",
+        "rt_003 p36 (0.615)"
+      ]
+    },
+    {
+      "id": "q043",
+      "category": "router",
+      "type": "how-to",
+      "question": "How can I back up the settings of my D-Link router before I reset it?",
+      "expected": "rt_001 p[203]",
+      "rank": 4,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_002 p139 (0.690)",
+        "rt_003 p72 (0.676)",
+        "rt_004 p136 (0.663)",
+        "rt_001 p203 (0.655)",
+        "rt_002 p142 (0.637)"
+      ]
+    },
+    {
+      "id": "q044",
+      "category": "router",
+      "type": "troubleshooting",
+      "question": "I forgot the admin password of my Netgear R6350. How do I reset it to factory settings?",
+      "expected": "rt_002 p[141]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_002 p138 (0.641)",
+        "rt_002 p141 (0.627)",
+        "rt_002 p137 (0.626)",
+        "rt_001 p202 (0.620)",
+        "rt_002 p140 (0.619)"
+      ]
+    },
+    {
+      "id": "q045",
+      "category": "router",
+      "type": "how-to",
+      "question": "How can I block some websites for my kids on my Netgear R6350 router?",
+      "expected": "rt_002 p[72, 73]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_003 p39 (0.626)",
+        "rt_002 p72 (0.620)",
+        "rt_003 p40 (0.609)",
+        "rt_003 p41 (0.601)",
+        "rt_004 p75 (0.596)"
+      ]
+    },
+    {
+      "id": "q046",
+      "category": "router",
+      "type": "how-to",
+      "question": "I want to host a game server at home behind my Netgear router. How do I open a port for it?",
+      "expected": "rt_002 p[178]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_003 p53 (0.653)",
+        "rt_002 p178 (0.632)",
+        "rt_003 p55 (0.629)",
+        "rt_003 p56 (0.624)",
+        "rt_002 p182 (0.623)"
+      ]
+    },
+    {
+      "id": "q047",
+      "category": "router",
+      "type": "troubleshooting",
+      "question": "I forgot the Wi-Fi password of my TP-Link Archer C6. How can I find it?",
+      "expected": "rt_003 p[83]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_003 p83 (0.682)",
+        "rt_002 p138 (0.602)",
+        "rt_003 p64 (0.602)",
+        "rt_001 p63 (0.598)",
+        "rt_003 p27 (0.596)"
+      ]
+    },
+    {
+      "id": "q048",
+      "category": "router",
+      "type": "spec",
+      "question": "How long do I hold the reset button on my TP-Link Archer C6 to restore factory settings?",
+      "expected": "rt_003 p[10]",
+      "rank": 10,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_001 p19 (0.633)",
+        "rt_002 p142 (0.603)",
+        "rt_004 p133 (0.598)",
+        "rt_003 p73 (0.585)",
+        "rt_001 p203 (0.572)"
+      ]
+    },
+    {
+      "id": "q049",
+      "category": "router",
+      "type": "how-to",
+      "question": "How do I factory reset my Tenda AC10 router with the button?",
+      "expected": "rt_004 p[133]",
+      "rank": 4,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_001 p19 (0.673)",
+        "rt_001 p203 (0.612)",
+        "rt_004 p3 (0.612)",
+        "rt_004 p133 (0.595)",
+        "rt_002 p141 (0.588)"
+      ]
+    },
+    {
+      "id": "q050",
+      "category": "router",
+      "type": "how-to",
+      "question": "Can I block YouTube and Instagram on my daughter's phone at certain times with my Tenda AC10?",
+      "expected": "rt_004 p[74, 75]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_004 p76 (0.642)",
+        "rt_004 p75 (0.589)",
+        "rt_003 p41 (0.530)",
+        "rt_004 p74 (0.527)",
+        "rt_004 p99 (0.526)"
+      ]
+    }
+  ]
+}
