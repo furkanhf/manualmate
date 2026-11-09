@@ -57,12 +57,23 @@ def untagged_sentences(answer: str) -> list[str]:
     # sentence before it: move it in front of the full stop first.
     answer = re.sub(r"([.!?])[ \t]*((?:\[[^\[\]]+\][ \t]*)+)", r" \2\1", answer)
     out = []
+    last = None                   # the last fact sentence, while it has no tag
     for piece in SENTENCE_RE.split(answer):
         piece = piece.strip()
         if len(piece.split()) < MIN_WORDS:
+            # A short piece with a tag ("▶ [ac_001 p9]") belongs to the
+            # sentence before it.
+            if last is not None and find_tags(piece):
+                out.remove(last)
+                last = None
             continue
-        if not find_tags(piece):
+        if piece.endswith(":"):   # a heading, for example "To clean the filter:"
+            continue
+        if find_tags(piece):
+            last = None
+        else:
             out.append(piece)
+            last = piece
     return out
 
 
@@ -99,7 +110,8 @@ def check(answer: str, chunks: list[dict]) -> dict:
 
 
 if __name__ == "__main__":
-    sources = [{"manual_id": "mw_003", "page": 24}, {"manual_id": "mw_003", "page": 157}]
+    sources = [{"manual_id": "mw_003", "page": 24}, {"manual_id": "mw_003", "page": 157},
+               {"manual_id": "ac_001", "page": 9}]
     examples = {
         "good": "Press Auto Cook until '6h' appears to select Ghee [mw_003 p24]. "
                 "Then press Start [mw_003 p.24].",
@@ -108,6 +120,9 @@ if __name__ == "__main__":
                   "Then wait about 20 minutes for the butter to melt.",
         "tag after full stop": "Press Auto Cook until '6h' appears. [mw_003 p24] "
                                "Then press Start. [mw_003 p24]",
+        "gemini q001": "Clean the filter every two weeks [ac_001 p9]. \n\nTo clean the filter:\n"
+                       "1. Slide the filter off of the unit [ac_001 p9].\n"
+                       "6. Reset the reminder: In operation ▶ ▶ Select Filter Reset. ▶ [ac_001 p9]",
         "refusal": "NOT_IN_MANUAL",
     }
     for name, answer in examples.items():
