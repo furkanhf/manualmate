@@ -17,9 +17,12 @@ Run (--method: dense, bm25 or hybrid; --name defaults to the method):
     python scripts/run_eval.py --method routed --query-text full
     python scripts/run_eval.py --method routed_rerank   (routed dense top 20 ->
         bge-reranker -> new order; needs GPU: run on Colab)
-        --rerank-text full (default): the reranker reads the whole question.
-        issue: the reranker reads the question WITHOUT brand and model words.
+        --rerank-text issue (default, best on 2026-11-09): the reranker reads the
+        question WITHOUT brand and model words. full: the whole question.
         --candidates 20: how many dense results the reranker reads.
+    --rewrites (routed methods): search with the question + Gemini's manual words
+        from eval/rewrites.jsonl (make it first: python scripts/make_rewrites.py).
+        The reranker still reads the question without the manual words.
         --query-text issue (default): search with the question WITHOUT brand and
         model words. full: search with the whole question.
 The results are saved to eval/results/<date>_<name>.json
@@ -39,10 +42,12 @@ from manualmate.index.db import get_connection
 from manualmate.index.embedder import MODEL_NAME, embed_texts
 from manualmate.retrieve import dense, hybrid, reranker
 from manualmate.retrieve.query_parser import parse
+from manualmate.retrieve.query_rewriter import expand
 from manualmate.retrieve.router import route
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 QUERIES_PATH = PROJECT_ROOT / "eval" / "text_queries.jsonl"
+REWRITES_PATH = PROJECT_ROOT / "eval" / "rewrites.jsonl"
 RESULTS_DIR = PROJECT_ROOT / "eval" / "results"
 KS = [1, 3, 5, 10]
 METHODS = ["dense", "bm25", "hybrid", "routed", "routed_hybrid", "routed_rerank"]
@@ -64,10 +69,13 @@ def main() -> None:
     parser.add_argument("--query-text", choices=["issue", "full"], default="issue",
                         help="routed methods: search text without brand/model words "
                              "(issue) or the whole question (full)")
-    parser.add_argument("--rerank-text", choices=["issue", "full"], default="full",
+    parser.add_argument("--rerank-text", choices=["issue", "full"], default="issue",
                         help="routed_rerank: the text the reranker reads")
     parser.add_argument("--candidates", type=int, default=reranker.CANDIDATES,
                         help="routed_rerank: how many dense results to rerank")
+    parser.add_argument("--rewrites", action="store_true",
+                        help="routed methods: add Gemini's manual words from "
+                             "eval/rewrites.jsonl to the search text")
     args = parser.parse_args()
     routed = args.method.startswith("routed")
     reranked = args.method == "routed_rerank"
@@ -75,9 +83,20 @@ def main() -> None:
         args.name = f"{args.method}_{args.query_text}" if routed else args.method
         if reranked:
             args.name += f"_rr-{args.rerank_text}_c{args.candidates}"
+        if args.rewrites:
+            args.name += "_rw"
+    if args.rewrites and not routed:
+        parser.error("--rewrites works only with the routed methods")
 
     with open(QUERIES_PATH, encoding="utf-8") as f:
         queries = [json.loads(line) for line in f if line.strip()]
+    rewrites = {}
+    if args.rewrites:
+        with open(REWRITES_PATH, encoding="utf-8") as f:
+            rewrites = {r["id"]: r["rewrite"] for r in map(json.loads, f) if r}
+        missing = [q["id"] for q in queries if not rewrites.get(q["id"])]
+        print(f"Rewrites: {len(rewrites)} loaded"
+              + (f", missing or empty: {', '.join(missing)}" if missing else ""))
 
     # Routed methods: parse each question, pick the manuals, and (by default)
     # search with the issue text only.
@@ -87,9 +106,12 @@ def main() -> None:
             r = route(parsed)
             q["_scope"], q["_route"] = r.manual_ids, f"{r.reason}: {','.join(r.manual_ids)}"
             q["_parsed"] = parsed.summary()
-            q["_text"] = parsed.issue if args.query_text == "issue" else q["question"]
+            q["_issue"] = parsed.issue if args.query_text == "issue" else q["question"]
+            q["_text"] = (expand(q["_issue"], rewrites.get(q["id"], ""))
+                          if args.rewrites else q["_issue"])
         else:
             q["_scope"], q["_route"], q["_parsed"], q["_text"] = None, None, None, q["question"]
+            q["_issue"] = q["question"]
 
     # Only BM25 alone runs without bge-m3 (no torch needed).
     if args.method != "bm25":
@@ -114,7 +136,7 @@ def main() -> None:
                 candidates = dense.search_by_vector(conn, vector, k=args.candidates,
                                                     manual_ids=scope)
                 dense_rank = first_hit_rank(candidates, query)
-                text = query["question"] if args.rerank_text == "full" else query["_text"]
+                text = query["question"] if args.rerank_text == "full" else query["_issue"]
                 start = time.perf_counter()
                 results = reranker.rerank(text, candidates, top_k=max_k)
                 rerank_ms.append((time.perf_counter() - start) * 1000)
@@ -199,6 +221,7 @@ def main() -> None:
             "name": args.name,
             "method": args.method,
             "query_text": args.query_text if routed else None,
+            "rewrites": args.rewrites,
             "reranker": ({"model": reranker.MODEL_NAME, "candidates": args.candidates,
                           "rerank_text": args.rerank_text} if reranked else None),
             "model": MODEL_NAME,
