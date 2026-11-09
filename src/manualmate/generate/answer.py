@@ -94,15 +94,21 @@ def _sources(chunks: list[dict]) -> list[dict]:
 
 
 def generate(question: str, chunks: list[dict], route=None,
-             language: str = "English", model: str = MODEL_NAME) -> Answer:
+             language: str = "English", model: str = MODEL_NAME,
+             refuse_below: float | None = None,
+             clarify_below: float | None = None) -> Answer:
     """Gate 1 -> Gemini -> gate 2 -> citation check.
 
     question: the FULL user question.
     chunks:   reranked chunks, best first (each has "score").
     route:    the router's Route (for "Which model?"), or None.
+    refuse_below, clarify_below: gate-1 thresholds; None = the defaults in
+              refusal.py. The eval passes 0.0 so that Gemini always runs.
     """
     chunks = chunks[:TOP_K]
-    before = gate_before(route, chunks)
+    limits = {k: v for k, v in (("refuse_below", refuse_below),
+                                ("clarify_below", clarify_below)) if v is not None}
+    before = gate_before(route, chunks, **limits)
     if not before.answers:
         return Answer(question, before.action, before.reason, before.message,
                       top_score=before.top_score, options=before.options,
