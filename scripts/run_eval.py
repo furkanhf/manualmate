@@ -15,6 +15,11 @@ Run (--method: dense, bm25 or hybrid; --name defaults to the method):
     python scripts/run_eval.py --method hybrid    (needs bge-m3: run on Colab)
     python scripts/run_eval.py --method routed    (parse -> route -> dense in scope)
     python scripts/run_eval.py --method routed --query-text full
+    python scripts/run_eval.py --method routed_rerank   (routed dense top 20 ->
+        bge-reranker -> new order; needs GPU: run on Colab)
+        --rerank-text full (default): the reranker reads the whole question.
+        issue: the reranker reads the question WITHOUT brand and model words.
+        --candidates 20: how many dense results the reranker reads.
         --query-text issue (default): search with the question WITHOUT brand and
         model words. full: search with the whole question.
 The results are saved to eval/results/<date>_<name>.json
@@ -24,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -31,7 +37,7 @@ from pathlib import Path
 from manualmate.index.bm25 import BM25Index
 from manualmate.index.db import get_connection
 from manualmate.index.embedder import MODEL_NAME, embed_texts
-from manualmate.retrieve import dense, hybrid
+from manualmate.retrieve import dense, hybrid, reranker
 from manualmate.retrieve.query_parser import parse
 from manualmate.retrieve.router import route
 
@@ -39,7 +45,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 QUERIES_PATH = PROJECT_ROOT / "eval" / "text_queries.jsonl"
 RESULTS_DIR = PROJECT_ROOT / "eval" / "results"
 KS = [1, 3, 5, 10]
-METHODS = ["dense", "bm25", "hybrid", "routed", "routed_hybrid"]
+METHODS = ["dense", "bm25", "hybrid", "routed", "routed_hybrid", "routed_rerank"]
 
 
 def first_hit_rank(results: list[dict], query: dict) -> int | None:
@@ -58,9 +64,17 @@ def main() -> None:
     parser.add_argument("--query-text", choices=["issue", "full"], default="issue",
                         help="routed methods: search text without brand/model words "
                              "(issue) or the whole question (full)")
+    parser.add_argument("--rerank-text", choices=["issue", "full"], default="full",
+                        help="routed_rerank: the text the reranker reads")
+    parser.add_argument("--candidates", type=int, default=reranker.CANDIDATES,
+                        help="routed_rerank: how many dense results to rerank")
     args = parser.parse_args()
     routed = args.method.startswith("routed")
-    args.name = args.name or (f"{args.method}_{args.query_text}" if routed else args.method)
+    reranked = args.method == "routed_rerank"
+    if args.name is None:
+        args.name = f"{args.method}_{args.query_text}" if routed else args.method
+        if reranked:
+            args.name += f"_rr-{args.rerank_text}_c{args.candidates}"
 
     with open(QUERIES_PATH, encoding="utf-8") as f:
         queries = [json.loads(line) for line in f if line.strip()]
@@ -85,6 +99,7 @@ def main() -> None:
     max_k = max(KS)
 
     per_query = []
+    rerank_ms = []
     with get_connection() as conn:
         bm25_index = None
         if args.method in ("bm25", "hybrid", "routed_hybrid"):
@@ -92,8 +107,17 @@ def main() -> None:
             print(f"BM25 index: {len(bm25_index)} chunks")
         for query, vector in zip(queries, vectors):
             scope = query["_scope"]
+            dense_rank = None
             if args.method in ("dense", "routed"):
                 results = dense.search_by_vector(conn, vector, k=max_k, manual_ids=scope)
+            elif reranked:
+                candidates = dense.search_by_vector(conn, vector, k=args.candidates,
+                                                    manual_ids=scope)
+                dense_rank = first_hit_rank(candidates, query)
+                text = query["question"] if args.rerank_text == "full" else query["_text"]
+                start = time.perf_counter()
+                results = reranker.rerank(text, candidates, top_k=max_k)
+                rerank_ms.append((time.perf_counter() - start) * 1000)
             elif args.method == "bm25":
                 results = bm25_index.search(query["_text"], k=max_k)
             else:
@@ -101,6 +125,7 @@ def main() -> None:
                                                   vector, k=max_k, manual_ids=scope)
             rank = first_hit_rank(results, query)
             per_query.append({
+                "dense_rank": dense_rank,
                 "id": query["id"],
                 "category": query["category"],
                 "type": query["type"],
@@ -140,6 +165,19 @@ def main() -> None:
           f"   questions: {n}\n")
     for key, value in metrics.items():
         print(f"  {key:<10} {value:.2f}")
+    if reranked:
+        # The first call also loads the model, so leave it out of the timing.
+        times = sorted(rerank_ms[1:]) or rerank_ms
+        metrics["rerank_ms_avg"] = sum(times) / len(times)
+        metrics["rerank_ms_p95"] = times[min(len(times) - 1, int(0.95 * len(times)))]
+        moved = [q for q in per_query if q["dense_rank"] != q["rank"]]
+        print(f"  reranker: {reranker.MODEL_NAME}, {args.candidates} candidates,"
+              f" reads the {args.rerank_text} question")
+        print(f"  rerank time per question: avg {metrics['rerank_ms_avg']:.0f} ms,"
+              f" p95 {metrics['rerank_ms_p95']:.0f} ms")
+        print(f"\nRank of the correct chunk, dense -> reranked ({len(moved)} changed):")
+        for q in moved:
+            print(f"  {q['id']}  {q['dense_rank']} -> {q['rank']}")
     print("\nRecall@5 by category:")
     for cat, value in category_recall.items():
         print(f"  {cat:<16} {value:.2f}")
@@ -161,6 +199,8 @@ def main() -> None:
             "name": args.name,
             "method": args.method,
             "query_text": args.query_text if routed else None,
+            "reranker": ({"model": reranker.MODEL_NAME, "candidates": args.candidates,
+                          "rerank_text": args.rerank_text} if reranked else None),
             "model": MODEL_NAME,
             "date": stamp,
             "n_questions": n,
