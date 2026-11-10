@@ -6,22 +6,22 @@ and update it at the end of every chat (status, sessions, next steps). Furqan co
 
 ## ▶ CURRENT STATUS (update every chat)
 - Date: 2026-11-10 (chat 4.1, evening)
-- Last commit: f890ff9 (week 4: headings.py). Before: 7f51a85, 60458ce (week 3 closed).
-- Week: 4 IN PROGRESS. Scope cut (chat 4.1, Furqan has 2 more resume projects): ~60 manuals instead of 150 (decide later; resume must say the real number), troubleshooting "one row = one chunk" and LLM keywords skipped for now, simple safe mode only.
-- Done in chat 4.1 (no Gemini): src/manualmate/ingest/headings.py (bold/bigger font, 8 noise rules; Furqan spot check 200 samples ≈ 5% wrong); pdf_parser.py also writes "paras" (headings as own paragraphs; "text" unchanged, checked 1,671/1,671 pages); chunker.py --mode section (default) / --mode fixed (week-1 baseline, checked identical 2,230 chunks).
-- Section mode rules: chunk starts with title line "<Brand> <MODEL> <category> | <parent> > <heading>" (2 levels); a new heading always starts a new chunk; never crosses a page; long sections cut at sentence ends (no overlap); no merging; body < 12 letters → no chunk; safe mode: < 0.3 headings/page → fixed. Result on 20 manuals: 4,159 chunks (fixed: 2,230), median 448 chars, all 20 manuals in section mode.
-- Key pages: mw_001 p39 DEODORIZE = own chunk (q033); mw_003 p24 Ghee/Bakery Mode = own chunk (q037); mw_002 p58 troubleshooting rows still 2 big chunks (q035, table step skipped).
-- Colab section 7e added (retrieval eval only). Section expansion (sibling parts → Gemini) NOT built yet; chunk_id has the section number (_sNNNN_) for later.
+- Last commit: f6cc9c7 (week 4: section chunking, parser paras, Colab 7e). Before: f890ff9 (headings.py), 7f51a85, 60458ce (week 3 closed).
+- Week: 4 IN PROGRESS. Step 1 (section chunking) DONE and KEPT → R@5 0.98 (see "Week 4 results" below). Neon now holds the 4,159 section chunks.
+- Scope cut (chat 4.1, Furqan has 2 more resume projects): ~60 manuals instead of 150 (decide later; the resume must say the real number); troubleshooting "one row = one chunk" and LLM keywords skipped; simple safe mode only. Weeks 5–6 to decide later (if week 5 is skipped, remove "OCR 91%" and "image query 84%" from the resume).
+- Done in chat 4.1 (no Gemini): src/manualmate/ingest/headings.py (bold/bigger font, 8 noise rules; Furqan spot check of 200 samples ≈ 5% wrong); pdf_parser.py also writes "paras" (headings as own paragraphs; "text" unchanged, checked on 1,671/1,671 pages); chunker.py --mode section (default) / --mode fixed (week-1 baseline, checked: identical 2,230 chunks).
+- Section mode rules: each chunk starts with a title line "<Brand> <MODEL> <category> | <parent> > <heading>" (2 levels); a new heading always starts a new chunk; a chunk never crosses a page; long sections cut at sentence ends (no overlap); no merging; body < 12 letters → no chunk; safe mode: < 0.3 headings/page → fixed (0 of 20 manuals). 4,159 chunks (fixed: 2,230), median 448 chars.
+- Not built yet: section expansion (send sibling parts of a section to Gemini); chunk_id has the section number (_sNNNN_) for later. Week-3 answer eval / RAGAS NOT re-run on the new chunks yet (needs Gemini).
 
 ## ▶ STOP RULE (agreed in chat 3.4 — no endless tuning)
 Change something only if: (1) the measurement is wrong (bug), (2) a resume target is missed, or (3) real users would often get a wrong or unsafe answer (not 1 case in 50).
 Otherwise: write it in this file and move on. If a target is missed: ONE round of fixes, measure again, write the result, move on. Never tune on the 50 test questions; never change labels.
 
 ## ▶ NEXT STEP (week 4)
-1. Laptop: re-run pdf_parser.py (expect TOTAL 1671 / 42 / 2131555) and chunker.py (expect ~4,159 chunks, mode=section) → commit.
-2. Colab: sections 1–4, 5 (upload NEW chunks.jsonl), 6 (build_index: TRUNCATE + embed ~4,159), 7e (2 eval commands) → paste output.
-3. Decide (stop rule, one round): keep section mode only if routed+rerank R@5 ≥ 0.94 and no category drops; else `chunker.py --mode fixed` + sections 5–6 again, and write the result here.
-4. Then: collect ~40 more manuals (official PDFs only), 20 Hindi/Telugu questions + retrieval eval; Gemini answer check after the daily quota resets.
+1. DONE: section chunking, measured on Colab (7e), kept.
+2. Collect ~40 more manuals (about 8 per category; official brand/support sites only, no manuals.plus / "Download_PDFS"). Add rows to data/manifest.csv + configs/aliases.yaml. Then parser → chunker → Colab 5–6 → 7e. Check the per-manual "mode" column (safe mode = few headings).
+3. 20 Hindi/Telugu questions (eval/multilingual_queries.jsonl, labeled manual + page) → retrieval eval on Colab (no Gemini).
+4. After the Gemini daily quota resets: quick answer check on the new chunks (7d --limit 3, then the full run if clean) + Hindi/Telugu answers.
 
 ## Old next step (done in chat 3.4, kept for reference)
 1. Colab 🔑 Secrets: `DATABASE_URL` and `GEMINI_API_KEY` both listed, value only, Notebook access on.
@@ -140,6 +140,20 @@ Dense baseline misses (week 1): 7 wrong brand on top (fixed mainly by routing), 
 - eval/out_of_scope.jsonl: 30 Qs (8 price, 6 near_miss, 4 compare, 4 smart_home, 3 off_topic, 2 local, 2 opinion, 1 unsafe); router check 28/28.
 - scripts/run_answer_eval.py: text 50 + oos 30 + clarify 10; gate 1 off during the run, top score saved, threshold sweep in the summary; --limit, --summarize, --sleep.
 - Laptop smoke test: q001 answered from [ac_001 p9], citations ok; price question refused.
+
+## Week 4 results — section chunking (Colab, 2026-11-10_1538 / _1539, commit f6cc9c7)
+Files: eval/results/2026-11-10_1538_routed_issue.json, 2026-11-10_1539_routed_rerank_issue_rr-issue_c20.json. 4,159 section chunks in Neon.
+| method | R@1 | R@3 | R@5 | R@10 | MRR@10 |
+| week 2: routed dense, issue (fixed chunks) | 0.62 | 0.88 | 0.90 | 0.94 | 0.75 |
+| week 4: routed dense, issue (section chunks) | 0.62 | 0.92 | 0.96 | 0.98 | 0.77 |
+| week 2: routed + rerank (issue), fixed chunks | 0.66 | 0.90 | 0.94 | 0.94 | 0.78 |
+| **week 4: routed + rerank (issue), section chunks (BEST)** | **0.78** | 0.92 | **0.98** | **1.00** | **0.86** |
+Rerank time on T4: avg 266 ms, p95 337 ms (20 candidates).
+- The 3 microwave misses are fixed: q035 rank 13 → 2 (the title line "troubleshooting and information code" was enough, even without the table step); q037 → 4; q033 → 5 (just in, the weakest).
+- New miss: q009 (Daikin FTXZ humidity, gold p12 SARARA DRY) rank 6 → ac R@5 0.90 (was 1.00). It was already weak in week 3 (rerank score 0.15, gold not cited). Logged, not tuned.
+- Stop rule: one round. "No category drops" is strictly not met (ac −1 question), but net +3/−1, R@1 +0.12, MRR +0.08 → Furqan and Claude decided to KEEP section mode (chat 4.1).
+- Caveat for the resume: the fix was designed while looking at 3 of the 50 test questions (the rule itself is general: cut at headings) → 0.98 may be slightly optimistic. The new manuals and the Hindi/Telugu questions are the fairer test.
+- Resume line idea: "Recall@5 0.72 → 0.98 (routing, bge-reranker, heading-aware chunking)".
 
 ## Week 3 results — full answer eval (Colab, 2026-11-10_1047, commit 115584f)
 File: eval/results/2026-11-10_1047_answers.jsonl (+ _summary.json). Gate 1 OFF during the run (scores saved, sweep offline).
