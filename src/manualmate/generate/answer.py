@@ -135,18 +135,19 @@ def generate(question: str, chunks: list[dict], route=None,
                   gemini_ms=gemini_ms)
 
 
-def retrieve(question: str, conn) -> tuple[list[dict], object]:
+def retrieve(question: str, conn, manual_id: str | None = None) -> tuple[list[dict], object]:
     """Parser + router + dense + rerank: the week-2 pipeline (needs torch).
 
     Returns (top chunks, route). If the router must ask "Which model?",
     the chunk list is empty.
+    manual_id: the user's answer to "Which model?" -> search only that manual.
     """
     from manualmate.retrieve import dense, reranker
     from manualmate.retrieve.query_parser import parse
-    from manualmate.retrieve.router import route as route_question
+    from manualmate.retrieve.router import route as route_question, route_to
 
     parsed = parse(question)
-    r = route_question(parsed)
+    r = route_to(manual_id) if manual_id else route_question(parsed)
     if r.ask:
         return [], r
     issue = parsed.issue or question

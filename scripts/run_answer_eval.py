@@ -67,6 +67,12 @@ def run(limit: int | None, sleep: float) -> Path:
                 else:
                     start = time.perf_counter()
                     chunks, r = retrieve(q["question"], conn)
+                    if set_name == "text" and r.ask:
+                        # In-scope question, router asks "Which model?" (e.g. FTKS is in
+                        # both Daikin K and L manuals). Act like the user: pick the
+                        # labeled manual, then answer. Counted as asked_first.
+                        row["asked_first"] = True
+                        chunks, r = retrieve(q["question"], conn, manual_id=q["manual_id"])
                     retrieve_ms = round((time.perf_counter() - start) * 1000)
                     a = generate(q["question"], chunks, route=r,
                                  refuse_below=0.0, clarify_below=0.0)
@@ -118,6 +124,7 @@ def summarize(path: Path) -> dict:
             "answered": pct(len(answered), len(text)),
             "wrongly_refused": pct(sum(r["action"] == "refuse" for r in text), len(text)),
             "errors": sum(r["action"] == "error" for r in text),
+            "asked_first": [r["id"] for r in text if r.get("asked_first")],
             "gold_page_in_top5": pct(sum(r.get("gold_retrieved", False) for r in text), len(text)),
             "gold_page_cited": pct(sum(r.get("gold_cited", False) for r in text), len(text)),
             "citations_ok": pct(sum(c["ok"] for c in cits), len(cits)),
@@ -148,7 +155,8 @@ def summarize(path: Path) -> dict:
     s = summary
     print(f"\n===== SUMMARY ({path.name})")
     print(f"In-scope ({s['text']['n']}): answered {s['text']['answered']}, wrongly refused "
-          f"{s['text']['wrongly_refused']}, errors {s['text']['errors']}")
+          f"{s['text']['wrongly_refused']}, errors {s['text']['errors']}, "
+          f"asked first (then user picked the model) {s['text']['asked_first']}")
     print(f"  gold page in top 5 {s['text']['gold_page_in_top5']}, gold page cited "
           f"{s['text']['gold_page_cited']}")
     print(f"  citations ok {s['text']['citations_ok']}, precision "

@@ -1,0 +1,211 @@
+# ManualMate — PROGRESS (read this first)
+
+This file is the single place to see where the project is and how to continue.
+Claude: read this file at the start of every chat (via the folder access to D:\Projects\manualmate),
+and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
+
+## ▶ CURRENT STATUS (update every chat)
+- Date: 2026-11-10 (chat 3.4)
+- Last commit: 91a6ad8 (week-3 code + eval script + notebook 7d). NOT committed yet: docs/PROGRESS.md, notebooks/02_eval_on_kaggle.ipynb (commit them; Colab does not need them).
+- Week: 3 (generate/). Code is done and tested on the laptop. The eval has not run on a GPU yet.
+- Where to run the eval: **Colab** (notebooks/01_embed_on_colab.ipynb, section 7d) = main, because Colab works again. Kaggle = backup (cells below + notebooks/02_eval_on_kaggle.ipynb).
+- Kaggle progress (backup only): cell 1 OK (2 × Tesla T4). Cells 2–6 not run.
+- Colab progress: quick test (7d, --limit 3) CLEAN (2026-11-10_1039): q001 answer score 0.64, q002 answer 0.925, q003 ask (router); oos o01–o03 refuse not_in_manual (scores ≤0.004); clarify 3/3 correct; Gemini avg 2061 ms. Full run NOT done yet.
+- Fix after the quick test (chat 3.4): q003 + q004 name "FTKS", which is in both Daikin K (ac_002) and L (ac_004) manuals → the router asks (correct). The eval now acts like the user: it picks the labeled manual (`retrieve(..., manual_id=...)` → `route_to`) and answers; the summary lists these ids as `asked_first`. Only these 2 of 50 are affected. Labels not changed. Files: scripts/run_answer_eval.py, src/manualmate/generate/answer.py (commit + push, then git pull in Colab before the full run).
+
+## ▶ NEXT STEP (Colab)
+1. Colab 🔑 Secrets: `DATABASE_URL` and `GEMINI_API_KEY` both listed, value only, Notebook access on.
+2. Run notebook sections 1–4 in order (GPU → git pull → pip install → DATABASE_URL). They are REQUIRED before 7d in every new Colab session. Expect `Tesla T4`, `91a6ad8 …` (or newer), no pip errors, `DATABASE_URL loaded`.
+3. Skip sections 5, 6, 7, 7b, 7c. (Section 5 = chunks.jsonl upload is NOT needed: the answer code reads chunks from Neon, not from data/.)
+4. Run the first 7d cell (`--limit 3`, 1–2 min; models download first). Expect `GEMINI_API_KEY loaded`, `=== text: 3 questions` + `q001 answer ok score=0.9…`, `=== oos: 3` (mostly `refuse not_in_manual`), `=== clarify: 3` (`ask`/`answer`), `===== SUMMARY` + threshold table. Paste the whole output to Claude.
+4b. Quick test done and clean. After the asked_first fix is pushed: run section 2 again (git pull → expect the new commit).
+5. If clean: run the second 7d cell (full: 50 text + 30 oos + 10 clarify, ~80 Gemini calls, 5–8 min). If the output shows `Gemini failed` lines → re-run with `!python scripts/run_answer_eval.py --sleep 5`.
+6. Run section **8** (the last cell, "Download the NEW results files") → save `<date>_answers.jsonl` + `<date>_answers_summary.json` in `D:\Projects\manualmate\eval\results\` → commit.
+7. Claude reads the results on the laptop → sets REFUSE_BELOW / CLARIFY_BELOW in `src/manualmate/generate/refusal.py` (now 0.10 / 0.30, temporary) from the threshold sweep; looks at out-of-scope answered ids and in-scope wrongly refused.
+8. Then: RAGAS faithfulness script (laptop, Gemini as judge, uses `strip_tags`) → target 0.90. Refusal target 90%. Optional: ~10 vague questions in clarify_queries.jsonl.
+
+## Code facts that help (checked in chat 3.4)
+- Code is in the src layout: `src/manualmate/<package>/…` (e.g. src/manualmate/generate/refusal.py). Docs below say `generate/refusal.py` as a short name.
+- Gemini model: `gemini-3.5-flash-lite` (MODEL_NAME in answer.py, pinned). call_gemini() retries 3 times (waits 5 s, 10 s), then returns None and prints `Gemini failed: …`.
+- run_answer_eval.py: `--limit N`, `--sleep S` (default 2.0 s after each Gemini call), `--summarize <file>` (re-make the summary from a saved answers file, no new Gemini calls).
+- The old `claude/chat-3.2-summary.md` and `claude/chat-3.3-summary.md` are NOT in the project folder. This file replaces them; the week-3 details are in the code itself.
+
+## How to start a new chat
+1. VS Code → File → Open Folder → D:\Projects\manualmate.
+2. Terminal (Ctrl+`): `conda activate D:\Projects\manualmate\.conda`
+3. `git status; git log --oneline -1` → expect clean and the "Last commit" above.
+4. New Claude chat (in the manualmate Project, opened in the Claude desktop app). First message:
+   "Continue ManualMate. Ask for folder access to D:\Projects\manualmate, then read docs/PROGRESS.md."
+5. Claude asks for folder access → approve it (needed again in every new chat).
+
+
+## What ManualMate is
+Multimodal, multilingual RAG assistant for product manuals (portfolio project for AI engineer roles).
+- Input: text question (English, Hindi, Telugu) and/or photo of a product or model-number label.
+- Output: grounded answer with citations (manual + page), or a refusal for out-of-scope questions.
+- Manuals are English only. "Multilingual" = cross-lingual queries: Hindi/Telugu questions find English chunks via bge-m3; Gemini answers in the user's language.
+- Data target: 150 manuals, 5 categories (washing machine, AC, refrigerator, microwave, Wi-Fi router). Now: 20.
+
+## Resume targets (must be measured, not assumed)
+Recall@5 0.70 → 0.88 | RAGAS faithfulness 0.74 → 0.90 | OCR accuracy 91% | image query correct page in top 3: 84% of 100 | correct refusals 90% | p95 latency 2.4 s.
+- Resume says "Render" → change to "Hugging Face Spaces" (Render free tier = 512 MB RAM).
+- Resume says "~9,000 chunks for 150 manuals": the current chunker gives 2,230 per 20 manuals (~17,000 for 150). Write the real measured count at the end.
+
+## Tech stack
+Python 3.11, PyMuPDF (import pymupdf, not fitz), pdfplumber, bge-m3 embeddings (sentence-transformers 6.2.0), bge-reranker, BM25 (rank-bm25), PostgreSQL + pgvector on Neon (free tier), Gemini API (google-genai), OpenCV + PaddleOCR, RAGAS, FastAPI, Gradio, Docker. Deploy on Hugging Face Spaces (Docker).
+
+## Where each part runs
+- Laptop / VS Code: all code, parsing, chunking, BM25, Gemini calls, evaluation, FastAPI, Docker, deploy.
+- Google Colab (T4 GPU): heavy jobs — embedding all chunks with bge-m3 (notebooks/01_embed_on_colab.ipynb), hybrid eval, optional batch OCR. Colab clones the GitHub repo; chunks.jsonl is uploaded by hand (data/ is gitignored); vectors go straight to Neon. Colab keeps nothing; the model re-downloads each session (~15 s).
+- Kaggle (2026-11-10): same jobs as Colab when Colab is not usable. Notebook GPU T4 x2, Internet On, Secrets via kaggle_secrets.UserSecretsClient; cells in the "Kaggle cells" section below. Results: right panel Output → download.
+- Neon = shared database (Colab, Kaggle, laptop, app). GitHub = shared code.
+- Rules: (1) same embedding model everywhere — only embedder.py loads it; (2) Colab keeps nothing; (3) pinned versions in requirements.txt (torch not listed there).
+
+## Environment rules
+- Project folder: D:\Projects\manualmate (Windows, PowerShell in VS Code). GitHub: https://github.com/furkanhf/manualmate (main).
+- Conda env: D:\Projects\manualmate\.conda (Python 3.11.18). Each new terminal: conda activate D:\Projects\manualmate\.conda (terminals start in (base)).
+- Use conda only to create the env. Install every library with pip, never conda install. torch on the laptop = CPU build (pip install torch --index-url https://download.pytorch.org/whl/cpu).
+- Caches on D: HF_HOME=D:\cache\huggingface (verified), PIP_CACHE_DIR=D:\cache\pip.
+- .env (top level) holds GEMINI_API_KEY and DATABASE_URL. Never pushed. .env.example kept with placeholders.
+- VS Code interpreter = the .conda python; Furqan often runs files with the ▷ "Run Python File" button. Scripts need pip install -e . (pyproject.toml, src layout).
+- Colab Secrets: DATABASE_URL = only the URL (postgresql://...?sslmode=require&channel_binding=require), no quotes, no "DATABASE_URL=", no extra lines (an extra line once caused a psycopg "channel_binding" error).
+- GOTCHA: if Claude changes a file that is open in VS Code, close the tab / check there is no unsaved dot before Run — VS Code once saved the old buffer over Claude's new pdf_parser.py.
+- LF→CRLF git warnings are harmless.
+- Claude reaches D:\Projects\manualmate through the Claude desktop app (device bridge). It works only while the desktop app is open, signed in and online on the laptop, and the chat is opened in that app. Folder access must be granted again in each new chat. D:\PDF manuals = backup of the downloaded PDFs (optional).
+
+## Sessions
+- Day 1 (2026-11-05): plan, skeleton, env, check_setup, first commit.
+- Day 2 (2026-11-06, chats 2.1 + 2.2): week 1 complete (20 manuals, parser, chunker, 50 questions, Colab embedding, dense baseline 0.72) + most of week 2 retrieval (BM25, hybrid, query parser, router).
+- Day 2 follow-up (2026-11-08): plain-language guide ManualMate_Project_Explained.pdf (14 pages) made in chat 2.1. NOTE: it covers week 1 only; it does not include BM25/hybrid/router or the 0.90 result.
+- Day 3 (2026-11-09, chat 3.1): reranker added (commit d0a6b0b) + notebook section 7b. Result: R@1 0.66, R@5 0.94, MRR 0.78 (rr-issue). Query rewriting (Gemini, commit 5377a1a) tested: NO gain → not used in the pipeline. Week 2 closed. Next: week 3 (generate/).
+- Day 3 evening (2026-11-09, chat 3.2): week 3 code written and tested on the laptop: generate/prompts.py, citations.py, refusal.py, answer.py, eval/out_of_scope.jsonl (30), scripts/run_answer_eval.py + notebook 7d. Last commit 91a6ad8. Colab did not run.
+- Day 4 (2026-11-10, chat 3.3): set up Kaggle as a GPU option (T4 x2 works). Eval not run yet. Kaggle cells: section below.
+- Day 4 (2026-11-10, chat 3.4): Colab works again → Colab is the main place for the eval, Kaggle the backup. Checked notebook 7d and the code; added the Colab run order (sections 1–4 first) to NEXT STEP. Eval not run yet.
+
+## Data: 20 manuals (data/manifest.csv: manual_id,brand,model,category,language,filename,source_url)
+AC: ac_001 samsung_ar-by_ac.pdf (12 p) | ac_002 daikin_ftks-k-series_ac.pdf (44) | ac_003 daikin_ftxz-us7_ac.pdf (48) | ac_004 daikin_ftxs-l-series_ac.pdf (44)
+Washing machine: wm_001 ifb_senator-mbn-8014k (78) | wm_002 samsung_ww80t (72) | wm_003 lg_fhm1408bdl (44) | wm_004 bosch_waj20180za (52)
+Refrigerator: rf_001 samsung_rf9000f (96) | rf_002 bosch_kgn (32) | rf_003 whirlpool_neo-ic355 (12, 7 low_text pages) | rf_004 bosch_kgn56 (32)
+Microwave: mw_001 ifb_30brc2 (44) | mw_002 samsung_mc28h5025vk (64) | mw_003 lg_mc2846bg (232, Indian recipes) | mw_004 panasonic_nn-st64qw (88)
+Router: rt_001 d-link_dir-825-ac (222) | rt_002 netgear_r6350 (204) | rt_003 tp-link_archer-c6 (99) | rt_004 tenda_ac10 (152)
+- 5 scanned (no-text) PDFs kept in data/scanned for week-5 OCR tests.
+- Daikin K and L manuals are almost identical (questions must name the model).
+- Avoid manuals.plus/asin pages and "Download_PDFS" sites (AI-written fakes). The Panasonic site blocks direct PDF links.
+
+## Done so far (from GitHub, last commit c921ebf, 2026-11-06 21:50)
+- ingest/pdf_parser.py — manifest → data/processed/<manual_id>.jsonl, one record per page (labels + page + text + n_chars + low_text). Removes margin headers/footers that repeat on ≥50% of pages, stamps/watermarks on ≥80% of pages, margin page numbers, invisible/icon chars; fixes ligature gaps ("fi lter") only in manuals with ≥20 gaps. 1,671 pages, 42 low_text, 2,131,555 chars.
+- ingest/chunker.py — baseline: 1600 chars, 200 overlap, never crosses a page; chunk_id <manual_id>_p<page:03d>_c<index>; 2,230 chunks.
+- index/embedder.py (bge-m3, 1024 dims, normalized, fp16 on GPU; the only place the model loads), index/db.py, index/schema.sql (chunks table, HNSW cosine, indexes on manual_id/category/brand), index/bm25.py.
+- retrieve/reranker.py (BAAI/bge-reranker-v2-m3 CrossEncoder, max_length 1024, 20 candidates, fp16 on GPU; Colab only), run_eval --method routed_rerank --rerank-text issue|full --candidates N (prints rank changes + rerank ms)
+- retrieve/dense.py, retrieve/hybrid.py (RRF), retrieve/query_parser.py + configs/aliases.yaml, retrieve/router.py (model → brand/category → all; asks "Which model?" when >1 manual matches).
+- scripts/build_index.py, run_eval.py (--method dense|bm25|hybrid|routed|routed_hybrid, --query-text issue|full), eval_routing.py, notebooks/01_embed_on_colab.ipynb, pyproject.toml.
+- eval/text_queries.jsonl (50 hand-labeled Qs, 10 per category; Furqan spot-checked 10/10), eval/clarify_queries.jsonl (10 Qs).
+- eval/results/2026-11-06_1431_dense_baseline.json (week 1 baseline).
+
+## Results so far (50 text questions)
+| method | R@1 | R@3 | R@5 | R@10 | MRR@10 |
+| bm25 only | 0.20 | 0.44 | 0.50 | 0.62 | 0.34 |
+| hybrid RRF (all manuals) | 0.36 | 0.58 | 0.64 | 0.72 | 0.48 |
+| dense baseline | 0.36 | 0.62 | 0.72 | 0.78 | 0.52 |
+| routed dense, full query | 0.50 | 0.78 | 0.82 | 0.94 | 0.65 |
+| routed hybrid, issue query | 0.58 | 0.76 | 0.88 | 0.94 | 0.70 |
+| routed dense, issue query | 0.62 | 0.88 | 0.90 | 0.94 | 0.75 |
+| routed + rerank, reranker reads full question | 0.56 | 0.90 | 0.94 | 0.94 | 0.72 |
+| routed + rerank (bge-reranker-v2-m3, 20 cand.), reranker reads issue (BEST) | 0.66 | 0.90 | 0.94 | 0.94 | 0.78 |
+Rerank time on Colab T4: avg 310 ms, p95 407 ms per question (CPU on HF Spaces will be much slower — check in week 6; options: fewer candidates, smaller reranker, ONNX).
+Weakest category: microwave (R@5 0.70). The 3 misses left after rerank are all microwave and are vocabulary gaps, not ranking errors:
+- q033 "smells of fish" → answer p39 says DEODORIZE ("flash the air"); the word smell/odour is not on the page.
+- q035 "clock not showing" → p58 troubleshooting ("time is not displayed": power / Eco function); p12 SETTING THE TIME ranks first.
+- q037 "make ghee" → p24 Ghee/Bakery auto mode ("6h: Ghee"); recipe pages that list ghee as an ingredient (p157) rank first.
+Tried query rewriting (retrieve/query_rewriter.py, gemini-3.5-flash-lite, eval/rewrites.jsonl, run_eval --rewrites): routed dense + rw 0.60/0.88/0.90/0.94/0.74; rerank + rw 0.66/0.88/0.94/0.96/0.78 → same as without (±1 question = noise). The 3 misses stay: q033 reranker also has the word gap; q035 p12 is partly right (high score 0.758); q037 'making ghee' pulls recipe pages p222/223. Decision: do not ship the rewrite (extra Gemini call, no gain); keep the code for week 4. Do not tune more variants on the 50 test questions. The 3 misses are a chunking problem → fix in week 4 re-chunking. Do not change the labels to raise the score.
+FINAL WEEK-2 PIPELINE: router → routed dense top 20 → bge-reranker-v2-m3 reads issue text → R@1 0.66, R@5 0.94, MRR 0.78.
+Dense baseline misses (week 1): 7 wrong brand on top (fixed mainly by routing), 3 cover/contents pages on top, 5 right manual but nearby page.
+
+## Week 3 files (done 2026-11-09, commit 91a6ad8)
+- generate/prompts.py: open-book SYSTEM_PROMPT (8 rules), tag(chunk) → "[mw_003 p24]", build_prompt(full question, chunks, language).
+- generate/citations.py: find_tags, check() → invalid (made-up) tags, untagged sentences, precision, ok; strip_tags (RAGAS), is_refusal.
+- generate/refusal.py: gate 0 router ask; gate 1 top rerank score (REFUSE_BELOW 0.10, CLARIFY_BELOW 0.30 = TEMPORARY); gate 2 NOT_IN_MANUAL.
+- generate/answer.py: generate() (gate 1 → gemini-3.5-flash-lite → gate 2 → citations), retrieve() (router → dense 20 → rerank → top 5, needs GPU), answer(), chunks_for_pages() (laptop test).
+- eval/out_of_scope.jsonl: 30 Qs (8 price, 6 near_miss, 4 compare, 4 smart_home, 3 off_topic, 2 local, 2 opinion, 1 unsafe); router check 28/28.
+- scripts/run_answer_eval.py: text 50 + oos 30 + clarify 10; gate 1 off during the run, top score saved, threshold sweep in the summary; --limit, --summarize, --sleep.
+- Laptop smoke test: q001 answered from [ac_001 p9], citations ok; price question refused.
+
+## Still empty (not started)
+filters.py, metadata.py, table_extractor.py, config.py, configs/settings.yaml, scripts/ingest.py, download_manuals.py, vision/, api/, ui/app.py, multilingual/image eval files, RAGAS faithfulness script.
+
+## Next steps
+1. Week 2 DONE (reranker kept, rewrite not kept). Rewrite result files committed (5df2c3a).
+2. Week 3 NOW: code done. Next: run scripts/run_answer_eval.py on Colab section 7d (Kaggle = backup) (quick test --limit 3, then full) → download results → pick gate-1 threshold from the sweep → RAGAS faithfulness (target 0.90); refusal target 90%. Include Furqan's idea: when the question is vague / top rerank score is low → ask a follow-up question or refuse; add ~10 vague questions to clarify_queries.jsonl and measure 'asked when it should' separately (it does not raise Recall). Warning: score can be high on a wrong page (q035 0.758) → tune the threshold on data.
+3. Later: week 4 (150 manuals, Hindi/Telugu questions), week 5 (vision), week 6 (FastAPI, Docker, Gradio, HF Spaces, latency; Neon free tier sleeps after ~5 min → cold start +0.5–1 s).
+
+## Small TODOs
+- Move paths/settings from pdf_parser.py and chunker.py into configs/settings.yaml + config.py.
+- Optional: rename samsung_ar-by_ac.pdf → samsung_ar9500t_ac.pdf (then re-run parser + chunker + index).
+- LG recipe tables come after the steps in reading order (fix in content-aware chunking).
+- Optional: update ManualMate_Project_Explained.pdf with week 2 results and copy it into D:\Projects\manualmate\docs\.
+
+## Kaggle cells (one code cell each, run one at a time)
+Shortcut: the same cells (+ a download cell 7) are in `notebooks/02_eval_on_kaggle.ipynb`. In Kaggle: File → Import Notebook → upload that file.
+Setup once: Create → New Notebook. Right panel → Session options: Accelerator **GPU T4 x2**, Internet **On** (phone-verified account).
+Add-ons → Secrets: `DATABASE_URL`, `GEMINI_API_KEY` (value only, no quotes, no extra line). Tick both for this notebook.
+If `nvidia-smi: command not found` → the session is CPU → select the GPU accelerator and restart.
+
+Cell 1 — GPU (expect Tesla T4):
+```
+!nvidia-smi -L
+```
+Cell 2 — code (expect the last commit hash):
+```
+import os
+if not os.path.exists("/kaggle/working/manualmate"):
+    !git clone https://github.com/furkanhf/manualmate.git /kaggle/working/manualmate
+%cd /kaggle/working/manualmate
+!git pull -q
+!git log --oneline -1
+```
+Cell 3 — libraries (Kaggle has torch; pip conflict warnings are OK):
+```
+!pip install -q sentence-transformers==6.2.0 rank-bm25==0.2.2 "psycopg[binary]" pgvector python-dotenv google-genai
+!pip install -q -e . --no-deps
+```
+Cell 4 — secrets (expect `secrets loaded`):
+```
+from kaggle_secrets import UserSecretsClient
+secrets = UserSecretsClient()
+os.environ["DATABASE_URL"] = secrets.get_secret("DATABASE_URL")
+os.environ["GEMINI_API_KEY"] = secrets.get_secret("GEMINI_API_KEY")
+print("secrets loaded")
+```
+Cell 5 — quick test (expect `q001 answer ok score=…` lines, then `===== SUMMARY`):
+```
+!python scripts/run_answer_eval.py --limit 3
+```
+Cell 6 — full eval (only after cell 5 is clean):
+```
+!python scripts/run_answer_eval.py
+```
+After a `git push` from the laptop: run cell 2 again before cells 5/6.
+If Neon does not connect on Kaggle → use the Colab notebook section 7d (now the main option anyway).
+
+## How Furqan wants to work (commands and explanations)
+Explanations
+- Simplified Technical English (ASD-STE100): short sentences, one action per step, simple words, active voice.
+- For a new component: analogy first ("what it is like"), then "why we need it", then what is in the file.
+- Explain before writing code when he asks "what are we doing / why".
+
+Steps and commands
+- About 5 steps per batch. He sends the output, then the next batch.
+- Each step says WHERE: laptop terminal, VS Code file, Colab/Kaggle cell.
+- Each step says the EXPECTED OUTPUT, so he can check it himself.
+- Commands in a code block, ready to paste. One command line per step where possible.
+- Simple no-code steps (open a folder, delete a file, click a button) in plain words, not terminal commands.
+- Commit command after each file: `git add <files>; git commit -m "<message>"; git push` → expect `N file(s) changed` and `main -> main`.
+- LF→CRLF warnings are harmless; say so instead of letting him worry.
+
+Workflow
+- One file at a time. Claude writes the file on the laptop (device bridge) and tests it there when possible; Furqan runs it with ▷ "Run Python File", pastes the output, then commits.
+- Before he runs a file that Claude changed: close the tab in VS Code (Don't Save), so VS Code does not save its old copy over the new file.
+- New GPU jobs (Colab/Kaggle): quick test first (--limit 3), paste the output, then the full run.
+- Put every Colab eval command into the notebook file and push it (cells added in the Colab tab are lost on reload). Kaggle saves its own notebook.
+- Claude cannot see Colab/Kaggle outputs → Furqan pastes them, or downloads the result files into eval/results so Claude reads them on the laptop.
+- Do not tune on the 50 test questions; do not change labels to raise a score.
