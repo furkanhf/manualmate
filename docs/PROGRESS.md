@@ -5,22 +5,23 @@ Claude: read this file at the start of every chat (via the folder access to D:\P
 and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
 
 ## ▶ CURRENT STATUS (update every chat)
-- Date: 2026-11-10 (chat 3.4)
-- Last commit: 60458ce (week 3 closed: RAGAS 0.97, run_ragas.py). Before: 288b870 (answer-eval results, thresholds, citation fix), 115584f, 91a6ad8.
-- Week: 3 CLOSED (2026-11-10). Answers 50/50, refusals 30/30, clarify 10/10, citations ok 0.96, RAGAS faithfulness 0.97. Next: week 4.
-- Where to run the eval: **Colab** (notebooks/01_embed_on_colab.ipynb, section 7d) = main, because Colab works again. Kaggle = backup (cells below + notebooks/02_eval_on_kaggle.ipynb).
-- Kaggle progress (backup only): cell 1 OK (2 × Tesla T4). Cells 2–6 not run.
-- Colab progress (DONE): quick test (7d, --limit 3) CLEAN (2026-11-10_1039): q001 answer score 0.64, q002 answer 0.925, q003 ask (router); oos o01–o03 refuse not_in_manual (scores ≤0.004); clarify 3/3 correct; Gemini avg 2061 ms. Full run DONE (2026-11-10_1047) → see "Week 3 results" below.
-- Fix after the quick test (chat 3.4): q003 + q004 name "FTKS", which is in both Daikin K (ac_002) and L (ac_004) manuals → the router asks (correct). The eval now acts like the user: it picks the labeled manual (`retrieve(..., manual_id=...)` → `route_to`) and answers; the summary lists these ids as `asked_first`. Only these 2 of 50 are affected. Labels not changed. Files: scripts/run_answer_eval.py, src/manualmate/generate/answer.py (commit + push, then git pull in Colab before the full run).
+- Date: 2026-11-10 (chat 4.1, evening)
+- Last commit: f890ff9 (week 4: headings.py). Before: 7f51a85, 60458ce (week 3 closed).
+- Week: 4 IN PROGRESS. Scope cut (chat 4.1, Furqan has 2 more resume projects): ~60 manuals instead of 150 (decide later; resume must say the real number), troubleshooting "one row = one chunk" and LLM keywords skipped for now, simple safe mode only.
+- Done in chat 4.1 (no Gemini): src/manualmate/ingest/headings.py (bold/bigger font, 8 noise rules; Furqan spot check 200 samples ≈ 5% wrong); pdf_parser.py also writes "paras" (headings as own paragraphs; "text" unchanged, checked 1,671/1,671 pages); chunker.py --mode section (default) / --mode fixed (week-1 baseline, checked identical 2,230 chunks).
+- Section mode rules: chunk starts with title line "<Brand> <MODEL> <category> | <parent> > <heading>" (2 levels); a new heading always starts a new chunk; never crosses a page; long sections cut at sentence ends (no overlap); no merging; body < 12 letters → no chunk; safe mode: < 0.3 headings/page → fixed. Result on 20 manuals: 4,159 chunks (fixed: 2,230), median 448 chars, all 20 manuals in section mode.
+- Key pages: mw_001 p39 DEODORIZE = own chunk (q033); mw_003 p24 Ghee/Bakery Mode = own chunk (q037); mw_002 p58 troubleshooting rows still 2 big chunks (q035, table step skipped).
+- Colab section 7e added (retrieval eval only). Section expansion (sibling parts → Gemini) NOT built yet; chunk_id has the section number (_sNNNN_) for later.
 
 ## ▶ STOP RULE (agreed in chat 3.4 — no endless tuning)
 Change something only if: (1) the measurement is wrong (bug), (2) a resume target is missed, or (3) real users would often get a wrong or unsafe answer (not 1 case in 50).
 Otherwise: write it in this file and move on. If a target is missed: ONE round of fixes, measure again, write the result, move on. Never tune on the 50 test questions; never change labels.
 
-## ▶ NEXT STEP (week 3 — last item)
-1. DONE (288b870): thresholds, citation fix, recheck, results committed.
-2. RAGAS DONE: 0.97 (runs 1759 0.98 + 1822 0.959). **WEEK 3 CLOSED.**
-3. Then week 4 (150 manuals, re-chunking for q033/q035/q037, Hindi/Telugu questions).
+## ▶ NEXT STEP (week 4)
+1. Laptop: re-run pdf_parser.py (expect TOTAL 1671 / 42 / 2131555) and chunker.py (expect ~4,159 chunks, mode=section) → commit.
+2. Colab: sections 1–4, 5 (upload NEW chunks.jsonl), 6 (build_index: TRUNCATE + embed ~4,159), 7e (2 eval commands) → paste output.
+3. Decide (stop rule, one round): keep section mode only if routed+rerank R@5 ≥ 0.94 and no category drops; else `chunker.py --mode fixed` + sections 5–6 again, and write the result here.
+4. Then: collect ~40 more manuals (official PDFs only), 20 Hindi/Telugu questions + retrieval eval; Gemini answer check after the daily quota resets.
 
 ## Old next step (done in chat 3.4, kept for reference)
 1. Colab 🔑 Secrets: `DATABASE_URL` and `GEMINI_API_KEY` both listed, value only, Notebook access on.

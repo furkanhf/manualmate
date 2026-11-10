@@ -1,9 +1,24 @@
-"""Split parsed manual pages into chunks for embedding (week 1 baseline).
+"""Split parsed manual pages into chunks for embedding.
 
 Input:  data/processed/<manual_id>.jsonl  (one record per page, from pdf_parser.py)
 Output: data/chunks/chunks.jsonl          (one record per chunk)
 
-Rules of this baseline chunker:
+Two modes:
+  --mode section (default, week 4): one topic per chunk, cut at the headings.
+  --mode fixed   (week 1 baseline):  ~1600-character pieces, rules below.
+
+Rules of --mode section:
+- Every chunk starts with a title line: product + heading path,
+  e.g. "LG MC2846BG microwave | OPERATION > Ghee/Bakery Mode".
+- A chunk never holds a new heading: a heading always starts a new chunk.
+- A chunk never crosses a page. Text that goes on to the next page gets a new
+  chunk with the same title line (and the same section number in chunk_id).
+- A long section is cut at sentence ends, like --mode fixed (no overlap).
+- Small sections stay small (no merging); the title line gives them meaning.
+- Safe mode: a manual with fewer than MIN_HEADINGS_PER_PAGE headings per page
+  (headings not found) uses --mode fixed.
+
+Rules of --mode fixed:
 - A chunk never crosses a page, so every chunk has exactly one page number.
 - Chunks are about CHUNK_SIZE characters. Cuts are at paragraph ends, then
   sentence ends, then word ends. A word is never cut.
@@ -11,11 +26,13 @@ Rules of this baseline chunker:
   so a sentence near a cut is not lost.
 
 Run from the project folder:
-    python src/manualmate/ingest/chunker.py
+    python src/manualmate/ingest/chunker.py                 # section mode
+    python src/manualmate/ingest/chunker.py --mode fixed    # week-1 baseline
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from pathlib import Path
@@ -31,6 +48,13 @@ CHUNK_SIZE = 1600        # target characters per chunk (about 400 tokens)
 OVERLAP = 200            # characters copied from the end of the chunk before
 MIN_LAST_CHUNK = 300     # a shorter last piece is joined to the chunk before
 MIN_PAGE_CHARS = 20      # pages with less text than this give no chunk
+
+MIN_HEADINGS_PER_PAGE = 0.3   # section mode: fewer headings -> safe mode (fixed)
+MAX_PATH = 2             # section mode: at most 2 heading levels in the title line
+MIN_BODY_LETTERS = 12    # section mode: a body with fewer letters gives no chunk ("English - 58")
+
+CATEGORY_NAMES = {"ac": "air conditioner", "washing-machine": "washing machine",
+                  "router": "Wi-Fi router"}
 
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 
@@ -107,13 +131,62 @@ def chunk_page(text: str) -> list[str]:
     return chunks
 
 
+# --- Section mode ------------------------------------------------------------
+def product_name(page: dict) -> str:
+    """"LG MC2846BG microwave" from the manifest labels."""
+    category = CATEGORY_NAMES.get(page["category"], page["category"])
+    return f'{page["brand"].upper() if len(page["brand"]) <= 3 else page["brand"].title()} ' \
+           f'{page["model"].upper()} {category}'
+
+
+def heading_count(pages: list[dict]) -> int:
+    return sum(1 for page in pages for p in page.get("paras", []) if p["h"])
+
+
+def chunk_sections(pages: list[dict]) -> list[dict]:
+    """Section-mode chunks of one manual: [{"page", "section_no", "path", "text"}]."""
+    product = product_name(pages[0])
+    stack: list[tuple[int, str]] = []          # open headings: (level, text)
+    section_no = 0
+    chunks = []
+    for page in pages:
+        body: list[str] = []
+
+        def flush() -> None:
+            text = "\n".join(body)
+            body.clear()
+            if len(re.findall(r"[A-Za-z]", text)) < MIN_BODY_LETTERS:
+                return
+            path = " > ".join(t for _, t in stack[-MAX_PATH:])
+            title = f"{product} | {path}" if path else product
+            room = max(CHUNK_SIZE - len(title) - 1, 400)
+            units = []
+            for line in text.split("\n"):
+                units.extend(split_long(line, room))
+            for piece in pack(units, room):
+                chunks.append({"page": page["page"], "section_no": section_no,
+                               "path": path, "text": f"{title}\n{piece}"})
+
+        for para in page.get("paras", []):
+            if para["h"]:
+                flush()                        # rule: a new heading ends the chunk
+                while stack and stack[-1][0] >= para["h"]:
+                    stack.pop()
+                stack.append((para["h"], para["text"]))
+                section_no += 1
+            else:
+                body.append(para["text"])
+        flush()                                # rule: a chunk never crosses a page
+    return chunks
+
+
 # --- Run on all manuals ------------------------------------------------------
 def read_pages(path: Path) -> list[dict]:
     with open(path, encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
 
 
-def chunk_all() -> list[dict]:
+def chunk_all(mode: str = "section") -> list[dict]:
     """Chunk every manual in data/processed and write data/chunks/chunks.jsonl."""
     page_files = sorted(PROCESSED_DIR.glob("*.jsonl"))
     if not page_files:
@@ -125,21 +198,45 @@ def chunk_all() -> list[dict]:
         for path in page_files:
             pages = read_pages(path)
             sizes = []
-            for page in pages:
-                if page["n_chars"] < MIN_PAGE_CHARS:
-                    continue
-                for index, text in enumerate(chunk_page(page["text"])):
-                    record = {label: page[label] for label in LABELS}
-                    record["chunk_id"] = (
-                        f"{page['manual_id']}_p{page['page']:03d}_c{index}"
-                    )
+            used = mode
+            if mode == "section":
+                if "paras" not in pages[0]:
+                    raise SystemExit(f"{path.name} has no 'paras'. Run pdf_parser.py again.")
+                if heading_count(pages) < MIN_HEADINGS_PER_PAGE * len(pages):
+                    used = "fixed (few headings)"
+            if used == "section":
+                labels = [l for l in LABELS if l != "page"]
+                counters: dict[int, int] = {}
+                for c in chunk_sections(pages):
+                    index = counters.get(c["page"], 0)
+                    counters[c["page"]] = index + 1
+                    record = {label: pages[0][label] for label in labels}
+                    record["page"] = c["page"]
+                    record["chunk_id"] = (f"{pages[0]['manual_id']}_p{c['page']:03d}"
+                                          f"_s{c['section_no']:04d}_c{index}")
                     record["chunk_index"] = index
-                    record["text"] = text
-                    record["n_chars"] = len(text)
+                    record["section"] = c["path"]
+                    record["text"] = c["text"]
+                    record["n_chars"] = len(c["text"])
                     out.write(json.dumps(record, ensure_ascii=False) + "\n")
-                    sizes.append(len(text))
+                    sizes.append(len(c["text"]))
+            else:                              # fixed mode (or safe mode)
+                for page in pages:
+                    if page["n_chars"] < MIN_PAGE_CHARS:
+                        continue
+                    for index, text in enumerate(chunk_page(page["text"])):
+                        record = {label: page[label] for label in LABELS}
+                        record["chunk_id"] = (
+                            f"{page['manual_id']}_p{page['page']:03d}_c{index}"
+                        )
+                        record["chunk_index"] = index
+                        record["text"] = text
+                        record["n_chars"] = len(text)
+                        out.write(json.dumps(record, ensure_ascii=False) + "\n")
+                        sizes.append(len(text))
             summary.append({
                 "manual_id": path.stem,
+                "mode": used,
                 "pages": len(pages),
                 "chunks": len(sizes),
                 "avg": round(sum(sizes) / len(sizes)) if sizes else 0,
@@ -150,12 +247,12 @@ def chunk_all() -> list[dict]:
 
 
 def print_summary(summary: list[dict]) -> None:
-    print(f"\n{'manual_id':<10}{'pages':>7}{'chunks':>8}{'avg':>7}{'min':>7}{'max':>7}")
-    print("-" * 46)
+    print(f"\n{'manual_id':<10}{'pages':>7}{'chunks':>8}{'avg':>7}{'min':>7}{'max':>7}  mode")
+    print("-" * 68)
     for row in summary:
         print(f"{row['manual_id']:<10}{row['pages']:>7}{row['chunks']:>8}"
-              f"{row['avg']:>7}{row['min']:>7}{row['max']:>7}")
-    print("-" * 46)
+              f"{row['avg']:>7}{row['min']:>7}{row['max']:>7}  {row['mode']}")
+    print("-" * 68)
     total = sum(r["chunks"] for r in summary)
     print(f"{'TOTAL':<10}{sum(r['pages'] for r in summary):>7}{total:>8}"
           f"   ({len(summary)} manuals)")
@@ -163,4 +260,6 @@ def print_summary(summary: list[dict]) -> None:
 
 
 if __name__ == "__main__":
-    print_summary(chunk_all())
+    ap = argparse.ArgumentParser(description="Chunk the parsed manuals.")
+    ap.add_argument("--mode", choices=["section", "fixed"], default="section")
+    print_summary(chunk_all(ap.parse_args().mode))

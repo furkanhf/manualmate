@@ -3,6 +3,12 @@
 Input:  data/manifest.csv and the PDFs in data/raw/
 Output: data/processed/<manual_id>.jsonl (one JSON line per page)
 
+Each page record has:
+- "text":  the clean page text (used by chunker.py --mode fixed)
+- "paras": the same page as paragraphs, with headings marked (week 4, used by
+           chunker.py --mode section): [{"h": 0, "text": "..."}, ...]
+           h = 0 is body text, h = 1, 2, ... is a heading level (1 = biggest).
+
 Run from the project folder:
     python src/manualmate/ingest/pdf_parser.py              # all manuals
     python src/manualmate/ingest/pdf_parser.py wm_004       # one manual
@@ -162,10 +168,74 @@ def is_noise(line: str, in_margin: bool,
     return False
 
 
+def section_paragraphs(doc: pymupdf.Document) -> list[list[dict]]:
+    """Paragraphs of every page, with headings as their own paragraphs.
+
+    Uses headings.py (font size + bold). The same noise filters as for "text"
+    are used: margin headers/footers, stamps and page numbers are removed.
+    Returns one list per page: [{"h": level or 0, "text": "..."}, ...].
+    """
+    from manualmate.ingest.headings import find_headings   # here: no import loop
+
+    lines, heads = find_headings(doc)
+    head_at = {h["parts"][0]["idx"]: h for h in heads}       # first line -> heading
+    later_parts = {p["idx"] for h in heads for p in h["parts"][1:]}
+
+    # Group lines into blocks per page, like extract_blocks().
+    n_pages = len(doc)
+    pages_blocks: list[list[dict]] = [[] for _ in range(n_pages)]
+    by_key: dict[tuple, dict] = {}
+    for line in lines:
+        key = (line["page"], line["block"])
+        if key not in by_key:
+            block = {"lines": [], "items": [], "y0": line["y0"], "y1": line["y1"]}
+            by_key[key] = block
+            pages_blocks[line["page"] - 1].append(block)
+        block = by_key[key]
+        block["lines"].append(line["text"])
+        block["items"].append(line)
+        block["y0"] = min(block["y0"], line["y0"])
+        block["y1"] = max(block["y1"], line["y1"])
+    for page_no, blocks in enumerate(pages_blocks):
+        rect = doc[page_no].rect
+        top = rect.y0 + rect.height * MARGIN_RATIO
+        bottom = rect.y1 - rect.height * MARGIN_RATIO
+        for block in blocks:
+            block["in_margin"] = block["y1"] <= top or block["y0"] >= bottom
+
+    margin_repeats, stamps = find_repeated_lines(pages_blocks)
+
+    pages_paras = []
+    for blocks in pages_blocks:
+        paras: list[dict] = []
+        for block in blocks:
+            body: list[str] = []
+            for line in block["items"]:
+                if line["idx"] in later_parts:
+                    continue                     # already in its heading's text
+                if line["idx"] in head_at:
+                    if body:
+                        paras.append({"h": 0, "text": join_block(body)})
+                        body = []
+                    h = head_at[line["idx"]]
+                    paras.append({"h": h["level"], "text": h["text"]})
+                    continue
+                if not is_noise(line["text"], block["in_margin"],
+                                margin_repeats, stamps):
+                    body.append(line["text"])
+            if body:
+                text = join_block(body)
+                if text:
+                    paras.append({"h": 0, "text": text})
+        pages_paras.append(paras)
+    return pages_paras
+
+
 def parse_pdf(pdf_path: Path, meta: dict) -> list[dict]:
     """Parse one PDF and return one record per page."""
     with pymupdf.open(pdf_path) as doc:
         pages_blocks = [extract_blocks(page) for page in doc]
+        pages_paras = section_paragraphs(doc)
 
     margin_repeats, stamps = find_repeated_lines(pages_blocks)
 
@@ -187,6 +257,9 @@ def parse_pdf(pdf_path: Path, meta: dict) -> list[dict]:
     gaps = sum(len(LIGATURE_GAP.findall(text)) for text in page_texts)
     if gaps >= LIGATURE_MIN:
         page_texts = [LIGATURE_GAP.sub(r"\1\2\3", text) for text in page_texts]
+        for paras in pages_paras:
+            for para in paras:
+                para["text"] = LIGATURE_GAP.sub(r"\1\2\3", para["text"])
 
     records = []
     for page_no, text in enumerate(page_texts, start=1):
@@ -201,6 +274,7 @@ def parse_pdf(pdf_path: Path, meta: dict) -> list[dict]:
             "text": text,
             "n_chars": len(text),
             "low_text": len(text) < LOW_TEXT_CHARS,
+            "paras": pages_paras[page_no - 1],
         })
     return records
 
