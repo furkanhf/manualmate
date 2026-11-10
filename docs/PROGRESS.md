@@ -10,10 +10,19 @@ and update it at the end of every chat (status, sessions, next steps). Furqan co
 - Week: 3 (generate/). Code is done and tested on the laptop. The eval has not run on a GPU yet.
 - Where to run the eval: **Colab** (notebooks/01_embed_on_colab.ipynb, section 7d) = main, because Colab works again. Kaggle = backup (cells below + notebooks/02_eval_on_kaggle.ipynb).
 - Kaggle progress (backup only): cell 1 OK (2 × Tesla T4). Cells 2–6 not run.
-- Colab progress: quick test (7d, --limit 3) CLEAN (2026-11-10_1039): q001 answer score 0.64, q002 answer 0.925, q003 ask (router); oos o01–o03 refuse not_in_manual (scores ≤0.004); clarify 3/3 correct; Gemini avg 2061 ms. Full run NOT done yet.
+- Colab progress (DONE): quick test (7d, --limit 3) CLEAN (2026-11-10_1039): q001 answer score 0.64, q002 answer 0.925, q003 ask (router); oos o01–o03 refuse not_in_manual (scores ≤0.004); clarify 3/3 correct; Gemini avg 2061 ms. Full run DONE (2026-11-10_1047) → see "Week 3 results" below.
 - Fix after the quick test (chat 3.4): q003 + q004 name "FTKS", which is in both Daikin K (ac_002) and L (ac_004) manuals → the router asks (correct). The eval now acts like the user: it picks the labeled manual (`retrieve(..., manual_id=...)` → `route_to`) and answers; the summary lists these ids as `asked_first`. Only these 2 of 50 are affected. Labels not changed. Files: scripts/run_answer_eval.py, src/manualmate/generate/answer.py (commit + push, then git pull in Colab before the full run).
 
-## ▶ NEXT STEP (Colab)
+## ▶ STOP RULE (agreed in chat 3.4 — no endless tuning)
+Change something only if: (1) the measurement is wrong (bug), (2) a resume target is missed, or (3) real users would often get a wrong or unsafe answer (not 1 case in 50).
+Otherwise: write it in this file and move on. If a target is missed: ONE round of fixes, measure again, write the result, move on. Never tune on the 50 test questions; never change labels.
+
+## ▶ NEXT STEP (week 3 — last item)
+1. Commit: refusal.py thresholds, citations.py abbreviation fix, run_answer_eval.py recheck, PROGRESS.md, eval/results/2026-11-10_1047_answers.jsonl + _summary.json.
+2. RAGAS faithfulness script (laptop, Gemini as judge, uses strip_tags, on the 50 saved answers of 2026-11-10_1047; no GPU). Context = the chunk texts of each answer's 5 sources (from Neon). Target 0.90. If ≥ 0.90 → week 3 CLOSED. If < 0.90 → one round of fixes (stop rule).
+3. Then week 4 (150 manuals, re-chunking for q033/q035/q037, Hindi/Telugu questions).
+
+## Old next step (done in chat 3.4, kept for reference)
 1. Colab 🔑 Secrets: `DATABASE_URL` and `GEMINI_API_KEY` both listed, value only, Notebook access on.
 2. Run notebook sections 1–4 in order (GPU → git pull → pip install → DATABASE_URL). They are REQUIRED before 7d in every new Colab session. Expect `Tesla T4`, `91a6ad8 …` (or newer), no pip errors, `DATABASE_URL loaded`.
 3. Skip sections 5, 6, 7, 7b, 7c. (Section 5 = chunks.jsonl upload is NOT needed: the answer code reads chunks from Neon, not from data/.)
@@ -129,6 +138,27 @@ Dense baseline misses (week 1): 7 wrong brand on top (fixed mainly by routing), 
 - eval/out_of_scope.jsonl: 30 Qs (8 price, 6 near_miss, 4 compare, 4 smart_home, 3 off_topic, 2 local, 2 opinion, 1 unsafe); router check 28/28.
 - scripts/run_answer_eval.py: text 50 + oos 30 + clarify 10; gate 1 off during the run, top score saved, threshold sweep in the summary; --limit, --summarize, --sleep.
 - Laptop smoke test: q001 answered from [ac_001 p9], citations ok; price question refused.
+
+## Week 3 results — full answer eval (Colab, 2026-11-10_1047, commit 115584f)
+File: eval/results/2026-11-10_1047_answers.jsonl (+ _summary.json). Gate 1 OFF during the run (scores saved, sweep offline).
+| metric | result |
+| in-scope answered (50) | 1.00, wrongly refused 0, errors 0; asked first then user picked model: q003, q004 |
+| gold page in top 5 | 0.94 (same as week 2) |
+| gold page cited | 0.88 |
+| citations ok | 0.96 after the "approx." checker fix (0.90 before), tag precision 0.99, answers with a made-up tag: 1 (q008) |
+| out-of-scope refused or asked (30) | 1.00 (28 NOT_IN_MANUAL, 2 ask) → refusal target 90% met |
+| clarify correct (10) | 1.00 |
+| Gemini ms | avg 2813, p50 1474, p95 9190 |
+| retrieve ms (dense+rerank, T4) | p50 720, p95 922 |
+| total (retrieve+Gemini) | p50 2239, p95 9904 |
+Threshold sweep: in-scope answered 1.00 up to 0.10, 0.98 at 0.15, 0.94 at 0.20–0.30, 0.88 at 0.50; out-of-scope refused 1.00 at every threshold (gate 2 catches everything).
+- Score gap: out-of-scope max 0.102 (o11), 0.10 (o14, o28), 0.093 (o27); in-scope min 0.15 (q009), then q046 0.17, q033 0.181, q022 0.321. o19 (sushi, LG) scored 0.868 but gate 2 refused it → gate 2 is needed.
+- Low-score in-scope answers (q009, q046, q033) are reasonable answers → a score-based clarify gate at 0.30 would hurt them.
+- Citation "not ok" (5 → 2): q020, q025, q028 = checker bug (sentence split after "approx.") → FIXED in citations.py (ABBREV_RE). Left, real, logged only: q046 = Gemini note line without a tag, q008 = made-up tag [ac_003 p36] (p36 not a source; gold p37 was retrieved).
+- Re-score without new Gemini calls: `python scripts/run_answer_eval.py --summarize eval/results/2026-11-10_1047_answers.jsonl` (summarize now re-runs the current citation checker on the saved answers).
+- Thresholds SET in refusal.py: REFUSE_BELOW 0.05, CLARIFY_BELOW 0.05 (clarify band off). Reason in the refusal.py docstring.
+- Gold retrieved but not cited: q006 (cited p4/p12, gold p38), q009 (cited p13, gold p12). Retrieval misses (known, week-4 chunking): q033, q035, q037.
+- Latency: average 2.8 s hides a long Gemini tail (p95 9.2 s). Do NOT put "p95 2.8 s" on the resume. Measure end-to-end in week 6 (options: streaming, lower max_output_tokens, check retries).
 
 ## Still empty (not started)
 filters.py, metadata.py, table_extractor.py, config.py, configs/settings.yaml, scripts/ingest.py, download_manuals.py, vision/, api/, ui/app.py, multilingual/image eval files, RAGAS faithfulness script.

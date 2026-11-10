@@ -105,12 +105,30 @@ def decide(row: dict, threshold: float) -> str:
     return row["action"]            # "answer", or "refuse" from NOT_IN_MANUAL
 
 
+def recheck(rows: list[dict]) -> None:
+    """Run the CURRENT citation checker again on the saved Gemini answers.
+
+    A fix in citations.py then changes the numbers without new Gemini calls.
+    """
+    from manualmate.generate.citations import check, find_tags
+
+    for r in rows:
+        if r.get("action") != "answer" or not r.get("raw") or not r.get("sources"):
+            continue
+        chunks = [{"manual_id": m, "page": p}
+                  for tag in r["sources"] for m, p in find_tags(tag)]
+        r["citations"] = check(r["raw"], chunks)
+        if "gold" in r:
+            r["gold_cited"] = bool(set(r["gold"]) & set(r["citations"]["tags"]))
+
+
 def pct(n: int, d: int) -> float:
     return round(n / d, 3) if d else 0.0
 
 
 def summarize(path: Path) -> dict:
     rows = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
+    recheck(rows)
     text = [r for r in rows if r["set"] == "text"]
     oos = [r for r in rows if r["set"] == "oos"]
     clar = [r for r in rows if r["set"] == "clarify"]

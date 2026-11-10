@@ -26,6 +26,10 @@ from manualmate.generate.prompts import NOT_IN_MANUAL
 BRACKET_RE = re.compile(r"\[([^\[\]]+)\]")                       # [ ... ]
 TAG_RE = re.compile(r"\b([a-z]{2}_\d{3})\s*p\.?\s*(\d+)\b", re.I)  # mw_003 p24
 SENTENCE_RE = re.compile(r"(?<=[.!?])\s+|\n+")
+# A full stop after these words does not end a sentence ("approx. 40 seconds").
+ABBREV_RE = re.compile(r"\b(approx|ca|e\.g|i\.e|incl|fig|vs)\.(?=\s)"
+                       r"|\b(no|min|max|sec|mins|secs|hrs)\.(?=\s*\d)", re.I)
+DOT = "\u2024"         # placeholder for a protected full stop
 MIN_WORDS = 4          # shorter pieces ("Steps:", "1.") are not fact sentences
 
 
@@ -56,10 +60,11 @@ def untagged_sentences(answer: str) -> list[str]:
     # A tag after the full stop ("... Ghee. [mw_003 p24]") belongs to the
     # sentence before it: move it in front of the full stop first.
     answer = re.sub(r"([.!?])[ \t]*((?:\[[^\[\]]+\][ \t]*)+)", r" \2\1", answer)
+    answer = ABBREV_RE.sub(lambda m: (m.group(1) or m.group(2)) + DOT, answer)
     out = []
     last = None                   # the last fact sentence, while it has no tag
     for piece in SENTENCE_RE.split(answer):
-        piece = piece.strip()
+        piece = piece.strip().replace(DOT, ".")
         if len(piece.split()) < MIN_WORDS:
             # A short piece with a tag ("▶ [ac_001 p9]") belongs to the
             # sentence before it.
@@ -118,6 +123,8 @@ if __name__ == "__main__":
         "made-up page": "Press Auto Cook until '6h' appears [mw_003 p25].",
         "no tag": "Press Auto Cook until '6h' appears [mw_003 p24]. "
                   "Then wait about 20 minutes for the butter to melt.",
+        "abbreviation": "Start the programme and leave it to run for approx. 40 seconds "
+                        "[mw_003 p24].",
         "tag after full stop": "Press Auto Cook until '6h' appears. [mw_003 p24] "
                                "Then press Start. [mw_003 p24]",
         "gemini q001": "Clean the filter every two weeks [ac_001 p9]. \n\nTo clean the filter:\n"

@@ -17,11 +17,16 @@ Three gates, in order:
                        else                    -> go to Gemini
   Gate 2 (Gemini):   after Gemini. Answer is NOT_IN_MANUAL -> refuse.
 
-IMPORTANT: the two thresholds below are TEMPORARY guesses.
-We set the real values from data: the top rerank scores of the 50 in-scope
-questions and the ~30 out-of-scope questions (run on Colab).
-A high score does not prove the page is right (q035: wrong page, 0.758),
-so gate 2 is still needed.
+Thresholds set from data (eval/results/2026-11-10_1047_answers.jsonl, Colab):
+  out-of-scope top scores: max 0.102; 24 of 28 are below 0.05.
+  in-scope top scores:     min 0.15 (q009), then 0.17, 0.18 - and those answers are fine.
+  REFUSE_BELOW = 0.05 keeps a 3x gap to the lowest in-scope score (not tuned tight
+  on the test set) and saves a Gemini call on most out-of-scope questions.
+  CLARIFY_BELOW = REFUSE_BELOW -> the score-based clarify band is OFF: low-score
+  in-scope questions still got good answers. Vague questions are handled by the
+  router ("Which model?", clarify set 10/10).
+A high score does not prove the page is right (q035: wrong page, 0.758;
+o19 sushi: 0.868, refused by gate 2), so gate 2 is still needed.
 
 Runs on the laptop (no torch). Run this file to see 6 example decisions.
 """
@@ -32,9 +37,9 @@ from dataclasses import dataclass, field
 
 from manualmate.generate.citations import is_refusal
 
-# TEMPORARY - set from data (see the docstring).
-REFUSE_BELOW = 0.10
-CLARIFY_BELOW = 0.30
+# Set from data on 2026-11-10 (see the docstring).
+REFUSE_BELOW = 0.05
+CLARIFY_BELOW = 0.05          # = REFUSE_BELOW -> clarify band off
 
 MESSAGES = {
     "ask_model": "Which model do you have? I found more than one manual that fits.",
