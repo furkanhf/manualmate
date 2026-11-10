@@ -6,7 +6,7 @@ and update it at the end of every chat (status, sessions, next steps). Furqan co
 
 ## ▶ CURRENT STATUS (update every chat)
 - Date: 2026-11-10 (chat 3.4)
-- Last commit: 288b870 (week-3 eval results 2026-11-10_1047, thresholds set, citation fix). Before: 115584f (asked_first + PROGRESS.md + Kaggle notebook), 91a6ad8 (week-3 code).
+- Last commit: 60458ce (week 3 closed: RAGAS 0.97, run_ragas.py). Before: 288b870 (answer-eval results, thresholds, citation fix), 115584f, 91a6ad8.
 - Week: 3 CLOSED (2026-11-10). Answers 50/50, refusals 30/30, clarify 10/10, citations ok 0.96, RAGAS faithfulness 0.97. Next: week 4.
 - Where to run the eval: **Colab** (notebooks/01_embed_on_colab.ipynb, section 7d) = main, because Colab works again. Kaggle = backup (cells below + notebooks/02_eval_on_kaggle.ipynb).
 - Kaggle progress (backup only): cell 1 OK (2 × Tesla T4). Cells 2–6 not run.
