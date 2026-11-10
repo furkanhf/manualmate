@@ -1,0 +1,199 @@
+{
+  "answers_file": "2026-11-10_1047_answers.jsonl",
+  "judge": "gemini-3.5-flash-lite",
+  "n": 6,
+  "scored": 6,
+  "failed": 0,
+  "faithfulness_mean": 0.467,
+  "target": 0.9,
+  "below_1": [
+    [
+      "q029",
+      0.0
+    ],
+    [
+      "q048",
+      0.0
+    ],
+    [
+      "q049",
+      0.0
+    ],
+    [
+      "q034",
+      0.8
+    ]
+  ],
+  "context": "whole source pages from Neon (run saved page tags, not chunk ids)",
+  "per_question": [
+    {
+      "id": "q021",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 4287,
+      "claims": [
+        {
+          "claim": "The Samsung RF9000 refrigerator fridge temperature can be set from 1 to 7 degrees Celsius.",
+          "verdict": 1,
+          "reason": "The context states that you can set the fridge temperature from 1 to 7 degrees Celsius, although it does not specifically mention the model name RF9000, the temperature range for the fridge matches the context."
+        }
+      ]
+    },
+    {
+      "id": "q024",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 5319,
+      "claims": [
+        {
+          "claim": "To set the refrigerator compartment temperature, press the required temperature.",
+          "verdict": 1,
+          "reason": "The context states: \"Setting the refrigerator compartment temperature Press the required temperature.\""
+        },
+        {
+          "claim": "The recommended temperature in the refrigerator compartment is 4 °C.",
+          "verdict": 1,
+          "reason": "The context states: \"The recommended temperature in the refrigerator compartment is 4 °C.\""
+        }
+      ]
+    },
+    {
+      "id": "q029",
+      "faithfulness": 0.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 5965,
+      "claims": [
+        {
+          "claim": "The Bosch KGN56 fridge makes rattling noises because the appliance is not level.",
+          "verdict": 0,
+          "reason": "The context mentions that the appliance makes noises because it is not level, but does not specify the model as Bosch KGN56."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge makes rattling noises because the appliance is not free-standing.",
+          "verdict": 0,
+          "reason": "The context mentions the appliance makes noises because it is not free-standing, but does not mention the Bosch KGN56 model."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge makes rattling noises because fittings wobble or stick.",
+          "verdict": 0,
+          "reason": "The context mentions fittings wobble or stick in relation to appliance noises, but does not mention the Bosch KGN56 model."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge makes rattling noises because bottles or containers are touching.",
+          "verdict": 0,
+          "reason": "The context mentions bottles or containers touching in relation to appliance noises, but does not specify the Bosch KGN56 model."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge makes rattling noises because super freezing is switched on.",
+          "verdict": 0,
+          "reason": "The context mentions super freezing is switched on, but does not specify the Bosch KGN56 model."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge making rattling noises is not a fault when a motor is running.",
+          "verdict": 0,
+          "reason": "The context states it is not a fault when a motor is running, but does not mention the Bosch KGN56 model."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge making rattling noises is not a fault when a refrigerating unit or fan is running.",
+          "verdict": 0,
+          "reason": "The context states it is not a fault when a refrigerating unit or fan is running, but does not specify the Bosch KGN56 model."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge making rattling noises is not a fault when refrigerant is flowing through the pipes.",
+          "verdict": 0,
+          "reason": "The context states it is not a fault when refrigerant flows through the pipes, but does not mention the Bosch KGN56 model."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge making rattling noises is not a fault when the motor, switches, or solenoid valves are switching on or off.",
+          "verdict": 0,
+          "reason": "The context states it is not a fault when these components switch on or off, but does not specify the Bosch KGN56 model."
+        },
+        {
+          "claim": "The Bosch KGN56 fridge making rattling noises is not a fault when automatic defrosting is running.",
+          "verdict": 0,
+          "reason": "The context states it is not a fault when automatic defrosting is running, but does not mention the Bosch KGN56 model."
+        }
+      ]
+    },
+    {
+      "id": "q034",
+      "faithfulness": 0.8,
+      "n_contexts": 3,
+      "gold_retrieved": true,
+      "judge_ms": 5057,
+      "claims": [
+        {
+          "claim": "Users can lock the buttons of the Samsung MC28H5025 microwave using the child lock feature.",
+          "verdict": 0,
+          "reason": "The context mentions a child lock feature that enables the oven to be locked, but does not explicitly mention the model 'Samsung MC28H5025'."
+        },
+        {
+          "claim": "Users must press the Up and Down button at the same time for one second to lock the microwave buttons.",
+          "verdict": 1,
+          "reason": "The context states to press the Up and Down button at the same time for one second to lock the oven."
+        },
+        {
+          "claim": "The microwave oven is locked and no functions can be selected after pressing the Up and Down buttons.",
+          "verdict": 1,
+          "reason": "The context states that as a result, the oven is locked (no functions can be selected)."
+        },
+        {
+          "claim": "The microwave display shows the letter L when the microwave is locked.",
+          "verdict": 1,
+          "reason": "The context states that the display shows 'L'."
+        },
+        {
+          "claim": "Users can unlock the microwave oven later by pressing the Up and Down button at the same time for one second.",
+          "verdict": 1,
+          "reason": "The context states that to unlock the oven, users should press the Up and Down button at the same time for one second."
+        }
+      ]
+    },
+    {
+      "id": "q048",
+      "faithfulness": 0.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 5926,
+      "claims": [
+        {
+          "claim": "The user needs to press and hold the RESET button on the TP-Link Archer C6 router for more than 5 seconds.",
+          "verdict": 0,
+          "reason": "The context states to press and hold the RESET button for more than 5 seconds to reset the router, but it does not mention the specific model 'TP-Link Archer C6'."
+        },
+        {
+          "claim": "Holding the RESET button for more than 5 seconds resets the TP-Link Archer C6 router to factory default settings.",
+          "verdict": 0,
+          "reason": "The context states that pressing and holding the button for more than 5 seconds resets the router to its factory default settings, but it does not specify the 'TP-Link Archer C6' model."
+        }
+      ]
+    },
+    {
+      "id": "q049",
+      "faithfulness": 0.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 13712,
+      "claims": [
+        {
+          "claim": "A user must wait until the SYS LED indicator on the Tenda AC10 router blinks.",
+          "verdict": 0,
+          "reason": "The context states to reset the router using the reset button when the SYS LED indicator blinks, but does not mention the router model being Tenda AC10."
+        },
+        {
+          "claim": "A user must hold down the reset button on the Tenda AC10 router for about 8 seconds.",
+          "verdict": 0,
+          "reason": "The context states to hold down the button for about 8 seconds, but does not specify the router model as Tenda AC10."
+        },
+        {
+          "claim": "A user must release the reset button on the Tenda AC10 router when all the LED indicators light up to restore the Tenda AC10 router to factory settings.",
+          "verdict": 0,
+          "reason": "The context mentions releasing the button when all LED indicators light up to restore the router to factory settings, but it does not specify the model as Tenda AC10."
+        }
+      ]
+    }
+  ]
+}

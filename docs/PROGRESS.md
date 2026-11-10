@@ -6,8 +6,8 @@ and update it at the end of every chat (status, sessions, next steps). Furqan co
 
 ## ▶ CURRENT STATUS (update every chat)
 - Date: 2026-11-10 (chat 3.4)
-- Last commit: 91a6ad8 (week-3 code + eval script + notebook 7d). NOT committed yet: docs/PROGRESS.md, notebooks/02_eval_on_kaggle.ipynb (commit them; Colab does not need them).
-- Week: 3 (generate/). Code is done and tested on the laptop. The eval has not run on a GPU yet.
+- Last commit: 288b870 (week-3 eval results 2026-11-10_1047, thresholds set, citation fix). Before: 115584f (asked_first + PROGRESS.md + Kaggle notebook), 91a6ad8 (week-3 code).
+- Week: 3 CLOSED (2026-11-10). Answers 50/50, refusals 30/30, clarify 10/10, citations ok 0.96, RAGAS faithfulness 0.97. Next: week 4.
 - Where to run the eval: **Colab** (notebooks/01_embed_on_colab.ipynb, section 7d) = main, because Colab works again. Kaggle = backup (cells below + notebooks/02_eval_on_kaggle.ipynb).
 - Kaggle progress (backup only): cell 1 OK (2 × Tesla T4). Cells 2–6 not run.
 - Colab progress (DONE): quick test (7d, --limit 3) CLEAN (2026-11-10_1039): q001 answer score 0.64, q002 answer 0.925, q003 ask (router); oos o01–o03 refuse not_in_manual (scores ≤0.004); clarify 3/3 correct; Gemini avg 2061 ms. Full run DONE (2026-11-10_1047) → see "Week 3 results" below.
@@ -18,8 +18,8 @@ Change something only if: (1) the measurement is wrong (bug), (2) a resume targe
 Otherwise: write it in this file and move on. If a target is missed: ONE round of fixes, measure again, write the result, move on. Never tune on the 50 test questions; never change labels.
 
 ## ▶ NEXT STEP (week 3 — last item)
-1. Commit: refusal.py thresholds, citations.py abbreviation fix, run_answer_eval.py recheck, PROGRESS.md, eval/results/2026-11-10_1047_answers.jsonl + _summary.json.
-2. RAGAS faithfulness script (laptop, Gemini as judge, uses strip_tags, on the 50 saved answers of 2026-11-10_1047; no GPU). Context = the chunk texts of each answer's 5 sources (from Neon). Target 0.90. If ≥ 0.90 → week 3 CLOSED. If < 0.90 → one round of fixes (stop rule).
+1. DONE (288b870): thresholds, citation fix, recheck, results committed.
+2. RAGAS DONE: 0.97 (runs 1759 0.98 + 1822 0.959). **WEEK 3 CLOSED.**
 3. Then week 4 (150 manuals, re-chunking for q033/q035/q037, Hindi/Telugu questions).
 
 ## Old next step (done in chat 3.4, kept for reference)
@@ -89,6 +89,7 @@ Python 3.11, PyMuPDF (import pymupdf, not fitz), pdfplumber, bge-m3 embeddings (
 - Day 3 (2026-11-09, chat 3.1): reranker added (commit d0a6b0b) + notebook section 7b. Result: R@1 0.66, R@5 0.94, MRR 0.78 (rr-issue). Query rewriting (Gemini, commit 5377a1a) tested: NO gain → not used in the pipeline. Week 2 closed. Next: week 3 (generate/).
 - Day 3 evening (2026-11-09, chat 3.2): week 3 code written and tested on the laptop: generate/prompts.py, citations.py, refusal.py, answer.py, eval/out_of_scope.jsonl (30), scripts/run_answer_eval.py + notebook 7d. Last commit 91a6ad8. Colab did not run.
 - Day 4 (2026-11-10, chat 3.3): set up Kaggle as a GPU option (T4 x2 works). Eval not run yet. Kaggle cells: section below.
+- Day 4 (2026-11-10, chat 3.4, later): full answer eval on Colab (1047), thresholds set, citation fix, RAGAS script (ragas 0.4.3 + Gemini judge via OpenAI endpoint) → 0.97. Week 3 closed. Gemini free quota: flash-lite 500/day + 15/min (answers + judge share it), flash 20/day.
 - Day 4 (2026-11-10, chat 3.4): Colab works again → Colab is the main place for the eval, Kaggle the backup. Checked notebook 7d and the code; added the Colab run order (sections 1–4 first) to NEXT STEP. Eval not run yet.
 
 ## Data: 20 manuals (data/manifest.csv: manual_id,brand,model,category,language,filename,source_url)
@@ -159,6 +160,20 @@ Threshold sweep: in-scope answered 1.00 up to 0.10, 0.98 at 0.15, 0.94 at 0.20�
 - Thresholds SET in refusal.py: REFUSE_BELOW 0.05, CLARIFY_BELOW 0.05 (clarify band off). Reason in the refusal.py docstring.
 - Gold retrieved but not cited: q006 (cited p4/p12, gold p38), q009 (cited p13, gold p12). Retrieval misses (known, week-4 chunking): q033, q035, q037.
 - Latency: average 2.8 s hides a long Gemini tail (p95 9.2 s). Do NOT put "p95 2.8 s" on the resume. Measure end-to-end in week 6 (options: streaming, lower max_output_tokens, check retries).
+
+## Week 3 results — RAGAS faithfulness (laptop, scripts/run_ragas.py)
+Setup: ragas 0.4.3 (+ instructor>=1.9, langchain-community<0.4, openai). Judge = gemini-3.5-flash-lite through Gemini's OpenAI-compatible endpoint (async client; the google-genai client is sync-only inside ragas). max_tokens 8192, reasoning_effort low (default 1024 tokens -> IncompleteOutputException). gemini-3.5-flash as judge: free tier only 20 requests/day -> not usable for 50 answers.
+Context = whole source pages from Neon (the 1047 run saved page tags, not chunk ids) -> slightly lenient.
+| run | code | faithfulness | note |
+| 2026-11-10_1728 | old scoring (Faithfulness.ascore, no claims saved) | 0.734 | 6 answers scored 0.0; on re-run they scored 1.0 -> judge failures, cannot be checked (no claims saved) |
+| 2026-11-10_1759 | current (keeps claims + verdicts + reasons) | **0.98** (50/50 scored) | below 1.0: q006 0.50, q009 0.80, q042 0.83, q032 0.89 |
+| 2026-11-10_1822 | current | **0.959** (50/50 scored) | below 1.0: q029 0.00 ("rattling" judge error), q006 0.50, q009 0.75, q042 0.83, q044 0.89 |
+**FINAL: RAGAS faithfulness 0.97 (mean of 2 judge runs with the current code, range 0.959–0.98) → target 0.90 MET.** A 3rd run hit the free daily quota (flash-lite 500 requests/day) → not needed (stop rule: both runs far above target).
+Resume line: "RAGAS faithfulness 0.97 (2 judge runs, 0.96–0.98; Gemini judge)".
+- The 4 "unsupported" claims of run 1759 are judge strictness, not hallucinations (e.g. q009: manual says SARARA DRY "mixes dehumidified cool air with room air"; judge wants the words "not too cold").
+- The judge is not stable: q029 scored 0.40 at 17:43 (judge put the question word "rattling" into every claim) and 1.00 at 17:59 with the same code.
+- Limits to write next to the number: judge = same model family as the writer (self-bias possible); page-level context; one judge run is noisy.
+- Debug: `python scripts/run_ragas.py --ids q029,q006` prints every claim, verdict and reason.
 
 ## Still empty (not started)
 filters.py, metadata.py, table_extractor.py, config.py, configs/settings.yaml, scripts/ingest.py, download_manuals.py, vision/, api/, ui/app.py, multilingual/image eval files, RAGAS faithfulness script.

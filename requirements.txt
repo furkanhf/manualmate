@@ -22,3 +22,11 @@ rank-bm25==0.2.2
 # laptop install the CPU version with:
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu
 sentence-transformers==6.2.0
+
+# --- Week 3: faithfulness eval (RAGAS, Gemini judge) ---
+# instructor and langchain-community are pinned because ragas 0.4.3 breaks with
+# instructor < 1.9 (no Gemini) and langchain-community >= 0.4 (import error).
+ragas==0.4.3
+instructor>=1.9
+langchain-community<0.4
+openai              # async client for Gemini's OpenAI-compatible endpoint (RAGAS judge)

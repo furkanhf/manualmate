@@ -1,0 +1,456 @@
+{
+  "answers_file": "2026-11-10_1047_answers.jsonl",
+  "judge": "gemini-3.5-flash-lite",
+  "n": 50,
+  "scored": 50,
+  "failed": 0,
+  "faithfulness_mean": 0.734,
+  "target": 0.9,
+  "below_1": [
+    [
+      "q021",
+      0.0
+    ],
+    [
+      "q024",
+      0.0
+    ],
+    [
+      "q029",
+      0.0
+    ],
+    [
+      "q034",
+      0.0
+    ],
+    [
+      "q048",
+      0.0
+    ],
+    [
+      "q049",
+      0.0
+    ],
+    [
+      "q044",
+      0.125
+    ],
+    [
+      "q028",
+      0.2
+    ],
+    [
+      "q031",
+      0.2
+    ],
+    [
+      "q033",
+      0.25
+    ],
+    [
+      "q019",
+      0.3333333333333333
+    ],
+    [
+      "q026",
+      0.3333333333333333
+    ],
+    [
+      "q017",
+      0.5
+    ],
+    [
+      "q009",
+      0.6666666666666666
+    ],
+    [
+      "q027",
+      0.6666666666666666
+    ],
+    [
+      "q037",
+      0.75
+    ],
+    [
+      "q039",
+      0.75
+    ],
+    [
+      "q050",
+      0.7692307692307693
+    ],
+    [
+      "q005",
+      0.8
+    ],
+    [
+      "q047",
+      0.8
+    ],
+    [
+      "q032",
+      0.8333333333333334
+    ],
+    [
+      "q042",
+      0.8333333333333334
+    ],
+    [
+      "q045",
+      0.875
+    ]
+  ],
+  "context": "whole source pages from Neon (run saved page tags, not chunk ids)",
+  "per_question": [
+    {
+      "id": "q001",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 7784
+    },
+    {
+      "id": "q002",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 8550
+    },
+    {
+      "id": "q003",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 5541
+    },
+    {
+      "id": "q004",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 6520
+    },
+    {
+      "id": "q005",
+      "faithfulness": 0.8,
+      "n_contexts": 3,
+      "gold_retrieved": true,
+      "judge_ms": 13172
+    },
+    {
+      "id": "q006",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 7669
+    },
+    {
+      "id": "q007",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 12719
+    },
+    {
+      "id": "q008",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 10785
+    },
+    {
+      "id": "q009",
+      "faithfulness": 0.6666666666666666,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 12888
+    },
+    {
+      "id": "q010",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 4593
+    },
+    {
+      "id": "q011",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 7997
+    },
+    {
+      "id": "q012",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 8538
+    },
+    {
+      "id": "q013",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 10324
+    },
+    {
+      "id": "q014",
+      "faithfulness": 1.0,
+      "n_contexts": 3,
+      "gold_retrieved": true,
+      "judge_ms": 13017
+    },
+    {
+      "id": "q015",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 6560
+    },
+    {
+      "id": "q016",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 5835
+    },
+    {
+      "id": "q017",
+      "faithfulness": 0.5,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 7855
+    },
+    {
+      "id": "q018",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 8475
+    },
+    {
+      "id": "q019",
+      "faithfulness": 0.3333333333333333,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 11401
+    },
+    {
+      "id": "q020",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 6636
+    },
+    {
+      "id": "q021",
+      "faithfulness": 0.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 4923
+    },
+    {
+      "id": "q022",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 5694
+    },
+    {
+      "id": "q023",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 5550
+    },
+    {
+      "id": "q024",
+      "faithfulness": 0.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 13446
+    },
+    {
+      "id": "q025",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 4258
+    },
+    {
+      "id": "q026",
+      "faithfulness": 0.3333333333333333,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 5910
+    },
+    {
+      "id": "q027",
+      "faithfulness": 0.6666666666666666,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 5353
+    },
+    {
+      "id": "q028",
+      "faithfulness": 0.2,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 5667
+    },
+    {
+      "id": "q029",
+      "faithfulness": 0.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 13574
+    },
+    {
+      "id": "q030",
+      "faithfulness": 1.0,
+      "n_contexts": 3,
+      "gold_retrieved": true,
+      "judge_ms": 11155
+    },
+    {
+      "id": "q031",
+      "faithfulness": 0.2,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 6371
+    },
+    {
+      "id": "q032",
+      "faithfulness": 0.8333333333333334,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 5265
+    },
+    {
+      "id": "q033",
+      "faithfulness": 0.25,
+      "n_contexts": 4,
+      "gold_retrieved": false,
+      "judge_ms": 12542
+    },
+    {
+      "id": "q034",
+      "faithfulness": 0.0,
+      "n_contexts": 3,
+      "gold_retrieved": true,
+      "judge_ms": 6838
+    },
+    {
+      "id": "q035",
+      "faithfulness": 1.0,
+      "n_contexts": 3,
+      "gold_retrieved": false,
+      "judge_ms": 6583
+    },
+    {
+      "id": "q036",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 6688
+    },
+    {
+      "id": "q037",
+      "faithfulness": 0.75,
+      "n_contexts": 5,
+      "gold_retrieved": false,
+      "judge_ms": 9404
+    },
+    {
+      "id": "q038",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 8033
+    },
+    {
+      "id": "q039",
+      "faithfulness": 0.75,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 5679
+    },
+    {
+      "id": "q040",
+      "faithfulness": 1.0,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 9564
+    },
+    {
+      "id": "q041",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 4761
+    },
+    {
+      "id": "q042",
+      "faithfulness": 0.8333333333333334,
+      "n_contexts": 4,
+      "gold_retrieved": true,
+      "judge_ms": 6321
+    },
+    {
+      "id": "q043",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 10443
+    },
+    {
+      "id": "q044",
+      "faithfulness": 0.125,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 5459
+    },
+    {
+      "id": "q045",
+      "faithfulness": 0.875,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 7011
+    },
+    {
+      "id": "q046",
+      "faithfulness": 1.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 24416
+    },
+    {
+      "id": "q047",
+      "faithfulness": 0.8,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 6685
+    },
+    {
+      "id": "q048",
+      "faithfulness": 0.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 7237
+    },
+    {
+      "id": "q049",
+      "faithfulness": 0.0,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 4903
+    },
+    {
+      "id": "q050",
+      "faithfulness": 0.7692307692307693,
+      "n_contexts": 5,
+      "gold_retrieved": true,
+      "judge_ms": 6043
+    }
+  ]
+}
