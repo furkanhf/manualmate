@@ -179,6 +179,27 @@ manuals:
     category: refrigerator
     name: Bosch KGN56 fridge-freezer
     models: [kgn56]
+  rf_006:
+    brand: haier
+    category: refrigerator
+    name: Haier HRF510 bottom mount / French door
+    models: [hrf510bhc, hrf510bw, hrf510bs, hrf510fhc, hrf510fhs, hrf510fs, hrf510]
+  rf_008:
+    brand: electrolux
+    category: refrigerator
+    name: Electrolux ETE/EBE/EHE top + bottom mount
+    models: [ete4600, ete4607, ete5400, ete5407, ebe4500, ebe4507, ebe5300, ebe5307,
+             ebe5367, ehe5267, efe4227, ere5047]
+  rf_011:
+    brand: samsung
+    category: refrigerator
+    name: Samsung SRT3500B top mount (RT31/RT35/RT38/RT42/RT47)
+    models: [srt3500b, srt3500, rt31, rt35, rt38, rt42, rt47]
+  rf_009:
+    brand: panasonic
+    category: refrigerator
+    name: Panasonic NR-BX471 / NR-BX421 bottom freezer (ECONAVI)
+    models: [nr-bx471c, nr-bx471h, nr-bx421b, nr-bx421h, nrbx471, nrbx421, bx471, bx421]
 
   # --- Microwave ------------------------------------------------------------
   mw_001:

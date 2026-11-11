@@ -8,6 +8,13 @@ ac_010,haier_hsu14k-pysg5bn_ac.pdf,SKIPPED,,,,,,DROPPED (chat 5.1): same file as
 ac_011,lloyd_ac-common_ac.pdf,SKIPPED,,,,,,"SCANNED (chat 5.1): image-only, moved to data/scanned for week-5 OCR",https://havells.com/media/wysiwyg/Manuals/lloyd-AC-common.pdf
 ac_012,blue-star_mdvryo-series_ac.pdf,IN_MANIFEST,,,,,,already added,https://5.imimg.com/data5/SELLER/Doc/2025/3/493472811/AP/VE/QO/46564151/blue-star-split-air-conditioner-ac.pdf
 ac_013,panasonic_cs-rs18uky-series_ac.pdf,IN_MANIFEST,,,,,,already added,
+rf_005,liebherr_cn-kgn-5x-series_refrigerator.pdf,DOWNLOAD_FAILED,,,,,,HTTP 403,https://www.hbh-woolacotts.co.uk/rpfiles/CNSDC5203-UM.pdf
+rf_006,haier_hrf510-series_refrigerator.pdf,OK,38,45432,0,1.0,3334,,https://www.haier.com.au/on/demandware.static/-/Sites-haier-master-catalog/default/dwc2f542c3/GeneralFiles-HaierAU/Haier-UserGuide-en-HRF510BHC-HRF510BW-HRF510BS-HRF510FHC-HRF510FHS-HRF510FS-FridgeFreezer-0-2025vA-NZ-AU.pdf
+rf_007,lg_lrtnc0915_refrigerator.pdf,OK,36,79392,0,1.0,3621,,https://www.canadianappliance.ca/pdf/lg/refrigerator/LRTNC0915V_owner-manual-en.pdf
+rf_008,electrolux_ete-ebe-series_refrigerator.pdf,OK,32,70709,3,1.0,6774,,https://resource.electrolux.com.au/Public/File/?Id=28363
+rf_009,panasonic_nr-bx471-421_refrigerator.pdf,BY_HAND,,,,,,save the PDF as data/raw/panasonic_nr-bx471-421_refrigerator.pdf (BY HAND (Panasonic gives HTTP 403 to scripts): https://www.panasonic.com/content/dam/panasonic/ph/en/PDF/productPDF/2025/Operating-Instructions-NR-BX471HWKP.pdf),
+rf_010,fisher-paykel_rf381t-series_refrigerator.pdf,OK,44,40948,16,1.0,2430,,https://www.fisherpaykel.com/on/demandware.static/-/Sites-fpa-master-catalog/default/dw992d1a68/GeneralFiles-FisherPaykelAU/FP-UserGuide-RF381TLPW6-FreestandingFridgeFreezer-AU-NZ-844938B.pdf
+rf_011,samsung_srt3500b_refrigerator.pdf,OK,56,60826,1,1.0,6155,,https://www.appliancesonline.com.au/ak/0/5/a/3/05a347cf140dca88e5520196c94a3a545a96939a_SRT3500B___User_Manual.pdf
 wm_005,bosch_wga244a0me_washing-machine.pdf,OK,60,73756,3,1.0,4446,,https://media3.bosch-home.com/Documents/9001735037_A.pdf
 wm_006,godrej_wteon-alr-c-70_washing-machine.pdf,DOWNLOAD_FAILED,,,,,,HTTP 404,https://godrejenterprises.com/Resources/Support/UMWTEONALRC7050_01053142.pdf
 wm_007,panasonic_na-fd135z3_washing-machine.pdf,BY_HAND,,,,,,save the PDF as data/raw/panasonic_na-fd135z3_washing-machine.pdf (BY HAND (Panasonic gives HTTP 403 to scripts): https://www.panasonic.com/content/dam/panasonic/my/en/PDF/Operating-Instructions-NA-FD135Z3BT.pdf),
