@@ -4,14 +4,33 @@ This file is the single place to see where the project is and how to continue.
 Claude: read this file at the start of every chat (via the folder access to D:\Projects\manualmate),
 and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
 
+## ▶ START HERE — next chat (5.2): parse + chunk + embed the 48 manuals
+Claude: do these steps with Furqan, about 5 per batch, one command at a time, and say where to run each and what to expect.
+0. Check: `git status; git log --oneline -1` → clean, last commit = "Week 4: router batch +6 (48 manuals, collection done) + PROGRESS chat 5.1". If not clean, commit first (the router batch + this file were the last open changes).
+   Check: data/raw has the 48 manifest PDFs (+ carrier_midea-india-split_ac.pdf, not in the manifest, harmless); data/scanned has 7 PDFs. Use ONE Claude chat only (two chats edited the same files in 5.1).
+1. Laptop terminal: `python src/manualmate/ingest/pdf_parser.py` (all manuals; a few minutes — routers are 95–195 pages).
+   Expect 48 manuals, no errors. Claude then reads data/processed/ on the laptop: pages per manual, low_text pages (fridge/AC trims and image pages are known), and that page counts match download_report.csv.
+2. Laptop terminal: `python src/manualmate/ingest/chunker.py` (section mode, default).
+   Expect about 9,000–12,000 chunks (old 20 = 4,159). Paste the per-manual table. Claude checks the "mode" column: a manual in safe mode (fixed) = headings not found → note it, do not tune (stop rule). Check the router manuals (very long) and the image-heavy ones (Electrolux, Whirlpool).
+3. Commit nothing from data/ (gitignored). Colab notebook 01_embed_on_colab.ipynb: run sections 1–4 (GPU → git pull → pip → DATABASE_URL), then 5 (upload the NEW data/chunks/chunks.jsonl), then 6 (build_index.py TRUNCATES Neon and re-embeds all chunks; ~3× longer than with 4,159 chunks).
+   Neon free tier = 0.5 GB: ~12k chunks × 1024 floats is ~50 MB + index → OK; if Neon refuses, tell Claude.
+4. Colab section 7e (routed + routed_rerank, issue text; no Gemini) → section 8 (download the results) → save in eval/results/ → commit.
+   Compare with week 4 step 1: R@5 0.98, R@1 0.78, MRR 0.86 (20 manuals). The 50 questions cover only the old 20 manuals, so this measures whether 28 more manuals hurt routing. If R@5 drops a lot → look at the misses first (router asks "which model?" / wrong manual) before changing anything (stop rule: one round of fixes).
+5. Claude writes the results into this file (new "Week 4 results — 48 manuals" table) and updates CURRENT STATUS. Then step 2b / 3 below (new test questions, Hindi/Telugu questions).
+
 ## ▶ CURRENT STATUS (update every chat)
-- Date: 2026-11-10 (chat 4.1, evening)
-- Last commit: f6cc9c7 (week 4: section chunking, parser paras, Colab 7e). Before: f890ff9 (headings.py), 7f51a85, 60458ce (week 3 closed).
-- Week: 4 IN PROGRESS. Step 1 (section chunking) DONE and KEPT → R@5 0.98 (see "Week 4 results" below). Neon now holds the 4,159 section chunks.
-- Scope cut (chat 4.1, Furqan has 2 more resume projects): ~60 manuals instead of 150 (decide later; the resume must say the real number); troubleshooting "one row = one chunk" and LLM keywords skipped; simple safe mode only. Weeks 5–6 to decide later (if week 5 is skipped, remove "OCR 91%" and "image query 84%" from the resume).
-- Done in chat 4.1 (no Gemini): src/manualmate/ingest/headings.py (bold/bigger font, 8 noise rules; Furqan spot check of 200 samples ≈ 5% wrong); pdf_parser.py also writes "paras" (headings as own paragraphs; "text" unchanged, checked on 1,671/1,671 pages); chunker.py --mode section (default) / --mode fixed (week-1 baseline, checked: identical 2,230 chunks).
-- Section mode rules: each chunk starts with a title line "<Brand> <MODEL> <category> | <parent> > <heading>" (2 levels); a new heading always starts a new chunk; a chunk never crosses a page; long sections cut at sentence ends (no overlap); no merging; body < 12 letters → no chunk; safe mode: < 0.3 headings/page → fixed (0 of 20 manuals). 4,159 chunks (fixed: 2,230), median 448 chars.
-- Not built yet: section expansion (send sibling parts of a section to Gemini); chunk_id has the section number (_sNNNN_) for later. Week-3 answer eval / RAGAS NOT re-run on the new chunks yet (needs Gemini).
+- Date: 2026-11-11 (chat 5.1, evening)
+- Last commit: router batch (48 manuals) + this file. Before: 5badb88 (microwaves, 42), 507a9ab (fridges, 36), aadb9f4 (washing machines, 32), 7097dd3 (AC + download_manuals.py, 25), 32abf60 (week-4 step 1 closed).
+- Week: 4 IN PROGRESS. Step 1 (section chunking) DONE, R@5 0.98. Step 2 manual COLLECTION DONE in chat 5.1: 48 manuals in data/manifest.csv + configs/aliases.yaml (was 20). NOT yet parsed/chunked/embedded: Neon still holds the 4,159 chunks of the old 20.
+- Counts: AC 9, washing machine 11, refrigerator 9, microwave 9, router 10 = 48. Decided: keep 48 (no trimming to 9 each, no padding to 50); resume says "48 manuals".
+- Chat 5.1 notes: see "Week 4 step 2 — manual collection (chat 5.1)" below (download script, drops, trims, scanned files, gotchas).
+- From chat 4.1 (still true):
+  - Last commit: f6cc9c7 (week 4: section chunking, parser paras, Colab 7e). Before: f890ff9 (headings.py), 7f51a85, 60458ce (week 3 closed).
+  - Week: 4 IN PROGRESS. Step 1 (section chunking) DONE and KEPT → R@5 0.98 (see "Week 4 results" below). Neon now holds the 4,159 section chunks.
+  - Scope cut (chat 4.1, Furqan has 2 more resume projects): ~60 manuals instead of 150 (decide later; the resume must say the real number); troubleshooting "one row = one chunk" and LLM keywords skipped; simple safe mode only. Weeks 5–6 to decide later (if week 5 is skipped, remove "OCR 91%" and "image query 84%" from the resume).
+  - Done in chat 4.1 (no Gemini): src/manualmate/ingest/headings.py (bold/bigger font, 8 noise rules; Furqan spot check of 200 samples ≈ 5% wrong); pdf_parser.py also writes "paras" (headings as own paragraphs; "text" unchanged, checked on 1,671/1,671 pages); chunker.py --mode section (default) / --mode fixed (week-1 baseline, checked: identical 2,230 chunks).
+  - Section mode rules: each chunk starts with a title line "<Brand> <MODEL> <category> | <parent> > <heading>" (2 levels); a new heading always starts a new chunk; a chunk never crosses a page; long sections cut at sentence ends (no overlap); no merging; body < 12 letters → no chunk; safe mode: < 0.3 headings/page → fixed (0 of 20 manuals). 4,159 chunks (fixed: 2,230), median 448 chars.
+  - Not built yet: section expansion (send sibling parts of a section to Gemini); chunk_id has the section number (_sNNNN_) for later. Week-3 answer eval / RAGAS NOT re-run on the new chunks yet (needs Gemini).
 
 ## ▶ STOP RULE (agreed in chat 3.4 — no endless tuning)
 Change something only if: (1) the measurement is wrong (bug), (2) a resume target is missed, or (3) real users would often get a wrong or unsafe answer (not 1 case in 50).
@@ -19,7 +38,8 @@ Otherwise: write it in this file and move on. If a target is missed: ONE round o
 
 ## ▶ NEXT STEP (week 4)
 1. DONE: section chunking, measured on Colab (7e), kept.
-2. Collect ~40 more manuals (about 8 per category; official brand/support sites only, no manuals.plus / "Download_PDFS"). Add rows to data/manifest.csv + configs/aliases.yaml. Then parser → chunker → Colab 5–6 → 7e. Check the per-manual "mode" column (safe mode = few headings).
+2. Collection DONE (48 manuals, chat 5.1). NOW: laptop `python src/manualmate/ingest/pdf_parser.py` (all) → `python src/manualmate/ingest/chunker.py` (section mode) → check the per-manual "mode" column (safe mode = few headings) and chunk counts → Colab 5 (upload chunks.jsonl) – 6 (embed to Neon; old 20 are re-embedded too) → 7e (retrieval eval on the 50 questions; they cover only the old 20 manuals, so this checks that 28 more manuals did not hurt routing/R@5).
+2b. Later: a few new test questions for the new manuals (Indian models first: Panasonic AKY, Blue Star, LG TS-Q19YNZE). Fairer test than the 50.
 3. 20 Hindi/Telugu questions (eval/multilingual_queries.jsonl, labeled manual + page) → retrieval eval on Colab (no Gemini).
 4. After the Gemini daily quota resets: quick answer check on the new chunks (7d --limit 3, then the full run if clean) + Hindi/Telugu answers.
 
@@ -45,7 +65,7 @@ Otherwise: write it in this file and move on. If a target is missed: ONE round o
 2. Terminal (Ctrl+`): `conda activate D:\Projects\manualmate\.conda`
 3. `git status; git log --oneline -1` → expect clean and the "Last commit" above.
 4. New Claude chat (in the manualmate Project, opened in the Claude desktop app). First message:
-   "Continue ManualMate. Ask for folder access to D:\Projects\manualmate, then read docs/PROGRESS.md."
+   "Continue ManualMate. Ask for folder access to D:\Projects\manualmate, then read docs/PROGRESS.md and follow ▶ START HERE."
 5. Claude asks for folder access → approve it (needed again in every new chat).
 
 
@@ -92,8 +112,10 @@ Python 3.11, PyMuPDF (import pymupdf, not fitz), pdfplumber, bge-m3 embeddings (
 - Day 4 (2026-11-10, chat 3.3): set up Kaggle as a GPU option (T4 x2 works). Eval not run yet. Kaggle cells: section below.
 - Day 4 (2026-11-10, chat 3.4, later): full answer eval on Colab (1047), thresholds set, citation fix, RAGAS script (ragas 0.4.3 + Gemini judge via OpenAI endpoint) → 0.97. Week 3 closed. Gemini free quota: flash-lite 500/day + 15/min (answers + judge share it), flash 20/day.
 - Day 4 (2026-11-10, chat 3.4): Colab works again → Colab is the main place for the eval, Kaggle the backup. Checked notebook 7d and the code; added the Colab run order (sections 1–4 first) to NEXT STEP. Eval not run yet.
+- Day 5 (2026-11-11, chat 5.1): week 4 step 2 — manual collection 20 → 48 with scripts/download_manuals.py + data/download_list.csv; commits 7097dd3, aadb9f4, 507a9ab, 5badb88 + router batch. Not parsed/embedded yet.
 
-## Data: 20 manuals (data/manifest.csv: manual_id,brand,model,category,language,filename,source_url)
+## Data: 48 manuals (data/manifest.csv: manual_id,brand,model,category,language,filename,source_url)
+The list below is the first 20 (week 1). The 28 added in chat 5.1 are in data/manifest.csv and data/download_list.csv (with notes); summary in "Week 4 step 2" below.
 AC: ac_001 samsung_ar-by_ac.pdf (12 p) | ac_002 daikin_ftks-k-series_ac.pdf (44) | ac_003 daikin_ftxz-us7_ac.pdf (48) | ac_004 daikin_ftxs-l-series_ac.pdf (44)
 Washing machine: wm_001 ifb_senator-mbn-8014k (78) | wm_002 samsung_ww80t (72) | wm_003 lg_fhm1408bdl (44) | wm_004 bosch_waj20180za (52)
 Refrigerator: rf_001 samsung_rf9000f (96) | rf_002 bosch_kgn (32) | rf_003 whirlpool_neo-ic355 (12, 7 low_text pages) | rf_004 bosch_kgn56 (32)
@@ -102,6 +124,23 @@ Router: rt_001 d-link_dir-825-ac (222) | rt_002 netgear_r6350 (204) | rt_003 tp-
 - 5 scanned (no-text) PDFs kept in data/scanned for week-5 OCR tests.
 - Daikin K and L manuals are almost identical (questions must name the model).
 - Avoid manuals.plus/asin pages and "Download_PDFS" sites (AI-written fakes). The Panasonic site blocks direct PDF links.
+
+## Week 4 step 2 — manual collection (chat 5.1, 2026-11-11)
+- No usable bulk dataset exists (checked Kaggle/HF/E-Manual corpus = text only/PM209 = phones/CheckManual = LLM-made/Internet Archive = old+scanned). So: curated link list + script.
+- scripts/download_manuals.py (new): reads data/download_list.csv (manifest columns + note), downloads to data/raw/, checks each PDF, writes data/download_report.csv. Statuses: OK, SHORT (<10 p), SCANNED (>50% pages <50 chars), NOT_EN (<80% a-z letters), DUPLICATE (same sha256 as a manifest PDF), BAD_FILE (HTML instead of PDF → renamed .bad), BY_HAND (no url: save the PDF as data/raw/<filename>, run again), BLOCKED_SITE (manuals.plus, manualslib, scribd, notice-facile …), DOWNLOAD_FAILED, IN_MANIFEST, SKIPPED (note starts with DROPPED/SCANNED). It never edits the manifest; Claude checks files, then adds manifest + aliases rows.
+- Run: `python scripts/download_manuals.py --category router` or `... rf_007 wm_011`.
+- Sites that block scripts (download by hand in the browser): Panasonic (HTTP 403), Godrej (404 even in browser → dropped), Croma (dead links), some retailers. Bosch/Siemens (media3), TP-Link, ASUS, Netgear, Haier AU, Electrolux AU, canadianappliance.ca worked.
+- NOT_EN check misses Latin-script languages: Panasonic NA-FD135Z3 (Malay pages 58-112) and LG WT7005C (Spanish 39-80) were trimmed to the English pages (page numbers unchanged). Routers keep 0-5 non-English regulatory pages (not worth trimming).
+- Added (28):
+- ac (+5): ac_005 panasonic cs-su-aky-series, ac_006 mitsubishi msz-ap25-50vgkd2, ac_009 lg ts-q19ynze, ac_012 blue-star mdvryo-series, ac_013 panasonic cs-rs18uky-series
+- washing-machine (+7): wm_005 bosch wga244a0me, wm_007 panasonic na-fd135z3, wm_008 haier hwf-an1-series, wm_009 electrolux ewf8024cdwa, wm_010 whirlpool fscr12430, wm_011 samsung wa47cg3500, wm_012 lg wt7005c
+- refrigerator (+5): rf_006 haier hrf510-series, rf_008 electrolux ete-ebe-series, rf_011 samsung srt3500b, rf_009 panasonic nr-bx471-421, rf_007 lg lrtnc0915
+- microwave (+5): mw_005 bosch bfl523m, mw_006 siemens bf722, mw_007 electrolux emb2527ba-emf2527ba, mw_008 whirlpool amw509ix, mw_010 sharp smc1169ks
+- router (+6): rt_005 asus rt-ax92u, rt_006 tp-link archer-ax23, rt_007 tp-link deco-x20-x60, rt_008 netgear orbi-rbe770, rt_009 d-link dir-841, rt_010 mercusys mr60x
+- Dropped: Carrier Midea (care/troubleshooting pages are images, no model), Hitachi 65MP3199 (cassette/ducted), Haier HSU14K (= scanned haier_inverter_ac.pdf), Samsung WA70A4022FS (2-page print sheet), Godrej washing machine + microwave (dead links), Liebherr (403 / HTML), Voltas (no official PDF online).
+- Moved to data/scanned (week-5 OCR): lloyd_ac-common_ac.pdf (79 p, all images), fisher-paykel_rf381t-series_refrigerator.pdf (16 of 44 p images). data/scanned now has 7 files.
+- New brands in aliases.yaml: mitsubishi, blue-star, godrej, electrolux, haier, siemens, sharp, mercusys, asus. Router test (query_parser.parse) checked for every new manual; old ones unchanged.
+- GOTCHAS this chat: (1) VS Code saved its old buffer over Claude's new download_manuals.py once → close the tab (Don't Save) before running. (2) Moving files: the whole data/raw was once moved into data/scanned by mistake (Claude moved them back) → only move the files named. (3) Two Claude chats edited manifest/aliases at the same time (no damage) → use ONE chat at a time. (4) Backups of manifest/aliases/PROGRESS are in _to_delete/ (gitignored; delete it any time).
 
 ## Done so far (from GitHub, last commit c921ebf, 2026-11-06 21:50)
 - ingest/pdf_parser.py — manifest → data/processed/<manual_id>.jsonl, one record per page (labels + page + text + n_chars + low_text). Removes margin headers/footers that repeat on ≥50% of pages, stamps/watermarks on ≥80% of pages, margin page numbers, invisible/icon chars; fixes ligature gaps ("fi lter") only in manuals with ≥20 gaps. 1,671 pages, 42 low_text, 2,131,555 chars.
@@ -191,7 +230,7 @@ Resume line: "RAGAS faithfulness 0.97 (2 judge runs, 0.96–0.98; Gemini judge)"
 - Debug: `python scripts/run_ragas.py --ids q029,q006` prints every claim, verdict and reason.
 
 ## Still empty (not started)
-filters.py, metadata.py, table_extractor.py, config.py, configs/settings.yaml, scripts/ingest.py, download_manuals.py, vision/, api/, ui/app.py, multilingual/image eval files, RAGAS faithfulness script.
+filters.py, metadata.py, table_extractor.py, config.py, configs/settings.yaml, scripts/ingest.py, vision/, api/, ui/app.py, multilingual/image eval files, RAGAS faithfulness script.
 
 ## Next steps
 1. Week 2 DONE (reranker kept, rewrite not kept). Rewrite result files committed (5df2c3a).

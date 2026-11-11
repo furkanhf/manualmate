@@ -32,6 +32,8 @@ brands:
   netgear: [netgear]
   tp-link: [tp-link, tplink]
   tenda: [tenda]
+  asus: [asus]
+  mercusys: [mercusys]
   mitsubishi: [mitsubishi, mitsubishi electric]
   blue-star: [blue star, bluestar]
   haier: [haier]
@@ -276,3 +278,33 @@ manuals:
     category: router
     name: Tenda AC10
     models: [ac10]
+  rt_005:
+    brand: asus
+    category: router
+    name: ASUS RT-AX92U AX6100 tri-band router
+    models: [rt-ax92u, rtax92u, ax92u]
+  rt_006:
+    brand: tp-link
+    category: router
+    name: TP-Link Archer AX23 AX1800 Wi-Fi 6 router
+    models: [archer ax23, archer-ax23, archerax23, ax23]
+  rt_007:
+    brand: tp-link
+    category: router
+    name: TP-Link Deco X20 / X60 / W3600 mesh Wi-Fi 6
+    models: [deco x20, deco x60, decox20, decox60, deco-x20, deco-x60, w3600, deco]
+  rt_008:
+    brand: netgear
+    category: router
+    name: Netgear Orbi RBE771 / RBE770 WiFi 7 mesh
+    models: [rbe771, rbe770, orbi rbe771, orbi]
+  rt_009:
+    brand: d-link
+    category: router
+    name: D-Link DIR-841/GF AC1200 router with fiber WAN
+    models: [dir-841, dir841, dir-841gf, dir841gf]
+  rt_010:
+    brand: mercusys
+    category: router
+    name: Mercusys MR60X AX1500 Wi-Fi 6 router
+    models: [mr60x, mr62x]

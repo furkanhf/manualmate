@@ -21,6 +21,12 @@ rf_008,electrolux_ete-ebe-series_refrigerator.pdf,OK,32,70709,3,1.0,6774,,https:
 rf_009,panasonic_nr-bx471-421_refrigerator.pdf,BY_HAND,,,,,,save the PDF as data/raw/panasonic_nr-bx471-421_refrigerator.pdf (BY HAND (Panasonic gives HTTP 403 to scripts): https://www.panasonic.com/content/dam/panasonic/ph/en/PDF/productPDF/2025/Operating-Instructions-NR-BX471HWKP.pdf),
 rf_010,fisher-paykel_rf381t-series_refrigerator.pdf,OK,44,40948,16,1.0,2430,,https://www.fisherpaykel.com/on/demandware.static/-/Sites-fpa-master-catalog/default/dw992d1a68/GeneralFiles-FisherPaykelAU/FP-UserGuide-RF381TLPW6-FreestandingFridgeFreezer-AU-NZ-844938B.pdf
 rf_011,samsung_srt3500b_refrigerator.pdf,OK,56,60826,1,1.0,6155,,https://www.appliancesonline.com.au/ak/0/5/a/3/05a347cf140dca88e5520196c94a3a545a96939a_SRT3500B___User_Manual.pdf
+rt_005,asus_rt-ax92u_router.pdf,OK,156,185212,0,0.94,10569,,https://dlcdnets.asus.com/pub/ASUS/wireless/RT-AX92U/E15762_RT-AX92U_UM.pdf
+rt_006,tp-link_archer-ax23_router.pdf,OK,115,111748,2,0.99,13285,,https://static.tp-link.com/upload/manual/2021/202108/20210811/1910013052_Archer%20AX23_UG_REV1.0.0.pdf
+rt_007,tp-link_deco-x20-x60_router.pdf,OK,30,20814,0,0.95,12531,,https://static.tp-link.com/2020/202009/20200916/1910012855_Deco%20X20&X60&W3600_UG_V1.pdf
+rt_008,netgear_orbi-rbe770_router.pdf,OK,142,226623,0,1.0,1658,,https://www.downloads.netgear.com/files/GDC/RBE770/RBE770_UM_EN.pdf
+rt_009,d-link_dir-841_router.pdf,OK,195,208722,0,1.0,5902,,https://ftp.dlink.ru/pub/Router/DIR-841_GF/Description/DIR-841_GF_A2_User%20Manual_v.3.0.4_05.02.20_EN.pdf
+rt_010,mercusys_mr60x_router.pdf,OK,95,103798,0,0.99,4779,,https://doc.moyo.ua/18918944_1706281281.pdf
 wm_005,bosch_wga244a0me_washing-machine.pdf,OK,60,73756,3,1.0,4446,,https://media3.bosch-home.com/Documents/9001735037_A.pdf
 wm_006,godrej_wteon-alr-c-70_washing-machine.pdf,DOWNLOAD_FAILED,,,,,,HTTP 404,https://godrejenterprises.com/Resources/Support/UMWTEONALRC7050_01053142.pdf
 wm_007,panasonic_na-fd135z3_washing-machine.pdf,BY_HAND,,,,,,save the PDF as data/raw/panasonic_na-fd135z3_washing-machine.pdf (BY HAND (Panasonic gives HTTP 403 to scripts): https://www.panasonic.com/content/dam/panasonic/my/en/PDF/Operating-Instructions-NA-FD135Z3BT.pdf),
