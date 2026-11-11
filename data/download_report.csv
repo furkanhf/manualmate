@@ -8,3 +8,11 @@ ac_010,haier_hsu14k-pysg5bn_ac.pdf,SKIPPED,,,,,,DROPPED (chat 5.1): same file as
 ac_011,lloyd_ac-common_ac.pdf,SKIPPED,,,,,,"SCANNED (chat 5.1): image-only, moved to data/scanned for week-5 OCR",https://havells.com/media/wysiwyg/Manuals/lloyd-AC-common.pdf
 ac_012,blue-star_mdvryo-series_ac.pdf,IN_MANIFEST,,,,,,already added,https://5.imimg.com/data5/SELLER/Doc/2025/3/493472811/AP/VE/QO/46564151/blue-star-split-air-conditioner-ac.pdf
 ac_013,panasonic_cs-rs18uky-series_ac.pdf,IN_MANIFEST,,,,,,already added,
+wm_005,bosch_wga244a0me_washing-machine.pdf,OK,60,73756,3,1.0,4446,,https://media3.bosch-home.com/Documents/9001735037_A.pdf
+wm_006,godrej_wteon-alr-c-70_washing-machine.pdf,DOWNLOAD_FAILED,,,,,,HTTP 404,https://godrejenterprises.com/Resources/Support/UMWTEONALRC7050_01053142.pdf
+wm_007,panasonic_na-fd135z3_washing-machine.pdf,BY_HAND,,,,,,save the PDF as data/raw/panasonic_na-fd135z3_washing-machine.pdf (BY HAND (Panasonic gives HTTP 403 to scripts): https://www.panasonic.com/content/dam/panasonic/my/en/PDF/Operating-Instructions-NA-FD135Z3BT.pdf),
+wm_008,haier_hwf-an1-series_washing-machine.pdf,OK,32,40448,1,1.0,6452,,https://haier.com.au/on/demandware.static/-/Sites-haier-master-catalog/default/dw8db7e682/GeneralFiles-HaierAU/Haier-UserGuide-en-HWF95AN1-HWF85AN1-HWF75AN1-HWF85ANB1-HWF95ANB1-WashingMachine-0-V3-NZ-AU.pdf
+wm_009,electrolux_ewf8024cdwa_washing-machine.pdf,OK,44,57018,4,1.0,15532,,https://resource.electrolux.com.au/Public/File/?Id=38640
+wm_010,whirlpool_fscr12430_washing-machine.pdf,OK,54,67655,4,1.0,6829,,https://www.appliancesdirect.co.uk/PDFs/FSCR12430_UserManual1.PDF
+wm_011,samsung_wa47cg3500_washing-machine.pdf,OK,72,91018,2,1.0,10043,,https://www.canadianappliance.ca/pdf/samsung/top-load-washer/WA46CG3505AWA4-user-manual-1.pdf
+wm_012,lg_wt7005c_washing-machine.pdf,OK,80,182118,0,0.99,12387,,https://c.searspartsdirect.com/doc/2105049L

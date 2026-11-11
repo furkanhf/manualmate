@@ -34,6 +34,9 @@ brands:
   tenda: [tenda]
   mitsubishi: [mitsubishi, mitsubishi electric]
   blue-star: [blue star, bluestar]
+  haier: [haier]
+  electrolux: [electrolux]
+  godrej: [godrej]
 
 manuals:
   # --- AC -------------------------------------------------------------------
@@ -118,6 +121,42 @@ manuals:
     category: washing-machine
     name: Bosch WAJ20180ZA / WAJ2018SZA
     models: [waj20180za, waj2018sza, waj20180, waj2018, waj]
+  wm_005:
+    brand: bosch
+    category: washing-machine
+    name: Bosch WGA244A0ME Serie 6 front load
+    models: [wga244a0me, wga244a0, wga244]
+  wm_007:
+    brand: panasonic
+    category: washing-machine
+    name: Panasonic NA-FD135Z3 top load (Auto Dose)
+    models: [na-fd135z3, nafd135z3, fd135z3, na-fd135z3bt]
+  wm_008:
+    brand: haier
+    category: washing-machine
+    name: Haier HWF**AN1 front load (7.5-10 kg)
+    models: [hwf95an1, hwf85an1, hwf75an1, hwf85anb1, hwf95anb1, hwf10an1, hwf90an1,
+             hwf80an1, hwf80anb1, hwf90anb1, hwf10anb1]
+  wm_009:
+    brand: electrolux
+    category: washing-machine
+    name: Electrolux EWF8024CDWA front load 8 kg
+    models: [ewf8024cdwa, ewf8024]
+  wm_010:
+    brand: whirlpool
+    category: washing-machine
+    name: Whirlpool FSCR12430 front load 12 kg
+    models: [fscr12430, fscr 12430]
+  wm_011:
+    brand: samsung
+    category: washing-machine
+    name: Samsung WA47CG3500 / WA46CG3505 top load (US)
+    models: [wa47cg3500, wa46cg3505, wa47cg, wa46cg]
+  wm_012:
+    brand: lg
+    category: washing-machine
+    name: LG WT7005C top load (US)
+    models: [wt7005c, wt7005]
 
   # --- Refrigerator ---------------------------------------------------------
   rf_001:
