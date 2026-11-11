@@ -1,0 +1,10 @@
+manual_id,filename,status,pages,chars,low_text_pages,en_ratio,size_kb,detail,source_url
+ac_005,panasonic_cs-su-aky-series_ac.pdf,IN_MANIFEST,,,,,,already added,
+ac_006,mitsubishi_msz-ap25-50vgkd2_ac.pdf,IN_MANIFEST,,,,,,already added,https://www.mitsubishielectric.com.au/wp-content/uploads/2024/06/MSZ-AP25-50VGKD2_OM_VG79N348H02.pdf
+ac_007,carrier_midea-india-split_ac.pdf,SKIPPED,,,,,,DROPPED (chat 5.1): care/troubleshooting pages are images; no model number,https://carriermideaindia.com/wp-content/uploads/2023/03/11-user-manual.pdf
+ac_008,hitachi_65mp3199_ac.pdf,SKIPPED,,,,,,DROPPED (chat 5.1): cassette/ducted units; server HTTP 503,https://documentation2.hitachiaircon.com/blbs/files/downloads/65MP3199_01.pdf
+ac_009,lg_ts-q19ynze_ac.pdf,IN_MANIFEST,,,,,,already added,
+ac_010,haier_hsu14k-pysg5bn_ac.pdf,SKIPPED,,,,,,DROPPED (chat 5.1): same file as data/scanned/haier_inverter_ac.pdf (scanned),
+ac_011,lloyd_ac-common_ac.pdf,SKIPPED,,,,,,"SCANNED (chat 5.1): image-only, moved to data/scanned for week-5 OCR",https://havells.com/media/wysiwyg/Manuals/lloyd-AC-common.pdf
+ac_012,blue-star_mdvryo-series_ac.pdf,IN_MANIFEST,,,,,,already added,https://5.imimg.com/data5/SELLER/Doc/2025/3/493472811/AP/VE/QO/46564151/blue-star-split-air-conditioner-ac.pdf
+ac_013,panasonic_cs-rs18uky-series_ac.pdf,IN_MANIFEST,,,,,,already added,

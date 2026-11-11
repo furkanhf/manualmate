@@ -18,3 +18,4 @@ venv/
 # build files from "pip install -e ."
 *.egg-info/
 build/
+_to_delete/

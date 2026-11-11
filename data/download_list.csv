@@ -1,0 +1,10 @@
+manual_id,brand,model,category,language,filename,source_url,note
+ac_005,panasonic,cs-su-aky-series,ac,en,panasonic_cs-su-aky-series_ac.pdf,,BY HAND (site gives HTTP 403 to scripts): https://www.panasonic.com/content/dam/Panasonic/in/en/pdf/CY25_RAC_AKY-Series-Type-IV.pdf
+ac_006,mitsubishi,msz-ap25-50vgkd2,ac,en,mitsubishi_msz-ap25-50vgkd2_ac.pdf,https://www.mitsubishielectric.com.au/wp-content/uploads/2024/06/MSZ-AP25-50VGKD2_OM_VG79N348H02.pdf,Australia; checked by Claude (18 p)
+ac_007,carrier,midea-india-split,ac,en,carrier_midea-india-split_ac.pdf,https://carriermideaindia.com/wp-content/uploads/2023/03/11-user-manual.pdf,DROPPED (chat 5.1): care/troubleshooting pages are images; no model number
+ac_008,hitachi,65mp3199,ac,en,hitachi_65mp3199_ac.pdf,https://documentation2.hitachiaircon.com/blbs/files/downloads/65MP3199_01.pdf,DROPPED (chat 5.1): cassette/ducted units; server HTTP 503
+ac_009,lg,ts-q19ynze,ac,en,lg_ts-q19ynze_ac.pdf,,BY HAND: https://www.lg.com/in/support/product-support/cs-TS-Q19YNZE.ANLG/ (Owner's Manual PDF English)
+ac_010,haier,hsu14k-pysg5bn,ac,en,haier_hsu14k-pysg5bn_ac.pdf,,DROPPED (chat 5.1): same file as data/scanned/haier_inverter_ac.pdf (scanned)
+ac_011,lloyd,ac-common,ac,en,lloyd_ac-common_ac.pdf,https://havells.com/media/wysiwyg/Manuals/lloyd-AC-common.pdf,"SCANNED (chat 5.1): image-only, moved to data/scanned for week-5 OCR"
+ac_012,blue-star,mdvryo-series,ac,en,blue-star_mdvryo-series_ac.pdf,https://5.imimg.com/data5/SELLER/Doc/2025/3/493472811/AP/VE/QO/46564151/blue-star-split-air-conditioner-ac.pdf,looks official (Blue Star Ltd 2023) but hosted on IndiaMART
+ac_013,panasonic,cs-rs18uky-series,ac,en,panasonic_cs-rs18uky-series_ac.pdf,,BY HAND (site gives HTTP 403 to scripts): https://www.panasonic.com/content/dam/Panasonic/in/en/pdf/CS-RS18UKY%20series.pdf

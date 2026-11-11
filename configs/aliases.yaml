@@ -32,6 +32,8 @@ brands:
   netgear: [netgear]
   tp-link: [tp-link, tplink]
   tenda: [tenda]
+  mitsubishi: [mitsubishi, mitsubishi electric]
+  blue-star: [blue star, bluestar]
 
 manuals:
   # --- AC -------------------------------------------------------------------
@@ -59,6 +61,40 @@ manuals:
     models: [ftks-l, ftxs-l, l series, ftks20lvma, ftks25lvma, ftks35lvma, ftks46lvma,
              ftxs20lvma, ftxs25lvma, ftxs35lvma, ftxs46lvma,
              ftks, ftxs, ftks20, ftks25, ftks35, ftks46, ftxs20, ftxs25, ftxs35, ftxs46]
+
+  ac_005:
+    brand: panasonic
+    category: ac
+    name: Panasonic CS-SU/RU/QU AKY-BKY series (India 2024)
+    models: [cs-su11aky3, cs-su12aky3, cs-su17aky3, cs-su18aky3, cs-ru12bky, cs-ru18bky,
+             cs-qu26bky, su11aky3, su12aky3, su17aky3, su18aky3, ru12bky, ru18bky, qu26bky]
+  ac_006:
+    brand: mitsubishi
+    category: ac
+    name: Mitsubishi Electric MSZ-AP25-50 VGD2/VGKD2
+    models: [msz-ap25vgd2, msz-ap35vgd2, msz-ap42vgd2, msz-ap50vgd2, msz-ap25vgkd2,
+             msz-ap35vgkd2, msz-ap42vgkd2, msz-ap50vgkd2, msz-ap, mszap]
+  ac_009:
+    brand: lg
+    category: ac
+    name: LG split AC TS-Q19YNZE (2024, owner's manual MFL72020502)
+    models: [ts-q19ynze, tsq19ynze, q19ynze, mfl72020502]
+  ac_012:
+    brand: blue-star
+    category: ac
+    name: Blue Star 2 & 3 star inverter hi-wall split ACs (M/D/V/R/Y/O series)
+    models: [ic212dnu, ic212ynu, ic218dku, ic218dnu, ic218yku, ic218ynu, ic224dnu,
+             ic224ynu, ic309ynu, ic312dnu, ic312mnu, ic312onu, ic312rnu, ic312vnu,
+             ic312ynu, ic315ynu, ic318dku, ic318dnu, ic318mku, ic318mnu, ic318oku,
+             ic318onu, ic318rnu, ic318vku, ic318vnu, ic318yku, ic318ynu, ic324dnu,
+             ic324mnu, ic324oku, ic324vku, ic324ynu, id218dku, id218yku, id318dku,
+             id318mku, id318oku, id318vku, id318yku, id324dnu, id324mnu, id324ynu]
+  ac_013:
+    brand: panasonic
+    category: ac
+    name: Panasonic CS-RS/QS/WS UKY series (India 2018)
+    models: [cs-rs12uky, cs-rs18uky, cs-rs18ukyl, cs-rs24uky, cs-qs12uky, cs-qs18uky,
+             cs-ws18uky, rs12uky, rs18uky, rs18ukyl, rs24uky, qs12uky, qs18uky, ws18uky]
 
   # --- Washing machine ------------------------------------------------------
   wm_001:
