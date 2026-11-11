@@ -8,6 +8,12 @@ ac_010,haier_hsu14k-pysg5bn_ac.pdf,SKIPPED,,,,,,DROPPED (chat 5.1): same file as
 ac_011,lloyd_ac-common_ac.pdf,SKIPPED,,,,,,"SCANNED (chat 5.1): image-only, moved to data/scanned for week-5 OCR",https://havells.com/media/wysiwyg/Manuals/lloyd-AC-common.pdf
 ac_012,blue-star_mdvryo-series_ac.pdf,IN_MANIFEST,,,,,,already added,https://5.imimg.com/data5/SELLER/Doc/2025/3/493472811/AP/VE/QO/46564151/blue-star-split-air-conditioner-ac.pdf
 ac_013,panasonic_cs-rs18uky-series_ac.pdf,IN_MANIFEST,,,,,,already added,
+mw_005,bosch_bfl523m_microwave.pdf,OK,24,57783,1,1.0,715,,https://media3.bosch-home.com/Documents/9001612333_J.pdf
+mw_006,siemens_bf722_microwave.pdf,OK,28,70952,1,1.0,680,,https://media3.bsh-group.com/Documents/9001848356_I.pdf
+mw_007,electrolux_emb2527ba-emf2527ba_microwave.pdf,OK,20,42167,0,1.0,2127,,https://resource.electrolux.com.au/Public/File/?Id=22056
+mw_008,whirlpool_amw509ix_microwave.pdf,OK,25,38959,3,1.0,11129,,https://www.whirlpool.com.hk/pub/media/old-media/product_brochure/AMW509IX_IFU_p.pdf
+mw_009,godrej_gme-723-cf_microwave.pdf,DOWNLOAD_FAILED,,,,,,HTTP 404,https://godrejenterprises.com/Resources/Support/GME723CF2prductManual_20091545.pdf
+mw_010,sharp_smc1169ks_microwave.pdf,OK,40,71533,3,1.0,1292,,https://content.abt.com/documents/168081/sharp-countertop-microwave-SMC1169KS-owners-manual.pdf
 rf_005,liebherr_cn-kgn-5x-series_refrigerator.pdf,DOWNLOAD_FAILED,,,,,,HTTP 403,https://www.hbh-woolacotts.co.uk/rpfiles/CNSDC5203-UM.pdf
 rf_006,haier_hrf510-series_refrigerator.pdf,OK,38,45432,0,1.0,3334,,https://www.haier.com.au/on/demandware.static/-/Sites-haier-master-catalog/default/dwc2f542c3/GeneralFiles-HaierAU/Haier-UserGuide-en-HRF510BHC-HRF510BW-HRF510BS-HRF510FHC-HRF510FHS-HRF510FS-FridgeFreezer-0-2025vA-NZ-AU.pdf
 rf_007,lg_lrtnc0915_refrigerator.pdf,OK,36,79392,0,1.0,3621,,https://www.canadianappliance.ca/pdf/lg/refrigerator/LRTNC0915V_owner-manual-en.pdf

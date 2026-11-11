@@ -35,6 +35,8 @@ brands:
   mitsubishi: [mitsubishi, mitsubishi electric]
   blue-star: [blue star, bluestar]
   haier: [haier]
+  siemens: [siemens]
+  sharp: [sharp]
   electrolux: [electrolux]
   godrej: [godrej]
 
@@ -200,6 +202,11 @@ manuals:
     category: refrigerator
     name: Panasonic NR-BX471 / NR-BX421 bottom freezer (ECONAVI)
     models: [nr-bx471c, nr-bx471h, nr-bx421b, nr-bx421h, nrbx471, nrbx421, bx471, bx421]
+  rf_007:
+    brand: lg
+    category: refrigerator
+    name: LG LRTNC0705 / LRTNC0915 top freezer
+    models: [lrtnc0705, lrtnc0915, lrtnc0915v, lrtnc]
 
   # --- Microwave ------------------------------------------------------------
   mw_001:
@@ -222,6 +229,31 @@ manuals:
     category: microwave
     name: Panasonic NN-ST64QW
     models: [nn-st64, nn-st64qw, st64, nnst64]
+  mw_005:
+    brand: bosch
+    category: microwave
+    name: Bosch BFL523M built-in microwave
+    models: [bfl523m0h, bfl523m, bfl523]
+  mw_006:
+    brand: siemens
+    category: microwave
+    name: Siemens BF722 built-in microwave
+    models: [bf72211i, bf722]
+  mw_007:
+    brand: electrolux
+    category: microwave
+    name: Electrolux EMB2527BA built-in / EMF2527BA freestanding
+    models: [emb2527ba, emf2527ba, emb2527, emf2527]
+  mw_008:
+    brand: whirlpool
+    category: microwave
+    name: Whirlpool AMW509IX built-in microwave
+    models: [amw509ix, amw509, amw 509]
+  mw_010:
+    brand: sharp
+    category: microwave
+    name: Sharp SMC1169KS countertop microwave
+    models: [smc1169ks, smc1169]
 
   # --- Router ---------------------------------------------------------------
   rt_001:
