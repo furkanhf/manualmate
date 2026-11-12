@@ -96,6 +96,7 @@ Python 3.11, PyMuPDF (import pymupdf, not fitz), pdfplumber, bge-m3 embeddings (
 - Colab Secrets: DATABASE_URL = only the URL (postgresql://...?sslmode=require&channel_binding=require), no quotes, no "DATABASE_URL=", no extra lines (an extra line once caused a psycopg "channel_binding" error).
 - GOTCHA: if Claude changes a file that is open in VS Code, close the tab / check there is no unsaved dot before Run — VS Code once saved the old buffer over Claude's new pdf_parser.py.
 - LF→CRLF git warnings are harmless.
+- GOTCHA (chat 5.2): Colab `git pull` failed silently-looking because results files made in Colab were later committed from the laptop with the same names ("untracked files would be overwritten") → Colab ran OLD code (empty skeleton eval/multilingual_queries.jsonl → ZeroDivisionError). Section 2 now uses `git fetch` + `git reset --hard origin/main`. Always check the hash printed by section 2.
 - Claude reaches D:\Projects\manualmate through the Claude desktop app (device bridge). It works only while the desktop app is open, signed in and online on the laptop, and the chat is opened in that app. Folder access must be granted again in each new chat. D:\PDF manuals = backup of the downloaded PDFs (optional).
 
 ## Sessions
