@@ -56,6 +56,9 @@ MESSAGES = {
     # "ask_model" with too many manuals for buttons (no brand/product in the question):
     "ask_product": ("Which product is this about? Please add the brand and type to your "
                     "question, for example \"Daikin AC\" or \"LG microwave\"."),
+    # "ask_model", product type known but too many manuals for buttons (11 washing machines):
+    "ask_brand": ("Which {product} do you have? I have manuals for these brands: {brands}. "
+                  "Please add the brand and model to your question, for example \"{example}\"."),
     # "ask_model" when the model name the user gave fits 2+ manuals (FTKS: K and L series):
     "ask_series": ("Your model name fits more than one manual (different series). "
                    "Which one is yours? The full model number is on the label of the product."),
@@ -80,6 +83,8 @@ MESSAGES_BY_LANGUAGE = {
         "pick": "नीचे से अपना मॉडल चुनें।",
         "ask_product": ("यह किस product के बारे में है? कृपया अपने सवाल में brand और product "
                         "का नाम लिखें, जैसे \"Daikin AC\" या \"LG microwave\"।"),
+        "ask_brand": ("आपके पास कौन-सा {product} है? मेरे पास इन brands के manual हैं: {brands}। "
+                      "कृपया अपने सवाल में brand और model लिखें, जैसे \"{example}\"।"),
         "ask_series": ("आपका model नाम एक से ज़्यादा manual (अलग series) में आता है। "
                        "आपका कौन-सा है? पूरा model number product के label पर लिखा होता है।"),
     },
@@ -97,6 +102,8 @@ MESSAGES_BY_LANGUAGE = {
         "pick": "కింద మీ మోడల్‌ను ఎంచుకోండి.",
         "ask_product": ("ఇది ఏ product గురించి? దయచేసి మీ ప్రశ్నలో brand మరియు product పేరు "
                         "రాయండి, ఉదాహరణకు \"Daikin AC\" లేదా \"LG microwave\"."),
+        "ask_brand": ("మీ దగ్గర ఏ {product} ఉంది? నా దగ్గర ఈ brands manuals ఉన్నాయి: {brands}. "
+                      "దయచేసి మీ ప్రశ్నలో brand మరియు model రాయండి, ఉదాహరణకు \"{example}\"."),
         "ask_series": ("మీ model పేరు ఒకటి కంటే ఎక్కువ manuals (వేర్వేరు series) కి సరిపోతుంది. "
                        "మీది ఏది? పూర్తి model number product label మీద ఉంటుంది."),
     },

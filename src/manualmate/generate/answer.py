@@ -210,6 +210,27 @@ def keeps_manual(question: str, manual_id: str) -> bool:
     return not parsed.models or manual_id in parsed.models
 
 
+BRAND_NAMES = {"lg": "LG", "ifb": "IFB", "asus": "ASUS", "tp-link": "TP-Link",
+               "d-link": "D-Link", "blue-star": "Blue Star"}
+
+
+def brand_hint(manual_ids: list[str]) -> dict:
+    """For "ask_brand": product name, its brands and an example manual, if all the
+    manuals are one product type (e.g. 11 washing machines). Else {}."""
+    from manualmate.generate.prompts import PRODUCT_NAMES
+    from manualmate.retrieve.query_parser import get_aliases
+
+    manuals = get_aliases().manuals
+    infos = [manuals[m] for m in manual_ids if m in manuals]
+    categories = {i["category"] for i in infos}
+    if len(categories) != 1:
+        return {}
+    brands = sorted({i["brand"] for i in infos})
+    return {"product": PRODUCT_NAMES.get(categories.pop(), "product"),
+            "brands": ", ".join(BRAND_NAMES.get(b, b.title()) for b in brands),
+            "example": min((i["name"] for i in infos), key=len)}
+
+
 LANGUAGES = ("English", "Hindi", "Telugu")
 
 
@@ -287,13 +308,16 @@ def ask(question: str, conn=None, manual_id: str | None = None,
 
     a = generate(question, chunks, route=r, language=language)
     if a.action != "answer":                 # "Which model?", refusals: user's language
-        reason = a.reason
+        reason, fill = a.reason, {}
         if reason == "ask_model":
-            # no buttons -> ask for brand + product; a model that fits 2+ manuals
-            # (e.g. FTKS: Daikin K and L series) -> say so, point to the label
-            reason = ("ask_product" if not a.options else
-                      "ask_series" if r.reason == "model" else "ask_model")
-        a.text = message(reason, language) or a.text
+            # no buttons: product type known -> list its brands, else ask for brand +
+            # product; a model that fits 2+ manuals (FTKS: Daikin K and L) -> say so
+            if not a.options:
+                fill = brand_hint(r.manual_ids)
+                reason = "ask_brand" if fill else "ask_product"
+            elif r.reason == "model":
+                reason = "ask_series"
+        a.text = (message(reason, language) or a.text).format(**fill)
     a.language, a.search_text, a.route_reason = language, search_text, r.reason
     a.manual_id = r.manual_ids[0] if r.is_single else None
     a.translate_ms, a.retrieve_ms = translate_ms, retrieve_ms
