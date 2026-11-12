@@ -64,6 +64,7 @@ class Answer:
     language: str = "English"
     search_text: str = ""          # the text the search used (English translation or the question)
     route_reason: str = ""
+    manual_id: str | None = None   # the one manual searched (None if several / asked)
     translate_ms: float | None = None
     retrieve_ms: float | None = None
     total_ms: float | None = None
@@ -188,6 +189,27 @@ def answer(question: str, conn, language: str = "English") -> Answer:
     return generate(question, chunks, route=r, language=language)
 
 
+def keeps_manual(question: str, manual_id: str) -> bool:
+    """Does the manual the user picked earlier still fit this question?
+
+    The UI keeps the picked manual for the chat. But "how do I set up my router"
+    after a Daikin AC pick is about another product (chat 5.4 bug): a brand,
+    product type or model in the question that the picked manual does not have
+    -> False, and ask() routes the question again.
+    """
+    from manualmate.retrieve.query_parser import get_aliases, parse
+
+    info = get_aliases().manuals.get(manual_id)
+    if info is None:
+        return False
+    parsed = parse(question)
+    if parsed.brand and parsed.brand != info["brand"]:
+        return False
+    if parsed.category and parsed.category != info["category"]:
+        return False
+    return not parsed.models or manual_id in parsed.models
+
+
 LANGUAGES = ("English", "Hindi", "Telugu")
 
 
@@ -253,6 +275,9 @@ def ask(question: str, conn=None, manual_id: str | None = None,
         search_text = translate(question, retries=2) or question
         translate_ms = round((time.perf_counter() - t0) * 1000)
 
+    if manual_id and not keeps_manual(search_text, manual_id):
+        manual_id = None                     # new product in the question: route again
+
     t0 = time.perf_counter()
     if bm25 is not None:
         chunks, r = retrieve_light(search_text, bm25, manual_id)
@@ -262,9 +287,15 @@ def ask(question: str, conn=None, manual_id: str | None = None,
 
     a = generate(question, chunks, route=r, language=language)
     if a.action != "answer":                 # "Which model?", refusals: user's language
-        reason = "ask_product" if a.reason == "ask_model" and not a.options else a.reason
+        reason = a.reason
+        if reason == "ask_model":
+            # no buttons -> ask for brand + product; a model that fits 2+ manuals
+            # (e.g. FTKS: Daikin K and L series) -> say so, point to the label
+            reason = ("ask_product" if not a.options else
+                      "ask_series" if r.reason == "model" else "ask_model")
         a.text = message(reason, language) or a.text
     a.language, a.search_text, a.route_reason = language, search_text, r.reason
+    a.manual_id = r.manual_ids[0] if r.is_single else None
     a.translate_ms, a.retrieve_ms = translate_ms, retrieve_ms
     a.total_ms = round((time.perf_counter() - start) * 1000)
     return a

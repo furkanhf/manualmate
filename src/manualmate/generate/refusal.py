@@ -56,6 +56,9 @@ MESSAGES = {
     # "ask_model" with too many manuals for buttons (no brand/product in the question):
     "ask_product": ("Which product is this about? Please add the brand and type to your "
                     "question, for example \"Daikin AC\" or \"LG microwave\"."),
+    # "ask_model" when the model name the user gave fits 2+ manuals (FTKS: K and L series):
+    "ask_series": ("Your model name fits more than one manual (different series). "
+                   "Which one is yours? The full model number is on the label of the product."),
 }
 
 # The same messages in Hindi and Telugu (chat 5.4): a Hindi question gets
@@ -77,6 +80,8 @@ MESSAGES_BY_LANGUAGE = {
         "pick": "नीचे से अपना मॉडल चुनें।",
         "ask_product": ("यह किस product के बारे में है? कृपया अपने सवाल में brand और product "
                         "का नाम लिखें, जैसे \"Daikin AC\" या \"LG microwave\"।"),
+        "ask_series": ("आपका model नाम एक से ज़्यादा manual (अलग series) में आता है। "
+                       "आपका कौन-सा है? पूरा model number product के label पर लिखा होता है।"),
     },
     "Telugu": {
         "ask_model": "మీ దగ్గర ఏ మోడల్ ఉంది? సరిపోయే manuals ఒకటి కంటే ఎక్కువ దొరికాయి.",
@@ -92,6 +97,8 @@ MESSAGES_BY_LANGUAGE = {
         "pick": "కింద మీ మోడల్‌ను ఎంచుకోండి.",
         "ask_product": ("ఇది ఏ product గురించి? దయచేసి మీ ప్రశ్నలో brand మరియు product పేరు "
                         "రాయండి, ఉదాహరణకు \"Daikin AC\" లేదా \"LG microwave\"."),
+        "ask_series": ("మీ model పేరు ఒకటి కంటే ఎక్కువ manuals (వేర్వేరు series) కి సరిపోతుంది. "
+                       "మీది ఏది? పూర్తి model number product label మీద ఉంటుంది."),
     },
 }
 

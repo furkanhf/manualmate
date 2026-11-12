@@ -114,6 +114,13 @@ def build_ui(get_service: Callable) -> gr.Blocks:
             return history, state, *buttons_for([])
         options = [o.model_dump() for o in r.options] if r.action == "ask" else []
         state = {**state, "pending": question if options else None, "options": options}
+        # Keep the one manual this question used for the follow-ups ("how do I clean
+        # it?"). A question about another product routes again (answer.keeps_manual)
+        # and replaces it; several manuals -> no manual kept.
+        if r.manual:
+            state = {**state, "manual_id": r.manual.manual_id, "manual_name": r.manual.name}
+        elif r.route_reason != "user choice":
+            state = {**state, "manual_id": None, "manual_name": None}
         history = history + [{"role": "assistant", "content": format_reply(r)}]
         return history, state, *buttons_for(options)
 

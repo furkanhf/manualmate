@@ -51,6 +51,7 @@ class AskResponse(BaseModel):
     language: str
     search_text: str
     route_reason: str
+    manual: Option | None    # the one manual searched (the UI keeps it for the chat)
     options: list[Option]
     sources: list[Source]
     citations_ok: bool | None

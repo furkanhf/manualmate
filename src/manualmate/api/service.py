@@ -88,6 +88,7 @@ def to_response(a: Answer) -> AskResponse:
     return AskResponse(
         action=a.action, reason=a.reason, text=a.text, language=a.language,
         search_text=a.search_text, route_reason=a.route_reason,
+        manual=Option(manual_id=a.manual_id, name=manual_name(a.manual_id)) if a.manual_id else None,
         options=[Option(manual_id=m, name=n) for m, n in a.options],
         sources=[Source(tag=s["tag"], manual_id=s["manual_id"],
                         name=manual_name(s["manual_id"]), page=s["page"],
