@@ -13,12 +13,20 @@
 # Add a new manual: copy one block, change the id, brand, category and models.
 # Model names come from the cover page of the manual (the model list on page 1).
 
+# Hindi (Devanagari) and Telugu words: how users write the English product name in
+# their script (added in chat 5.2 for the Hindi/Telugu questions). Romanized Hindi/Telugu
+# ("mera fridge") already uses the English words above.
 categories:
-  ac: [ac, a/c, air conditioner, air conditioners, air con, aircon, split ac, split, inverter ac]
-  washing-machine: [washing machine, washer, front load, front loader, top load]
-  refrigerator: [refrigerator, fridge, fridge-freezer, freezer, french door]
-  microwave: [microwave, microwave oven, convection oven, oven]
-  router: [router, wifi router, wi-fi router, modem, wireless router]
+  ac: [ac, a/c, air conditioner, air conditioners, air con, aircon, split ac, split, inverter ac,
+       एसी, एयर कंडीशनर, ఏసీ, ఎయిర్ కండీషనర్]
+  washing-machine: [washing machine, washer, front load, front loader, top load,
+       वॉशिंग मशीन, वाशिंग मशीन, వాషింగ్ మెషీన్, వాషింగ్ మెషిన్]
+  refrigerator: [refrigerator, fridge, fridge-freezer, freezer, french door,
+       फ्रिज, फ्रिज़, रेफ्रिजरेटर, ఫ్రిజ్, రిఫ్రిజిరేటర్]
+  microwave: [microwave, microwave oven, convection oven, oven,
+       माइक्रोवेव, మైక్రోవేవ్]
+  router: [router, wifi router, wi-fi router, modem, wireless router,
+       राउटर, రౌటర్, రూటర్]
 
 brands:
   samsung: [samsung]
