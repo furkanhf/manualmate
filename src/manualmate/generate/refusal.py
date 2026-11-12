@@ -66,6 +66,20 @@ MESSAGES = {
     # router found a brand + product type that no manual has ("Daikin fridge"):
     "no_manual": ("I do not have a manual for a {brand} {product}. "
                   "I have {product} manuals for these brands: {brands}."),
+    # label photo (vision/image_to_query.py)
+    "photo_found": ("I read **{label}** on the label. I will use the **{manual}** manual "
+                    "in this chat."),
+    "photo_ask": "What would you like to know about it?",
+    "photo_choose": ("I read **{label}** on the label. This model fits more than one manual. "
+                     "Which one is yours?"),
+    "photo_no_manual": "I read **{label}** on the label, but I do not have a manual for this model.",
+    "photo_no_manual_options": ("These {brand} manuals are available. Pick one only if it is "
+                                "your model:"),
+    "photo_unreadable": ("I could not read a model number in this photo. Please take a sharp, "
+                         "close photo of the model label (the sticker on the side or back of "
+                         "the appliance, or under the router)."),
+    "photo_error": "Sorry, I could not read the photo now. Please try again.",
+    "picked": "OK, I will use the **{manual}** manual in this chat. What would you like to know?",
     # "ask_model", product type known but too many manuals for buttons (11 washing machines):
     "ask_brand": ("Which {product} do you have? I have manuals for these brands: {brands}. "
                   "Please add the brand and model to your question, for example \"{example}\"."),
@@ -101,6 +115,19 @@ MESSAGES_BY_LANGUAGE = {
         "thanks": "आपका स्वागत है! अपने उपकरण के बारे में कुछ और पूछें।",
         "no_manual": ("मेरे पास {brand} {product} का manual नहीं है। "
                       "मेरे पास इन brands के {product} manual हैं: {brands}।"),
+        "photo_found": ("मैंने label पर **{label}** पढ़ा। इस chat में मैं **{manual}** manual "
+                        "का उपयोग करूँगा।"),
+        "photo_ask": "आप इसके बारे में क्या जानना चाहते हैं?",
+        "photo_choose": ("मैंने label पर **{label}** पढ़ा। यह model एक से ज़्यादा manual में आता है। "
+                         "आपका कौन-सा है?"),
+        "photo_no_manual": "मैंने label पर **{label}** पढ़ा, लेकिन मेरे पास इस model का manual नहीं है।",
+        "photo_no_manual_options": ("{brand} के ये manual उपलब्ध हैं। केवल तभी चुनें जब यह आपका "
+                                    "model हो:"),
+        "photo_unreadable": ("मैं इस photo में model number नहीं पढ़ पाया। कृपया model label "
+                             "(उपकरण के side या पीछे लगा sticker, या router के नीचे) की साफ़, "
+                             "पास से photo लें।"),
+        "photo_error": "माफ़ कीजिए, अभी photo नहीं पढ़ पाया। कृपया फिर से कोशिश करें।",
+        "picked": "ठीक है, इस chat में मैं **{manual}** manual का उपयोग करूँगा। आप क्या जानना चाहते हैं?",
         "ask_brand": ("आपके पास कौन-सा {product} है? मेरे पास इन brands के manual हैं: {brands}। "
                       "कृपया अपने सवाल में brand और model लिखें, जैसे \"{example}\"।"),
         "ask_series": ("आपका model नाम एक से ज़्यादा manual (अलग series) में आता है। "
@@ -128,6 +155,19 @@ MESSAGES_BY_LANGUAGE = {
         "thanks": "మీకు స్వాగతం! మీ ఉపకరణం గురించి ఇంకేమైనా అడగండి.",
         "no_manual": ("నా దగ్గర {brand} {product} manual లేదు. "
                       "ఈ brands {product} manuals నా దగ్గర ఉన్నాయి: {brands}."),
+        "photo_found": ("label మీద **{label}** చదివాను. ఈ chat లో **{manual}** manual "
+                        "ఉపయోగిస్తాను."),
+        "photo_ask": "దీని గురించి మీరు ఏమి తెలుసుకోవాలనుకుంటున్నారు?",
+        "photo_choose": ("label మీద **{label}** చదివాను. ఈ model ఒకటి కంటే ఎక్కువ manuals కి "
+                         "సరిపోతుంది. మీది ఏది?"),
+        "photo_no_manual": "label మీద **{label}** చదివాను, కానీ ఈ model manual నా దగ్గర లేదు.",
+        "photo_no_manual_options": ("{brand} యొక్క ఈ manuals ఉన్నాయి. ఇది మీ model అయితేనే "
+                                    "ఎంచుకోండి:"),
+        "photo_unreadable": ("ఈ photo లో model number చదవలేకపోయాను. దయచేసి model label "
+                             "(ఉపకరణం పక్కన లేదా వెనుక ఉన్న sticker, లేదా router కింద) యొక్క "
+                             "స్పష్టమైన, దగ్గరి photo తీయండి."),
+        "photo_error": "క్షమించండి, ప్రస్తుతం photo చదవలేకపోయాను. దయచేసి మళ్ళీ ప్రయత్నించండి.",
+        "picked": "సరే, ఈ chat లో **{manual}** manual ఉపయోగిస్తాను. మీరు ఏమి తెలుసుకోవాలనుకుంటున్నారు?",
         "ask_brand": ("మీ దగ్గర ఏ {product} ఉంది? నా దగ్గర ఈ brands manuals ఉన్నాయి: {brands}. "
                       "దయచేసి మీ ప్రశ్నలో brand మరియు model రాయండి, ఉదాహరణకు \"{example}\"."),
         "ask_series": ("మీ model పేరు ఒకటి కంటే ఎక్కువ manuals (వేర్వేరు series) కి సరిపోతుంది. "

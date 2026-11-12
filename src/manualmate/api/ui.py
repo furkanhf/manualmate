@@ -6,6 +6,8 @@ What the user sees:
   - "Which model?" -> up to 6 buttons; the picked manual is kept for the
     rest of the chat (shown above the chat, with a "Change manual" button)
   - a small line with the time each part took (search, Gemini, total)
+  - a photo of the model label -> Gemini vision reads the model number ->
+    that manual is used in the chat (vision/image_to_query.py)
 
 The UI calls the same Service as POST /ask (in the same process, no HTTP).
 """
@@ -35,7 +37,8 @@ EXAMPLES = [
 INTRO = """# ManualMate
 Ask a question about your **air conditioner, washing machine, refrigerator, microwave or Wi-Fi router**
 in English, Hindi or Telugu. Answers come only from the product manuals, with page numbers.
-Add the brand or model to your question (for example *Samsung split AC*, *LG MC2846BG*)."""
+Add the brand or model to your question (for example *Samsung split AC*, *LG MC2846BG*),
+or upload a photo of the model label."""
 
 
 # --- formatting ----------------------------------------------------------
@@ -136,7 +139,11 @@ class Chat:
             state = {**state, "manual_id": r.manual.manual_id, "manual_name": r.manual.name}
         elif r.route_reason not in ("user choice", "small talk"):
             state = {**state, "manual_id": None, "manual_name": None}
+        state["language"] = r.language            # photo replies use the chat's language
         return history + [{"role": "assistant", "content": format_reply(r)}], state
+
+    def _say(self, history: list, key: str, language: str, **fill) -> list:
+        return history + [{"role": "assistant", "content": message(key, language).format(**fill)}]
 
     def submit(self, question: str, history: list, state: dict, language: str = "auto"):
         question = (question or "").strip()
@@ -149,12 +156,60 @@ class Chat:
 
     def pick(self, index: int, history: list, state: dict, language: str = "auto"):
         options = state.get("options") or []
-        if index >= len(options) or not state.get("pending"):
+        if index >= len(options):
             return history, {**state, "options": []}
         choice = options[index]
-        state = {**state, "manual_id": choice["manual_id"], "manual_name": choice["name"]}
+        state = {**state, "manual_id": choice["manual_id"], "manual_name": choice["name"],
+                 "options": [], "pending_product": None}
         history = history + [{"role": "user", "content": choice["name"]}]
+        if not state.get("pending"):              # buttons after a photo, no question yet
+            return self._say(history, "picked", self._language(state, language),
+                             manual=choice["name"]), state
         return self._run(state["pending"], history, state, language)
+
+    @staticmethod
+    def _language(state: dict, language: str) -> str:
+        return language if language in ("English", "Hindi", "Telugu") else \
+            state.get("language", "English")
+
+    def photo(self, image, history: list, state: dict, language: str = "auto"):
+        """A photo of the model label -> the manual for this chat.
+
+        found:     keep that manual; if a question was waiting ("Which model?",
+                   "Which washing machine?"), answer it now.
+        choose:    buttons (the waiting question, if any, is answered after the pick).
+        no_manual: say so; same-brand manuals as buttons only if a few.
+        """
+        if image is None:
+            return history, state
+        lang = self._language(state, language)
+        history = history + [{"role": "user", "content": "📷 Photo of the model label"}]
+        try:
+            res = self.get_service().read_label(image)
+        except Exception as error:                     # keep the UI alive
+            print(f"read_label failed: {error!r}")
+            return self._say(history, "photo_error", lang), {**state, "options": []}
+        label = " ".join(x for x in (res.brand, res.model_number) if x) or "?"
+        waiting = state.get("pending") or state.get("pending_product")
+        if res.status == "found":
+            state = {**state, "manual_id": res.manual.manual_id, "manual_name": res.manual.name,
+                     "options": [], "pending": None, "pending_product": None}
+            history = self._say(history, "photo_found", lang, label=label, manual=res.manual.name)
+            if waiting:
+                return self._run(waiting, history, state, language)
+            return self._say(history, "photo_ask", lang), state
+        options = [o.model_dump() for o in res.options]
+        state = {**state, "options": options, "pending": waiting, "pending_product": None}
+        if res.status == "choose":
+            return self._say(history, "photo_choose", lang, label=label), state
+        if res.status == "no_manual":
+            history = self._say(history, "photo_no_manual", lang, label=label)
+            if options:
+                history = self._say(history, "photo_no_manual_options", lang,
+                                    brand=res.brand or "")
+            return history, state
+        key = "photo_unreadable" if res.status == "unreadable" else "photo_error"
+        return self._say(history, key, lang), {**state, "options": [], "pending": waiting}
 
     @staticmethod
     def change_manual(state: dict) -> dict:
@@ -184,6 +239,12 @@ def build_ui(get_service: Callable) -> gr.Blocks:
         state = logic.change_manual(state)
         return state, manual_line(state), *buttons_for(state)
 
+    def photo(image, history, state, language):
+        if image is None:                          # the photo was cleared: nothing to do
+            return gr.update(), history, state, manual_line(state), *buttons_for(state)
+        history, state = logic.photo(image, history, state, language)
+        return None, history, state, manual_line(state), *buttons_for(state)
+
     def new_chat():
         return [], {}, manual_line({}), *buttons_for({})
 
@@ -206,6 +267,11 @@ def build_ui(get_service: Callable) -> gr.Blocks:
                                    info="auto = from the script; pick Hindi/Telugu for "
                                         "questions typed in English letters", scale=2)
             send = gr.Button("Ask", variant="primary", scale=1)
+        with gr.Accordion("📷 Don't know your model? Upload a photo of the model label",
+                          open=False):
+            photo_in = gr.Image(type="filepath", sources=["upload", "webcam"],
+                                label="Model label (sticker on the side or back, or under "
+                                      "the router)", height=260)
         gr.Examples(EXAMPLES, inputs=box, label="Try")
 
         outputs = [box, chat, state, manual, *buttons]
@@ -214,6 +280,8 @@ def build_ui(get_service: Callable) -> gr.Blocks:
         for i, button in enumerate(buttons):
             button.click(lambda h, s, l, i=i: pick(i, h, s, l), [chat, state, language],
                          [chat, state, manual, *buttons])
+        photo_in.change(photo, [photo_in, chat, state, language],
+                        [photo_in, chat, state, manual, *buttons])
         change.click(change_manual, [state], [state, manual, *buttons])
         clear.click(new_chat, None, [chat, state, manual, *buttons])
     return ui

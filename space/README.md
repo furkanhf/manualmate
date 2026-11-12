@@ -29,5 +29,9 @@ How it works:
    page tag on every fact; two refusal gates (low score, "not in manual").
 4. **Hindi/Telugu** (own script or typed in English letters): the question is
    translated for the search; the answer comes back in the user's language.
+5. **Label photo**: don't know your model? Upload a photo of the model sticker.
+   Gemini vision reads the brand and model number (not the serial number or
+   voltage), and the router opens that manual. Unknown models are reported as
+   "no manual", never matched to a different model.
 
 Code: https://github.com/furkanhf/manualmate

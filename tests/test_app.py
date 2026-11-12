@@ -96,6 +96,9 @@ class Recorder:
         self.last = self.service.ask(req)
         return self.last
 
+    def read_label(self, image):
+        return self.service.read_label(image)
+
 
 @pytest.fixture
 def chat(service):
@@ -468,6 +471,137 @@ def test_chat_thanks_keeps_manual_and_skips_gemini(chat, fakes):
     assert "welcome" in last_text(h)
     h, s = c.submit("नमस्ते", [], {})
     assert re.search(r"[ऀ-ॿ]", last_text(h)) and not s.get("pending_product")
+
+
+# --- label photo (week 5 light: Gemini vision reads the model label) --------------
+READINGS = {   # fake Gemini vision: image name -> what it "reads"
+    "daikin_k": {"brand": "Daikin", "model_number": "FTKS35KVMA",
+                 "product_type": "air conditioner", "label_found": True},
+    "daikin_ftks35": {"brand": "Daikin", "model_number": "FTKS35",
+                      "product_type": "air conditioner", "label_found": True},
+    "samsung_mw": {"brand": "Samsung", "model_number": "MC28H5025VK",
+                   "product_type": "microwave oven", "label_found": True},
+    "voltas": {"brand": "Voltas", "model_number": "183V CZT",
+               "product_type": "air conditioner", "label_found": True},
+    "lg_unknown": {"brand": "LG", "model_number": "XYZ999", "product_type": "washing machine",
+                   "label_found": True},
+    "blank": {"brand": None, "model_number": None, "product_type": "unknown",
+              "label_found": False},
+}
+
+
+@pytest.fixture
+def photos(monkeypatch, tmp_path):
+    """Fake label reading: the photo file's name says what Gemini 'reads'."""
+    from PIL import Image
+
+    def fake_read(jpeg, **kwargs):
+        return dict(READINGS[fake_read.current]) if fake_read.current != "fail" else None
+
+    fake_read.current = None
+    monkeypatch.setattr("manualmate.vision.image_to_query.read_label", fake_read)
+
+    def make(name):
+        path = tmp_path / f"{name}.jpg"
+        Image.new("RGB", (4000, 3000), "white").save(path)
+        fake_read.current = name
+        return str(path)
+    return make
+
+
+def test_preprocess_upright_and_small(tmp_path):
+    import io
+    from PIL import Image
+    from manualmate.vision.preprocess import MAX_SIDE, prepare
+
+    img = Image.new("RGB", (4000, 3000), "white")
+    exif = Image.Exif()
+    exif[0x0112] = 6                                  # "rotate 90" phone photo
+    path = tmp_path / "phone.jpg"
+    img.save(path, exif=exif)
+    out = Image.open(io.BytesIO(prepare(str(path))))
+    assert out.format == "JPEG" and max(out.size) == MAX_SIDE
+    assert out.size[1] > out.size[0]                  # now upright (portrait)
+
+
+@pytest.mark.parametrize("name,status,manual", [
+    ("daikin_k", "found", "ac_002"), ("samsung_mw", "found", "mw_002"),
+    ("daikin_ftks35", "choose", None), ("voltas", "no_manual", None),
+    ("lg_unknown", "no_manual", None), ("blank", "unreadable", None),
+])
+def test_label_match(name, status, manual):
+    from manualmate.vision.image_to_query import match
+
+    r = match(READINGS[name])
+    assert r.status == status and r.manual_id == manual
+    if name == "daikin_ftks35":
+        assert {m for m, _ in r.options} == {"ac_002", "ac_004"}
+    if name == "lg_unknown":                          # 2 LG washing machines: offered
+        assert {m for m, _ in r.options} == {"wm_003", "wm_012"}
+    if name == "voltas":
+        assert r.options == []
+
+
+def test_chat_photo_found_sets_manual(chat, photos):
+    c, rec = chat
+    h, s = c.photo(photos("daikin_k"), [], {})
+    assert s["manual_id"] == "ac_002" and "FTKS35KVMA" in h[-2]["content"]
+    assert "What would you like to know" in last_text(h)
+    h, s = c.submit("How do I clean the filter?", h, s)
+    assert rec.requests[-1].manual_id == "ac_002"
+
+
+def test_chat_photo_answers_waiting_question(chat, photos):
+    c, rec = chat
+    h, s = c.submit("how can I reset my washing machine", [], {})       # "Which washing machine?"
+    h, s = c.photo(photos("samsung_mw"), h, s)                          # (a microwave label)
+    assert rec.requests[-1].manual_id == "mw_002" and "reset" in rec.requests[-1].question
+    assert h[-1]["role"] == "assistant"
+
+
+def test_chat_photo_choose_then_pick(chat, photos):
+    c, rec = chat
+    h, s = c.photo(photos("daikin_ftks35"), [], {})
+    assert len(s["options"]) == 2 and not s.get("pending")
+    n = len(rec.requests)
+    h, s = c.pick(0, h, s)
+    assert s["manual_id"] in {"ac_002", "ac_004"} and len(rec.requests) == n   # no search yet
+    assert "What would you like to know" in last_text(h)
+
+
+def test_chat_photo_no_manual_unreadable_error(chat, photos):
+    c, _ = chat
+    h, s = c.photo(photos("voltas"), [], {})
+    assert "do not have a manual" in last_text(h) and s["options"] == []
+    h, s = c.photo(photos("lg_unknown"), [], {})
+    assert "Pick one only if it is your model" in last_text(h) and len(s["options"]) == 2
+    h, s = c.photo(photos("blank"), [], {})
+    assert "could not read a model number" in last_text(h)
+    h, s = c.photo(photos("fail"), [], {})
+    assert "could not read the photo" in last_text(h)
+    assert c.photo(None, h, s) == (h, s)
+
+
+def test_chat_photo_reply_in_chat_language(chat, photos):
+    c, _ = chat
+    h, s = c.submit("मेरे Samsung split AC का फ़िल्टर कितनी बार धोना चाहिए?", [], {})
+    h, s = c.photo(photos("daikin_k"), h, s)
+    assert re.search(r"[ऀ-ॿ]", last_text(h))
+
+
+def test_http_read_label(fakes, photos, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("MANUALMATE_SEARCH", "bm25")
+    from manualmate.api.main import app
+
+    with TestClient(app) as client:
+        path = photos("daikin_k")
+        with open(path, "rb") as f:
+            r = client.post("/read-label", files={"photo": ("label.jpg", f, "image/jpeg")})
+        assert r.status_code == 200 and r.json()["manual"]["manual_id"] == "ac_002"
+        bad = client.post("/read-label", files={"photo": ("x.jpg", b"not an image", "image/jpeg")})
+        assert bad.status_code == 415
 
 
 # --- the HTTP API ---------------------------------------------------------------

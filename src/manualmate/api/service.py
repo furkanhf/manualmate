@@ -23,7 +23,8 @@ from manualmate.generate.answer import Answer, ask
 from manualmate.index.db import count_chunks, get_connection
 from manualmate.retrieve.query_parser import get_aliases
 
-from manualmate.api.schemas import AskRequest, AskResponse, Option, Source, Timings
+from manualmate.api.schemas import (AskRequest, AskResponse, LabelResponse, Option, Source,
+                                    Timings)
 
 SEARCH_MODES = ("full", "bm25")
 
@@ -81,6 +82,22 @@ class Service:
                 self._conn = None
                 a = run()
         return to_response(a)
+
+
+    # --- label photo -----------------------------------------------------
+    def read_label(self, image) -> LabelResponse:
+        """Photo of the model label -> brand, model number, manual (Gemini vision;
+        no search, no GPU, no database)."""
+        from manualmate.vision.image_to_query import label_to_manual
+
+        res = label_to_manual(image)
+        return LabelResponse(
+            status=res.status, brand=res.brand, model_number=res.model_number,
+            product_type=res.product_type,
+            manual=(Option(manual_id=res.manual_id, name=manual_name(res.manual_id))
+                    if res.manual_id else None),
+            options=[Option(manual_id=m, name=n) for m, n in res.options],
+            read_ms=res.read_ms, tries=res.tries)
 
 
 def manual_name(manual_id: str) -> str:

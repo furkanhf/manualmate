@@ -60,6 +60,18 @@ class AskResponse(BaseModel):
     timings: Timings
 
 
+class LabelResponse(BaseModel):
+    """POST /read-label: what Gemini read on the label photo, and the manual."""
+    status: Literal["found", "choose", "no_manual", "unreadable", "error"]
+    brand: str | None
+    model_number: str | None
+    product_type: str | None
+    manual: Option | None          # status "found"
+    options: list[Option]          # status "choose" (or same-brand manuals for "no_manual")
+    read_ms: float | None
+    tries: int
+
+
 class Health(BaseModel):
     status: str
     search: str              # "full" (dense + rerank) or "bm25" (laptop)
