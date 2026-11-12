@@ -4,9 +4,11 @@ This file is the single place to see where the project is and how to continue.
 Claude: read this file at the start of every chat (via the folder access to D:\Projects\manualmate),
 and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
 
-## ▶ START HERE — next chat (5.5): week 6 step 4 (answer check) + step 5 (Docker)
-Week 6 steps 1–3 DONE in chat 5.4 (API + Gradio UI + bug sweep + 58 tests), see "Week 6 — chat 5.4".
-0. Check: `git status; git log --oneline -1` → clean, last commit = the PROGRESS commit of chat 5.4 (code: 4032425 or newer).
+## ▶ START HERE — next chat (5.5): answer check + latency on the LIVE Space
+**LIVE: https://huggingface.co/spaces/furqan2131/manualmate** (Gradio SDK, ZeroGPU, public; deployed chat 5.4).
+Week 6 steps 1–6 DONE in chat 5.4, see "Week 6 — chat 5.4" and "Week 6 — HF Space (chat 5.4)".
+0. Check: `git status; git log --oneline -1` → clean, last commit = the PROGRESS commit of chat 5.4 (code: d51352f or newer).
+NOTE: steps 2 (Docker) and 6 (create Space) below are DONE differently: free HF accounts cannot host Docker/CPU Spaces any more (PRO needed) → ZeroGPU Gradio Space (space/app.py). The Dockerfile stays for a paid/self-hosted setup.
 1. Step 4 (Furqan, Colab or Kaggle, needs a GPU + Gemini not overloaded): Runtime → Restart session → sections 1–4 (section 2 prints the hash) → new cell = the 7k code (GEMINI_API_KEY + pip gradio/fastapi/uvicorn + `!python scripts/run_app_eval.py --limit 3`), then the full run (`!python scripts/run_app_eval.py`, 124 questions, ~150 Gemini calls). Paste from `=== RESULT` down. Compare with week 4 (gold cited ~0.88, Hindi/Telugu 0.85–0.95, oos refused 1.00). Gemini errors = run again, not a bug.
    Colab stopped in chat 5.4 (probably the free GPU limit after a long day) and Gemini was overloaded (503 high demand, one-word answers 5–30 s) → step 4 moved to the next chat.
 2. Step 5 (Claude, laptop): Dockerfile for HF Spaces (CPU torch, bge-m3 + reranker: in the image or downloaded at start, port 7860, `uvicorn manualmate.api.main:app`). Step 6: Furqan creates the HF Space (Docker, free CPU) + secrets DATABASE_URL, GEMINI_API_KEY; Claude pushes. Step 7: check it works + measure latency ONCE (agreed chat 5.4: free tiers make timing unreliable → write the honest number, no tuning). Step 8: PROGRESS + resume.
@@ -43,6 +45,14 @@ Agreed order (chat 5.2): finish week 4 (step 3 Hindi/Telugu, step 4 Gemini answe
 ## ▶ CURRENT STATUS (update every chat)
 - Date: 2026-11-12 (chat 5.4, Claude Code in VS Code). Week 6 steps 1–3 DONE (API, UI, bug sweep). Next: step 4 answer check (Colab/Kaggle), step 5 Dockerfile.
 - Chat 5.4 commits: a63cf5f (API + UI), fbed3c4, fab93ce, cd3ea9f, 12e0570, e2d06a5 (bug sweep + tests), 4e7a926 (Gemini timeouts/retries), 4032425 (run_app_eval + Colab 7k), then the PROGRESS commit.
+
+## Week 6 — HF Space (chat 5.4)
+- Space: furqan2131/manualmate, Gradio SDK 6.31.0, python 3.12, hardware zero-a10g (ZeroGPU), public. Secrets DATABASE_URL + GEMINI_API_KEY set from .env by script (values never printed). HF login on the laptop: `hf auth login` (browser code), user furqan2131 (isPro False, canPay False).
+- Why ZeroGPU: HF's huggingface-spaces skill (github.com/huggingface/skills) says Docker/Gradio on cpu-basic need a paid plan; free accounts get Static or up to 2 ZeroGPU Spaces. Creating with zero-a10g worked.
+- space/app.py: `import spaces` first; both models loaded at module scope on "cuda"; gpu_search() (@spaces.GPU(duration=20)) = dense + rerank in the GPU worker with its OWN Neon connection, returns plain dicts; Service.searcher = gpu_search; routing/Gemini/chat state stay in the main process (no GPU quota while waiting for Gemini; no GPU call when the router asks "Which model?"). space/requirements.txt has no gradio/spaces/torch/huggingface_hub (HF rule).
+- Deploy/update: `& "D:\Projects\manualmate\.conda\python.exe" scripts/deploy_space.py` (stages space/ + src/ + configs/ only; --dry-run lists files). Build ~1 min, start ~1 min (models download from the HF Hub at ~130 MB/s). Logs: `$env:PYTHONUTF8=1; hf spaces logs furqan2131/manualmate --tail 80` (without UTF-8 the Windows console fails with 'charmap').
+- First live check (chat 5.4, via gradio_client): Samsung filter p9 ✅; Hindi microwave child lock p44 ✅; price refused ✅; FTKS "how many modes" → series buttons → K → AUTO/DRY/COOL/HEAT/FAN p9 ✅ (BM25 missed it); 1 Gemini error (504/503, Google overloaded that evening, handled: 2 tries then the error message). Search on ZeroGPU: 0.4 s warm, 6.8 s cold (first call). Gemini was 6–33 s that evening → latency not measured yet.
+- Next: run the answer check against the live Space (or Colab 7k) on a normal Gemini day; measure latency once (p50/p95) for the resume; README for GitHub.
 
 ## Week 6 — chat 5.4 (API + UI)
 - Run on the laptop (light search, no torch): `$env:MANUALMATE_SEARCH = "bm25"; & "D:\Projects\manualmate\.conda\python.exe" -m uvicorn manualmate.api.main:app --port 7860` → http://127.0.0.1:7860 (chat), /docs (API). Light search = router + BM25: good for testing the UI, NOT for answer quality ("how many modes" missed page 9 with BM25).
