@@ -158,6 +158,9 @@ def summarize(path: Path) -> dict:
     text = [r for r in rows if r["set"] == "text"]
     oos = [r for r in rows if r["set"] == "oos"]
     clar = [r for r in rows if r["set"] == "clarify"]
+    labels = {q["id"]: q["expect"] for q in load("clarify_queries.jsonl")}
+    for r in clar:                       # use the CURRENT labels (c02 fixed in week 4)
+        r["expect"] = labels.get(r["id"], r["expect"])
 
     answered = [r for r in text if r["action"] == "answer"]
     cits = [r["citations"] for r in answered if r.get("citations")]
@@ -216,9 +219,11 @@ def summarize(path: Path) -> dict:
     for lang, b in s["by_language"].items():
         print(f"  {lang}: n {b['n']}, answered {b['answered']}, gold page cited "
               f"{b['gold_page_cited']}")
-    print(f"Out-of-scope ({s['oos']['n']}): refused or asked {s['oos']['refused_or_asked']}  "
-          f"answered: {s['oos']['answered_ids']}")
-    print(f"Clarify ({s['clarify']['n']}): correct {s['clarify']['correct']}")
+    if s["oos"]["n"]:
+        print(f"Out-of-scope ({s['oos']['n']}): refused or asked {s['oos']['refused_or_asked']}  "
+              f"answered: {s['oos']['answered_ids']}")
+    if s["clarify"]["n"]:
+        print(f"Clarify ({s['clarify']['n']}): correct {s['clarify']['correct']}")
     print(f"Gemini avg {s['gemini_ms_avg']} ms")
     print("\nGate-1 threshold | in-scope answered | out-of-scope refused")
     for row in s["thresholds"]:

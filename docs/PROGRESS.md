@@ -4,7 +4,15 @@ This file is the single place to see where the project is and how to continue.
 Claude: read this file at the start of every chat (via the folder access to D:\Projects\manualmate),
 and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
 
-## ▶ START HERE — next chat (5.3): week 4 step 4 (Gemini answer check), then week 6
+## ▶ START HERE — next chat (5.4): week 6 (FastAPI + Gradio + Docker + HF Spaces + latency)
+Week 4 is DONE (step 4 answer check done in chat 5.3, see "Week 4 results — answer check (step 4)").
+0. Check: `git status; git log --oneline -1` → clean, last commit = "Week 4 step 4 done: answer check results + PROGRESS".
+1. Optional before week 6 (Gemini quota): RAGAS faithfulness on the new answers (`scripts/run_ragas.py` on eval/results/2026-11-12_1021_answers.jsonl; check first that it takes the file as an option). The resume number 0.97 is from the week-3 answers (old chunks). Re-run only if the resume should show the 48-manual system; not required by the stop rule.
+2. Optional (Furqan): check the Hindi/Telugu wording in eval/multilingual_queries.jsonl; spot-check 3–4 of eval/text_queries_new.jsonl.
+3. Week 6: FastAPI (src/manualmate/api/ exists, check what is in it) + Gradio + Docker + HF Spaces + end-to-end latency. Decide there: answer.py calls translate() for Hindi/Telugu questions (the eval used saved translations; without it direct search R@5 is 0.85).
+   Latency now (Colab T4, gemini-3.5-flash-lite): English total p50 1.5 s, p95 2.3 s (retrieve p95 1.0 s + Gemini p95 1.5 s) → target 2.4 s met on Colab, NOT yet end-to-end on HF Spaces (CPU, no T4 → retrieve will be slower; Neon cold start). Hindi/Telugu Gemini much slower: hi p95 9.1 s, te p95 17.1 s (long native-script output) → in week 6 consider max_output_tokens / streaming.
+
+## (old) START HERE — chat 5.3: week 4 step 4 — DONE
 Step 3 (Hindi/Telugu) is DONE in chat 5.2 (see "Week 4 results — Hindi/Telugu"). The old step-3 plan below is kept for reference.
 0. Check: `git status; git log --oneline -1` → clean, last commit = "Week 4 step 3 done: translation round results + PROGRESS".
 1. Optional (Furqan): check the Hindi/Telugu wording in eval/multilingual_queries.jsonl and spot-check 3–4 of eval/text_queries_new.jsonl.
@@ -24,6 +32,9 @@ Agreed order (chat 5.2): finish week 4 (step 3 Hindi/Telugu, step 4 Gemini answe
 3. Optional: Furqan spot-checks 3–4 of the 14 new questions (eval/text_queries_new.jsonl).
 
 ## ▶ CURRENT STATUS (update every chat)
+- Date: 2026-11-12 (chat 5.3). Week 4 DONE: step 4 answer check on the 48-manual chunks (see "Week 4 results — answer check (step 4)"). Next: week 6.
+- Chat 5.3 commits: d760755 (run_answer_eval --queries/--translations, Colab 7i, c02 label), then "Week 4 step 4 done" (checker fix + results + PROGRESS).
+- (chat 5.2 status below, still true)
 - Date: 2026-11-12 (chat 5.2)
 - Last commit: "Week 4: 48 manuals parsed, chunked, embedded + eval (chat 5.2)". Before: cb30f92 (router batch, 48), 5badb88, 507a9ab, aadb9f4, 7097dd3, 32abf60 (week-4 step 1 closed).
 - Week: 4 IN PROGRESS. Step 1 (section chunking) DONE. Step 2 DONE in chat 5.2: 48 manuals parsed (3,220 pages, 93 low_text), chunked (8,134 section chunks, 0 in safe mode; old 20 = 4,159 unchanged), embedded on Colab (Neon = 8,134 chunks), retrieval eval R@5 0.98 kept (see "Week 4 results — 48 manuals"). Step 2b DONE: 14 new questions on the new manuals → rerank R@1 0.93, R@5 1.00, MRR 0.96. Step 3 DONE: 20 Hindi/Telugu questions → direct rerank R@5 0.85 (native 12/12, romanized 5/8) → one fix round with Gemini translation → R@5 1.00, R@1 0.80, MRR 0.89. Next: step 4 (Gemini answer check), then week 6.
@@ -125,6 +136,7 @@ Python 3.11, PyMuPDF (import pymupdf, not fitz), pdfplumber, bge-m3 embeddings (
 - Day 4 (2026-11-10, chat 3.4): Colab works again → Colab is the main place for the eval, Kaggle the backup. Checked notebook 7d and the code; added the Colab run order (sections 1–4 first) to NEXT STEP. Eval not run yet.
 - Day 5 (2026-11-11, chat 5.1): week 4 step 2 — manual collection 20 → 48 with scripts/download_manuals.py + data/download_list.csv; commits 7097dd3, aadb9f4, 507a9ab, 5badb88 + router batch. Not parsed/embedded yet.
 - Day 6 (2026-11-12, chat 5.2, first chat in Claude Code / VS Code): parsed + chunked the 48 manuals on the laptop (Claude ran them), embedded 8,134 chunks on Colab, eval 7e → R@5 0.98 kept, R@1 0.72 (brand-only questions now match 2 manuals). Week 4 step 2 closed. Step 2b: 14 new questions → R@5 1.00. Step 3: 20 Hindi/Telugu questions → direct R@5 0.85, with Gemini translation 1.00 (translator.py, make_translations.py). Colab section 2 fixed (fetch + reset). Commits db49fee … (last: "Week 4 step 3 done").
+- Day 6 (2026-11-12, chat 5.3): week 4 step 4 — answer check on Colab (7d full + new 7i Hindi/Telugu, ~100 Gemini calls): gold cited 0.88, citations ok 0.98, refusal 1.00, clarify 1.00, Hindi/Telugu gold cited 0.95. run_answer_eval.py: --queries, --translations, per-language summary. Checker fix ("does not cover" sentences), c02 label fix. Week 4 closed.
 
 ## Data: 48 manuals (data/manifest.csv: manual_id,brand,model,category,language,filename,source_url)
 The list below is the first 20 (week 1). The 28 added in chat 5.1 are in data/manifest.csv and data/download_list.csv (with notes); summary in "Week 4 step 2" below.
@@ -192,6 +204,24 @@ Dense baseline misses (week 1): 7 wrong brand on top (fixed mainly by routing), 
 - eval/out_of_scope.jsonl: 30 Qs (8 price, 6 near_miss, 4 compare, 4 smart_home, 3 off_topic, 2 local, 2 opinion, 1 unsafe); router check 28/28.
 - scripts/run_answer_eval.py: text 50 + oos 30 + clarify 10; gate 1 off during the run, top score saved, threshold sweep in the summary; --limit, --summarize, --sleep.
 - Laptop smoke test: q001 answered from [ac_001 p9], citations ok; price question refused.
+
+## Week 4 results — answer check (step 4, Colab 7d + 7i, chat 5.3)
+Files: eval/results/2026-11-12_1021_answers.jsonl (50 text + 30 oos + 10 clarify), 2026-11-12_1033_answers_multilingual_queries.jsonl (20 Hindi/Telugu; search with saved English translation, Gemini answers the ORIGINAL question in hi/te). _1018 = --limit 3 quick test. Numbers below = `--summarize` with the current checker (no new Gemini calls).
+| metric | week 3 (20 manuals, fixed chunks) | week 4 (48 manuals, section chunks) | Hindi/Telugu (20) |
+| answered / wrongly refused / errors | 1.00 / 0 / 0 | 1.00 / 0 / 0 | 1.00 / 0 / 0 |
+| asked first, then user picked model | q003, q004 | 11: q003 q004 q014 q015 q016 q018 q020 q022 q023 q043 q046 (2 manuals per brand now, correct) | h02 |
+| gold page in top 5 | 0.94 | **0.98** | 1.00 |
+| gold page cited | 0.88 | 0.88 | 0.95 (hi 0.90, te 1.00) |
+| citations ok | 0.96 | **0.98** (0.92 before the checker fix) | 1.00 |
+| made-up tag | 1 (q008) | 1 (q017: [wm_003 p34], p34 not a source) | 0 |
+| out-of-scope refused or asked (30) | 1.00 | 1.00 (28 NOT_IN_MANUAL, 2 ask) | – |
+| clarify correct (10) | 1.00 | 1.00 (c02 label fixed, see below) | – |
+| Gemini ms p50 / p95 | 1474 / 9190 | 784 / 1479 | hi 1297 / 9088, te 2757 / 17095 |
+| total (retrieve + Gemini) p50 / p95 | 2239 / 9904 | 1537 / 2327 | – |
+- Fixes in chat 5.3 (stop rule 1, measurement bugs): (a) citations.py: a sentence that says what the manual does NOT cover (prompt rule 5) no longer counts as an untagged fact (NOT_COVERED_RE) → q013, q027, q045 ok. (b) eval/clarify_queries.jsonl c02 ("My Samsung washer…"): expect answer → ask, manual_ids wm_002 + wm_011 (2 Samsung washers since week 4). summarize() now uses the current clarify labels.
+- Gold page not cited (6 English + h07): all reasonable answers from a neighbouring/other page, NOT wrong answers; labels not changed (stop rule). q009 cited p13 SARARA DRY (gold p12 not retrieved); q016 + h07 OE error cited p35 (gold p36); q033 lemon odour p40 (gold p39); q037 ghee recipe p198–199 (gold p24); q045 Block Sites p79 (gold p72–73).
+- Score gap: out-of-scope o19 (sushi, LG) 0.958 → gate 2 (Gemini NOT_IN_MANUAL) refuses it; next o14 0.198, o27 0.07, o28 0.037. In-scope min q009 0.134, q022 0.154, q001 0.179. → keep REFUSE_BELOW 0.05 (any threshold > 0.10 refuses good questions; 0.15 → 0.98 answered, 0.20 → 0.94).
+- Resume: refusal 100% (30/30, target 90%); "Hindi/Telugu: 20/20 answered in the user's language, gold page cited 95%". p95 2.3 s is Colab T4 only, measure end-to-end in week 6 before writing it.
 
 ## Week 4 results — Hindi/Telugu questions (step 3, Colab 7g + 7h, chat 5.2)
 Files: eval/multilingual_queries.jsonl (20: h01–h10 Hindi, t01–t10 Telugu; 6 native script + 4 romanized each; made from English questions with known labels, field "source"; Furqan has not checked the wording yet). Results: eval/results/2026-11-12_0942 / _0943 (direct), _0951 / _0952 (translated, `_tr`).

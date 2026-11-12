@@ -55,6 +55,11 @@ def is_refusal(answer: str) -> bool:
     return answer.strip().strip(".").upper() == NOT_IN_MANUAL
 
 
+NOT_COVERED_RE = re.compile(
+    r"\b(?:does|do)\s+not\s+(?:cover|mention|say|explain|include)|\bnot\s+covered\b",
+    re.IGNORECASE)
+
+
 def untagged_sentences(answer: str) -> list[str]:
     """Fact sentences that have no tag."""
     # A tag after the full stop ("... Ghee. [mw_003 p24]") belongs to the
@@ -73,6 +78,10 @@ def untagged_sentences(answer: str) -> list[str]:
                 last = None
             continue
         if piece.endswith(":"):   # a heading, for example "To clean the filter:"
+            continue
+        if NOT_COVERED_RE.search(piece):
+            # Prompt rule 5: "say which part the manual does not cover".
+            # That sentence states a gap, not a fact, so it needs no tag.
             continue
         if find_tags(piece):
             last = None

@@ -1,0 +1,85 @@
+{
+  "file": "2026-11-12_1021_answers.jsonl",
+  "text": {
+    "n": 50,
+    "answered": 1.0,
+    "wrongly_refused": 0.0,
+    "errors": 0,
+    "asked_first": [
+      "q003",
+      "q004",
+      "q014",
+      "q015",
+      "q016",
+      "q018",
+      "q020",
+      "q022",
+      "q023",
+      "q043",
+      "q046"
+    ],
+    "gold_page_in_top5": 0.98,
+    "gold_page_cited": 0.88,
+    "citations_ok": 0.98,
+    "citation_precision": 0.998,
+    "answers_with_invalid_tag": 1
+  },
+  "oos": {
+    "n": 30,
+    "refused_or_asked": 1.0,
+    "answered_ids": []
+  },
+  "clarify": {
+    "n": 10,
+    "correct": 1.0
+  },
+  "by_language": {},
+  "gemini_ms_avg": 1220,
+  "thresholds": [
+    {
+      "refuse_below": 0.0,
+      "text_answered": 1.0,
+      "oos_refused": 1.0
+    },
+    {
+      "refuse_below": 0.02,
+      "text_answered": 1.0,
+      "oos_refused": 1.0
+    },
+    {
+      "refuse_below": 0.05,
+      "text_answered": 1.0,
+      "oos_refused": 1.0
+    },
+    {
+      "refuse_below": 0.1,
+      "text_answered": 1.0,
+      "oos_refused": 1.0
+    },
+    {
+      "refuse_below": 0.15,
+      "text_answered": 0.98,
+      "oos_refused": 1.0
+    },
+    {
+      "refuse_below": 0.2,
+      "text_answered": 0.94,
+      "oos_refused": 1.0
+    },
+    {
+      "refuse_below": 0.3,
+      "text_answered": 0.88,
+      "oos_refused": 1.0
+    },
+    {
+      "refuse_below": 0.4,
+      "text_answered": 0.8,
+      "oos_refused": 1.0
+    },
+    {
+      "refuse_below": 0.5,
+      "text_answered": 0.76,
+      "oos_refused": 1.0
+    }
+  ]
+}
