@@ -210,6 +210,33 @@ def keeps_manual(question: str, manual_id: str) -> bool:
     return not parsed.models or manual_id in parsed.models
 
 
+# Words that do not make a question: product words and fillers ("its an LG").
+PRODUCT_ONLY_WORDS = frozenset("""
+washing machine washer front top load ac air conditioner split window inverter fridge
+refrigerator freezer microwave oven router wifi wi fi modem
+its it is s an a the my mine i have has got this that one model brand series
+mera meri mere hai ka ki ke naa di adi idi undi ok yes no sorry
+""".split())
+
+
+def follow_up(pending: str, reply: str) -> str | None:
+    """Join a product-only reply to the question that is waiting for it.
+
+    The app asked "Which product?" (too many manuals for buttons) about
+    `pending` ("how do I reset my washing machine"). If `reply` only names a
+    product ("LG washing machine", "its an LG FHM1408", "Samsung"), return
+    "<pending> (<reply>)". If it is a real question, return None: it is new.
+    """
+    from manualmate.retrieve.query_parser import parse
+
+    parsed = parse(reply)
+    if not (parsed.brand or parsed.category or parsed.models):
+        return None
+    leftover = [w for w in re.findall(r"[^\W\d_]+", (parsed.issue or "").lower())
+                if w not in PRODUCT_ONLY_WORDS]
+    return None if leftover else f"{pending.strip()} ({reply.strip()})"
+
+
 BRAND_NAMES = {"lg": "LG", "ifb": "IFB", "asus": "ASUS", "tp-link": "TP-Link",
                "d-link": "D-Link", "blue-star": "Blue Star"}
 

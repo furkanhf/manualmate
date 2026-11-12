@@ -18,6 +18,7 @@ from typing import Callable
 import gradio as gr
 
 from manualmate.api.schemas import AskRequest, AskResponse
+from manualmate.generate.answer import follow_up
 from manualmate.generate.citations import BRACKET_RE, TAG_RE
 from manualmate.generate.refusal import message
 
@@ -113,7 +114,11 @@ def build_ui(get_service: Callable) -> gr.Blocks:
                                   "content": "Sorry, something went wrong. Please try again."}]
             return history, state, *buttons_for([])
         options = [o.model_dump() for o in r.options] if r.action == "ask" else []
-        state = {**state, "pending": question if options else None, "options": options}
+        state = {**state, "pending": question if options else None, "options": options,
+                 # "Which product?" without buttons: the next product-only reply is
+                 # joined to this question (answer.follow_up)
+                 "pending_product": question if (r.action == "ask" and not options
+                                                 and r.reason == "ask_model") else None}
         # Keep the one manual this question used for the follow-ups ("how do I clean
         # it?"). A question about another product routes again (answer.keeps_manual)
         # and replaces it; several manuals -> no manual kept.
@@ -129,6 +134,8 @@ def build_ui(get_service: Callable) -> gr.Blocks:
         if len(question) < 2:
             return "", history, state, manual_line(state), *buttons_for(state.get("options", []))
         history = history + [{"role": "user", "content": question}]
+        if state.get("pending_product"):
+            question = follow_up(state["pending_product"], question) or question
         history, state, *buttons = run(question, history, state, language)
         return "", history, state, manual_line(state), *buttons
 
