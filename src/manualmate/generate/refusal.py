@@ -54,8 +54,18 @@ MESSAGES = {
     "gemini_error": "Sorry, the answer service is not available now. Please try again.",
     "pick": "Pick your model below.",
     # "ask_model" with too many manuals for buttons (no brand/product in the question):
-    "ask_product": ("Which product is this about? Please add the brand and type to your "
-                    "question, for example \"Daikin AC\" or \"LG microwave\"."),
+    "ask_product": ("Which product is this about? I have manuals for air conditioners, "
+                    "washing machines, refrigerators, microwave ovens and Wi-Fi routers. "
+                    "Please add the brand and type to your question, "
+                    "for example \"Daikin AC\" or \"LG microwave\"."),
+    # small talk (no product, no question): "hi", "thanks"
+    "greeting": ("Hello! Ask me about your air conditioner, washing machine, refrigerator, "
+                 "microwave oven or Wi-Fi router, with its brand and model, for example "
+                 "\"How do I clean the filter of my Samsung split AC?\""),
+    "thanks": "You are welcome! Ask me anything else about your appliance.",
+    # router found a brand + product type that no manual has ("Daikin fridge"):
+    "no_manual": ("I do not have a manual for a {brand} {product}. "
+                  "I have {product} manuals for these brands: {brands}."),
     # "ask_model", product type known but too many manuals for buttons (11 washing machines):
     "ask_brand": ("Which {product} do you have? I have manuals for these brands: {brands}. "
                   "Please add the brand and model to your question, for example \"{example}\"."),
@@ -81,8 +91,16 @@ MESSAGES_BY_LANGUAGE = {
                           "कृपया brand के service centre से संपर्क करें।"),
         "gemini_error": "माफ़ कीजिए, अभी जवाब देने वाली सेवा उपलब्ध नहीं है। कृपया फिर से कोशिश करें।",
         "pick": "नीचे से अपना मॉडल चुनें।",
-        "ask_product": ("यह किस product के बारे में है? कृपया अपने सवाल में brand और product "
+        "ask_product": ("यह किस product के बारे में है? मेरे पास AC, washing machine, "
+                        "refrigerator, microwave oven और Wi-Fi router के manual हैं। "
+                        "कृपया अपने सवाल में brand और product "
                         "का नाम लिखें, जैसे \"Daikin AC\" या \"LG microwave\"।"),
+        "greeting": ("नमस्ते! अपने AC, washing machine, refrigerator, microwave oven या "
+                     "Wi-Fi router के बारे में brand और model के साथ पूछें, जैसे "
+                     "\"मेरे Samsung split AC का filter कैसे साफ़ करूँ?\""),
+        "thanks": "आपका स्वागत है! अपने उपकरण के बारे में कुछ और पूछें।",
+        "no_manual": ("मेरे पास {brand} {product} का manual नहीं है। "
+                      "मेरे पास इन brands के {product} manual हैं: {brands}।"),
         "ask_brand": ("आपके पास कौन-सा {product} है? मेरे पास इन brands के manual हैं: {brands}। "
                       "कृपया अपने सवाल में brand और model लिखें, जैसे \"{example}\"।"),
         "ask_series": ("आपका model नाम एक से ज़्यादा manual (अलग series) में आता है। "
@@ -100,8 +118,16 @@ MESSAGES_BY_LANGUAGE = {
                           "దయచేసి brand service centre ను సంప్రదించండి."),
         "gemini_error": "క్షమించండి, ప్రస్తుతం సమాధానం ఇచ్చే సేవ అందుబాటులో లేదు. దయచేసి మళ్ళీ ప్రయత్నించండి.",
         "pick": "కింద మీ మోడల్‌ను ఎంచుకోండి.",
-        "ask_product": ("ఇది ఏ product గురించి? దయచేసి మీ ప్రశ్నలో brand మరియు product పేరు "
+        "ask_product": ("ఇది ఏ product గురించి? నా దగ్గర AC, washing machine, refrigerator, "
+                        "microwave oven మరియు Wi-Fi router manuals ఉన్నాయి. "
+                        "దయచేసి మీ ప్రశ్నలో brand మరియు product పేరు "
                         "రాయండి, ఉదాహరణకు \"Daikin AC\" లేదా \"LG microwave\"."),
+        "greeting": ("నమస్కారం! మీ AC, washing machine, refrigerator, microwave oven లేదా "
+                     "Wi-Fi router గురించి brand మరియు model తో అడగండి, ఉదాహరణకు "
+                     "\"నా Samsung split AC filter ఎలా శుభ్రం చేయాలి?\""),
+        "thanks": "మీకు స్వాగతం! మీ ఉపకరణం గురించి ఇంకేమైనా అడగండి.",
+        "no_manual": ("నా దగ్గర {brand} {product} manual లేదు. "
+                      "ఈ brands {product} manuals నా దగ్గర ఉన్నాయి: {brands}."),
         "ask_brand": ("మీ దగ్గర ఏ {product} ఉంది? నా దగ్గర ఈ brands manuals ఉన్నాయి: {brands}. "
                       "దయచేసి మీ ప్రశ్నలో brand మరియు model రాయండి, ఉదాహరణకు \"{example}\"."),
         "ask_series": ("మీ model పేరు ఒకటి కంటే ఎక్కువ manuals (వేర్వేరు series) కి సరిపోతుంది. "

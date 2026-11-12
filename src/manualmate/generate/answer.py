@@ -258,6 +258,22 @@ def brand_hint(manual_ids: list[str]) -> dict:
             "example": min((i["name"] for i in infos), key=len)}
 
 
+def no_manual_hint(question: str) -> dict:
+    """For "no_manual" ("Daikin fridge": we have Daikin ACs, but no Daikin fridge):
+    the brand, the product and the brands we DO have for that product. Else {}."""
+    from manualmate.retrieve.query_parser import get_aliases, parse
+
+    parsed = parse(question)
+    if not (parsed.brand and parsed.category):
+        return {}
+    same_product = [m for m, i in get_aliases().manuals.items()
+                    if i["category"] == parsed.category]
+    hint = brand_hint(same_product)
+    if not hint:
+        return {}
+    return {**hint, "brand": BRAND_NAMES.get(parsed.brand, parsed.brand.title())}
+
+
 LANGUAGES = ("English", "Hindi", "Telugu")
 
 
@@ -281,6 +297,28 @@ cheyyatledu panicheyyatledu cheppandi cheppu adi idi ekkada eppudu entha
 naa chesina chesanu tarvata taruvata kuda kooda edaina emaina aithe ayithe
 """.split())
 WORD_RE = re.compile(r"[a-z]+")
+
+
+GREETINGS = frozenset("hi hello hey hii hiii namaste namaskar namaskaram hola start "
+                      "help नमस्ते नमस्कार హాయ్ నమస్కారం".split())
+THANKS = frozenset("thanks thank thx ok okay great cool nice bye shukriya dhanyavad "
+                   "dhanyavaad dhanyawad dhanyavadalu thanku धन्यवाद शुक्रिया ధన్యవాదాలు".split())
+
+
+def small_talk(text: str) -> str | None:
+    """"greeting" / "thanks" if the message is ONLY that (up to 4 words), else None."""
+    # split on spaces, not \w: Hindi/Telugu vowel signs are not \w (धन्यवाद would break)
+    words = [w.strip(".,!?;:'\"()-।") for w in text.lower().split()]
+    words = [w for w in words if w]
+    if not words or len(words) > 4:
+        return None
+    if all(w in GREETINGS or w in {"there", "you", "so", "much", "a", "lot", "me", "ji"}
+           for w in words) and any(w in GREETINGS for w in words):
+        return "greeting"
+    if all(w in THANKS or w in {"you", "so", "much", "a", "lot", "ji", "very"}
+           for w in words) and any(w in THANKS for w in words):
+        return "thanks"
+    return None
 
 
 def detect_language(text: str) -> str:
@@ -317,6 +355,11 @@ def ask(question: str, conn=None, manual_id: str | None = None,
     start = time.perf_counter()
     language = language if language in LANGUAGES else detect_language(question)
 
+    talk = small_talk(question)
+    if talk:                                 # "hi", "thanks": no search, no Gemini
+        return Answer(question, "ask", talk, message(talk, language), language=language,
+                      search_text=question, route_reason="small talk", total_ms=0)
+
     search_text, translate_ms = question, None
     if language != "English":
         t0 = time.perf_counter()
@@ -339,7 +382,10 @@ def ask(question: str, conn=None, manual_id: str | None = None,
         if reason == "ask_model":
             # no buttons: product type known -> list its brands, else ask for brand +
             # product; a model that fits 2+ manuals (FTKS: Daikin K and L) -> say so
-            if not a.options:
+            if "no manual fits" in r.reason:
+                fill = no_manual_hint(search_text)
+                reason = "no_manual" if fill else "ask_product"
+            elif not a.options:
                 fill = brand_hint(r.manual_ids)
                 reason = "ask_brand" if fill else "ask_product"
             elif r.reason == "model":
