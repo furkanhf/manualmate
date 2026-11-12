@@ -4,7 +4,17 @@ This file is the single place to see where the project is and how to continue.
 Claude: read this file at the start of every chat (via the folder access to D:\Projects\manualmate),
 and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
 
-## ▶ START HERE — next chat (5.3): Hindi/Telugu questions (week 4 step 3)
+## ▶ START HERE — next chat (5.3): week 4 step 4 (Gemini answer check), then week 6
+Step 3 (Hindi/Telugu) is DONE in chat 5.2 (see "Week 4 results — Hindi/Telugu"). The old step-3 plan below is kept for reference.
+0. Check: `git status; git log --oneline -1` → clean, last commit = "Week 4 step 3 done: translation round results + PROGRESS".
+1. Optional (Furqan): check the Hindi/Telugu wording in eval/multilingual_queries.jsonl and spot-check 3–4 of eval/text_queries_new.jsonl.
+2. Step 4 (needs Gemini quota, Colab 7d): answer check on the 48-manual chunks: `--limit 3` first, then the full run → compare with week 3 (gold cited 0.88, citations ok 0.96, refusal 1.00). Hindi/Telugu answers: decide if run_answer_eval needs a --queries option (check first).
+   Before 7d: Claude reads scripts/run_answer_eval.py and notebook 7d on the laptop and says what to expect. Gemini quota: flash-lite 500/day (the full 7d run ≈ 80 calls + 20 for Hindi/Telugu).
+   Note: 11 of the 50 English questions now route to 2 manuals (route_single 0.78) → in 7d they will "ask first, then the user picks" (like q003/q004 in week 3); expect more "asked first" lines, that is correct behaviour.
+3. Then week 6: FastAPI + Gradio + Docker + HF Spaces + latency (p95 9.9 s now, target 2.4 s); decide there whether answer.py calls translate().
+Colab: section 2 now does fetch + reset (no more stuck pulls); always check the printed hash.
+
+## (old) START HERE — chat 5.3 plan for Hindi/Telugu questions (week 4 step 3) — DONE
 Claude: do these steps with Furqan, about 5 per batch, one command at a time, and say where to run each and what to expect.
 NEW (chat 5.2): Claude now runs in Claude Code inside VS Code → it CAN run PowerShell on the laptop itself (parser, chunker, checks). Use `& "D:\Projects\manualmate\.conda\python.exe" <script>` (= the activated env). Embedding + evals still run on Colab (Furqan runs, pastes output).
 Agreed order (chat 5.2): finish week 4 (step 3 Hindi/Telugu, step 4 Gemini answer check) → week 6 (FastAPI, Gradio, Docker, HF Spaces, latency) → light week 5 (label photo → model number → manual, ~30 photos) only if time.
@@ -16,7 +26,7 @@ Agreed order (chat 5.2): finish week 4 (step 3 Hindi/Telugu, step 4 Gemini answe
 ## ▶ CURRENT STATUS (update every chat)
 - Date: 2026-11-12 (chat 5.2)
 - Last commit: "Week 4: 48 manuals parsed, chunked, embedded + eval (chat 5.2)". Before: cb30f92 (router batch, 48), 5badb88, 507a9ab, aadb9f4, 7097dd3, 32abf60 (week-4 step 1 closed).
-- Week: 4 IN PROGRESS. Step 1 (section chunking) DONE. Step 2 DONE in chat 5.2: 48 manuals parsed (3,220 pages, 93 low_text), chunked (8,134 section chunks, 0 in safe mode; old 20 = 4,159 unchanged), embedded on Colab (Neon = 8,134 chunks), retrieval eval R@5 0.98 kept (see "Week 4 results — 48 manuals"). Step 2b DONE: 14 new questions on the new manuals → rerank R@1 0.93, R@5 1.00, MRR 0.96. Next: step 3 (Hindi/Telugu questions).
+- Week: 4 IN PROGRESS. Step 1 (section chunking) DONE. Step 2 DONE in chat 5.2: 48 manuals parsed (3,220 pages, 93 low_text), chunked (8,134 section chunks, 0 in safe mode; old 20 = 4,159 unchanged), embedded on Colab (Neon = 8,134 chunks), retrieval eval R@5 0.98 kept (see "Week 4 results — 48 manuals"). Step 2b DONE: 14 new questions on the new manuals → rerank R@1 0.93, R@5 1.00, MRR 0.96. Step 3 DONE: 20 Hindi/Telugu questions → direct rerank R@5 0.85 (native 12/12, romanized 5/8) → one fix round with Gemini translation → R@5 1.00, R@1 0.80, MRR 0.89. Next: step 4 (Gemini answer check), then week 6.
 - Counts: AC 9, washing machine 11, refrigerator 9, microwave 9, router 10 = 48. Decided: keep 48 (no trimming to 9 each, no padding to 50); resume says "48 manuals".
 - Chat 5.1 notes: see "Week 4 step 2 — manual collection (chat 5.1)" below (download script, drops, trims, scanned files, gotchas).
 - From chat 4.1 (still true):
@@ -55,7 +65,12 @@ Otherwise: write it in this file and move on. If a target is missed: ONE round o
 - run_answer_eval.py: `--limit N`, `--sleep S` (default 2.0 s after each Gemini call), `--summarize <file>` (re-make the summary from a saved answers file, no new Gemini calls).
 - The old `claude/chat-3.2-summary.md` and `claude/chat-3.3-summary.md` are NOT in the project folder. This file replaces them; the week-3 details are in the code itself.
 
-## How to start a new chat
+## How to start a new chat — Claude Code in VS Code (used since chat 5.2)
+1. VS Code → File → Open Folder → D:\Projects\manualmate. Open the Claude Code panel → new chat.
+2. First message: "Continue ManualMate. Read docs/PROGRESS.md and follow ▶ START HERE."
+3. No folder access step needed. Claude runs PowerShell itself (git, parser, chunker, Neon checks) with `& "D:\Projects\manualmate\.conda\python.exe" <script>`; Claude can also commit + push when Furqan says so. Colab is still run by Furqan (paste the output; section 8 downloads into eval/results).
+
+## How to start a new chat — Claude desktop app (old way, before chat 5.2)
 1. VS Code → File → Open Folder → D:\Projects\manualmate.
 2. Terminal (Ctrl+`): `conda activate D:\Projects\manualmate\.conda`
 3. `git status; git log --oneline -1` → expect clean and the "Last commit" above.
@@ -109,7 +124,7 @@ Python 3.11, PyMuPDF (import pymupdf, not fitz), pdfplumber, bge-m3 embeddings (
 - Day 4 (2026-11-10, chat 3.4, later): full answer eval on Colab (1047), thresholds set, citation fix, RAGAS script (ragas 0.4.3 + Gemini judge via OpenAI endpoint) → 0.97. Week 3 closed. Gemini free quota: flash-lite 500/day + 15/min (answers + judge share it), flash 20/day.
 - Day 4 (2026-11-10, chat 3.4): Colab works again → Colab is the main place for the eval, Kaggle the backup. Checked notebook 7d and the code; added the Colab run order (sections 1–4 first) to NEXT STEP. Eval not run yet.
 - Day 5 (2026-11-11, chat 5.1): week 4 step 2 — manual collection 20 → 48 with scripts/download_manuals.py + data/download_list.csv; commits 7097dd3, aadb9f4, 507a9ab, 5badb88 + router batch. Not parsed/embedded yet.
-- Day 6 (2026-11-12, chat 5.2, first chat in Claude Code / VS Code): parsed + chunked the 48 manuals on the laptop (Claude ran them), embedded 8,134 chunks on Colab, eval 7e → R@5 0.98 kept, R@1 0.72 (brand-only questions now match 2 manuals). Week 4 step 2 closed.
+- Day 6 (2026-11-12, chat 5.2, first chat in Claude Code / VS Code): parsed + chunked the 48 manuals on the laptop (Claude ran them), embedded 8,134 chunks on Colab, eval 7e → R@5 0.98 kept, R@1 0.72 (brand-only questions now match 2 manuals). Week 4 step 2 closed. Step 2b: 14 new questions → R@5 1.00. Step 3: 20 Hindi/Telugu questions → direct R@5 0.85, with Gemini translation 1.00 (translator.py, make_translations.py). Colab section 2 fixed (fetch + reset). Commits db49fee … (last: "Week 4 step 3 done").
 
 ## Data: 48 manuals (data/manifest.csv: manual_id,brand,model,category,language,filename,source_url)
 The list below is the first 20 (week 1). The 28 added in chat 5.1 are in data/manifest.csv and data/download_list.csv (with notes); summary in "Week 4 step 2" below.
@@ -177,6 +192,20 @@ Dense baseline misses (week 1): 7 wrong brand on top (fixed mainly by routing), 
 - eval/out_of_scope.jsonl: 30 Qs (8 price, 6 near_miss, 4 compare, 4 smart_home, 3 off_topic, 2 local, 2 opinion, 1 unsafe); router check 28/28.
 - scripts/run_answer_eval.py: text 50 + oos 30 + clarify 10; gate 1 off during the run, top score saved, threshold sweep in the summary; --limit, --summarize, --sleep.
 - Laptop smoke test: q001 answered from [ac_001 p9], citations ok; price question refused.
+
+## Week 4 results — Hindi/Telugu questions (step 3, Colab 7g + 7h, chat 5.2)
+Files: eval/multilingual_queries.jsonl (20: h01–h10 Hindi, t01–t10 Telugu; 6 native script + 4 romanized each; made from English questions with known labels, field "source"; Furqan has not checked the wording yet). Results: eval/results/2026-11-12_0942 / _0943 (direct), _0951 / _0952 (translated, `_tr`).
+Fix before the run: aliases.yaml had no Hindi/Telugu product words → t02 (Telugu "వాషింగ్ మెషీన్") routed to brand only. Added the native-script words for all 5 categories (general fix; English routing unchanged: route_single 0.78 / 1.00).
+| run | R@1 | R@5 | MRR | native R@5 (12) | romanized R@5 (8) |
+| 7g direct (bge-m3 reads Hindi/Telugu), dense | 0.45 | 0.90 | 0.65 | 12/12 | 6/8 |
+| 7g direct, + rerank | 0.55 | 0.85 | 0.70 | 12/12 | 5/8 |
+| 7h translated to English first (Gemini), dense | 0.65 | 1.00 | 0.80 | 12/12 | 8/8 |
+| **7h translated, + rerank (BEST)** | **0.80** | **1.00** | **0.89** | 12/12 | 8/8 |
+- Direct: native script is as good as English at R@5; romanized ("mere microwave mein nami…") is the weak point: misses h07, h10, t07, reranker scores near 0 (0.004 / 0.001 / 0.011) = the reranker does not understand romanized text. 0.85 < 0.88 target → stop rule: ONE round of fixes = translation.
+- Fix round: retrieve/translator.py (Gemini gemini-3.5-flash-lite, keeps brand/model/codes), scripts/make_translations.py (run once on the laptop → eval/translations.jsonl), run_eval --translations, notebook 7h. Round done → no more tuning.
+- Caveat: the Hindi/Telugu questions were written from English questions, so the translations are almost the same as those English questions → 1.00 is optimistic. 20 questions only (1 question = 0.05). Write both numbers.
+- Resume line idea: "Hindi/Telugu queries: R@5 0.85 cross-lingual (bge-m3, no translation; native script 12/12), 1.00 with Gemini query translation (20 questions)".
+- NOT in the app yet: answer.py does not call translate(). Decide in week 6 with latency: +1 Gemini call per non-English question. Option: translate only when the question is not plain English (native script is easy to detect but already works; romanized detection needs a check). Gemini still answers in the user's language.
 
 ## Week 4 results — new questions on the new manuals (step 2b, Colab, 2026-11-12_0855 / _0856, chat 5.2)
 Files: eval/text_queries_new.jsonl (14 questions n001–n014, Claude wrote them after reading the pages; Furqan has not spot-checked them yet), eval/results/2026-11-12_0855_new_routed_issue.json, 2026-11-12_0856_new_routed_rerank_issue.json. Notebook section 7f. run_eval.py has a new `--queries` option.
