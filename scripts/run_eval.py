@@ -92,6 +92,9 @@ def main() -> None:
 
     with open(args.queries, encoding="utf-8") as f:
         queries = [json.loads(line) for line in f if line.strip()]
+    if not queries:
+        raise SystemExit(f"No questions in {args.queries}. Old code? Run 'git pull' "
+                         "(notebook section 2) and check the commit hash.")
     rewrites = {}
     if args.rewrites:
         with open(REWRITES_PATH, encoding="utf-8") as f:
