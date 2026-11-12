@@ -1,0 +1,309 @@
+{
+  "name": "new_routed_issue",
+  "method": "routed",
+  "query_text": "issue",
+  "rewrites": false,
+  "reranker": null,
+  "model": "BAAI/bge-m3",
+  "date": "2026-11-12_0855",
+  "n_questions": 14,
+  "metrics": {
+    "recall@1": 0.8571428571428571,
+    "recall@3": 1.0,
+    "recall@5": 1.0,
+    "recall@10": 1.0,
+    "mrr@10": 0.9166666666666667,
+    "manual@5": 1.0,
+    "route_in_scope": 1.0,
+    "route_single": 1.0
+  },
+  "recall@5_by_category": {
+    "ac": 1.0,
+    "microwave": 1.0,
+    "refrigerator": 1.0,
+    "router": 1.0,
+    "washing-machine": 1.0
+  },
+  "per_query": [
+    {
+      "dense_rank": null,
+      "id": "n001",
+      "category": "ac",
+      "type": "feature",
+      "question": "Can I run my Blue Star split AC at a lower cooling capacity, like 60%, to save power?",
+      "expected": "ac_012 p[7]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_012 p7 (0.588)",
+        "ac_012 p7 (0.578)",
+        "ac_012 p6 (0.576)",
+        "ac_012 p5 (0.573)",
+        "ac_012 p9 (0.542)"
+      ],
+      "route": "brand+category: ac_012",
+      "parsed": "brand=blue-star category=ac models=- codes=-",
+      "search_text": "Can I run my split AC at a lower cooling capacity, like 60%, to save power?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n002",
+      "category": "ac",
+      "type": "maintenance",
+      "question": "How often should I clean the filter of my Blue Star AC, and can I wash it with soap?",
+      "expected": "ac_012 p[10]",
+      "rank": 2,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_012 p11 (0.677)",
+        "ac_012 p10 (0.668)",
+        "ac_012 p10 (0.607)",
+        "ac_012 p9 (0.594)",
+        "ac_012 p9 (0.574)"
+      ],
+      "route": "brand+category: ac_012",
+      "parsed": "brand=blue-star category=ac models=- codes=-",
+      "search_text": "How often should I clean the filter of my AC, and can I wash it with soap?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n003",
+      "category": "ac",
+      "type": "troubleshooting",
+      "question": "My LG TS-Q19YNZE indoor unit keeps running after I switch it off. Is something wrong?",
+      "expected": "ac_009 p[40]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_009 p40 (0.628)",
+        "ac_009 p29 (0.618)",
+        "ac_009 p38 (0.602)",
+        "ac_009 p25 (0.590)",
+        "ac_009 p40 (0.589)"
+      ],
+      "route": "model: ac_009",
+      "parsed": "brand=lg category=ac models=ac_009:9 codes=-",
+      "search_text": "My AC indoor unit keeps running after I switch it off. Is something wrong?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n004",
+      "category": "ac",
+      "type": "how-to",
+      "question": "How do I reset the learned room information on my LG TS-Q19YNZE AC?",
+      "expected": "ac_009 p[26]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_009 p26 (0.666)",
+        "ac_009 p25 (0.543)",
+        "ac_009 p23 (0.535)",
+        "ac_009 p24 (0.529)",
+        "ac_009 p27 (0.528)"
+      ],
+      "route": "model: ac_009",
+      "parsed": "brand=lg category=ac models=ac_009:9 codes=-",
+      "search_text": "How do I reset the learned room information on my AC?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n005",
+      "category": "ac",
+      "type": "feature",
+      "question": "How can I make the outdoor unit of my Mitsubishi MSZ-AP35VGKD quieter at night and stop the beeps?",
+      "expected": "ac_006 p[10]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "ac_006 p10 (0.675)",
+        "ac_006 p19 (0.584)",
+        "ac_006 p8 (0.565)",
+        "ac_006 p17 (0.559)",
+        "ac_006 p17 (0.556)"
+      ],
+      "route": "model: ac_006",
+      "parsed": "brand=mitsubishi category=ac models=ac_006:11 codes=-",
+      "search_text": "How can I make the outdoor unit of my AC quieter at night and stop the beeps?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n006",
+      "category": "washing-machine",
+      "type": "troubleshooting",
+      "question": "There is too much foam in my Haier HWF85AN1 washing machine and it does not spin. What should I do?",
+      "expected": "wm_008 p[25]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_008 p25 (0.685)",
+        "wm_008 p25 (0.678)",
+        "wm_008 p24 (0.571)",
+        "wm_008 p12 (0.559)",
+        "wm_008 p21 (0.551)"
+      ],
+      "route": "model: wm_008",
+      "parsed": "brand=haier category=washing-machine models=wm_008:8 codes=-",
+      "search_text": "There is too much foam in my washing machine and it does not spin. What should I do?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n007",
+      "category": "washing-machine",
+      "type": "troubleshooting",
+      "question": "My Electrolux front loader does not fill with water. What should I check?",
+      "expected": "wm_009 p[30]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "wm_009 p30 (0.589)",
+        "wm_009 p30 (0.580)",
+        "wm_009 p31 (0.566)",
+        "wm_009 p17 (0.560)",
+        "wm_009 p33 (0.545)"
+      ],
+      "route": "brand+category: wm_009",
+      "parsed": "brand=electrolux category=washing-machine models=- codes=-",
+      "search_text": "My front loader does not fill with water. What should I check?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n008",
+      "category": "refrigerator",
+      "type": "how-to",
+      "question": "How do I use quick freezing on my Panasonic NR-BX471H fridge, and when does it turn off?",
+      "expected": "rf_009 p[17]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_009 p17 (0.726)",
+        "rf_009 p17 (0.718)",
+        "rf_009 p17 (0.711)",
+        "rf_009 p17 (0.682)",
+        "rf_009 p22 (0.661)"
+      ],
+      "route": "model: rf_009",
+      "parsed": "brand=panasonic category=refrigerator models=rf_009:8 codes=-",
+      "search_text": "How do I use quick freezing on my fridge, and when does it turn off?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n009",
+      "category": "refrigerator",
+      "type": "troubleshooting",
+      "question": "My LG LRTNC0915 fridge makes gurgling and popping sounds. Is that normal?",
+      "expected": "rf_007 p[26]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rf_007 p26 (0.721)",
+        "rf_007 p27 (0.698)",
+        "rf_007 p26 (0.682)",
+        "rf_007 p13 (0.615)",
+        "rf_007 p24 (0.610)"
+      ],
+      "route": "model: rf_007",
+      "parsed": "brand=lg category=refrigerator models=rf_007:9 codes=-",
+      "search_text": "My fridge makes gurgling and popping sounds. Is that normal?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n010",
+      "category": "microwave",
+      "type": "other",
+      "question": "Why is there moisture inside my Sharp microwave after cooking?",
+      "expected": "mw_010 p[26]",
+      "rank": 3,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_010 p30 (0.714)",
+        "mw_010 p29 (0.701)",
+        "mw_010 p26 (0.664)",
+        "mw_010 p30 (0.663)",
+        "mw_010 p27 (0.641)"
+      ],
+      "route": "brand+category: mw_010",
+      "parsed": "brand=sharp category=microwave models=- codes=-",
+      "search_text": "Why is there moisture inside my microwave after cooking?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n011",
+      "category": "microwave",
+      "type": "feature",
+      "question": "My Whirlpool AMW509IX microwave shows Cool On after cooking and keeps running. Why?",
+      "expected": "mw_008 p[12]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "mw_008 p12 (0.701)",
+        "mw_008 p11 (0.621)",
+        "mw_008 p15 (0.614)",
+        "mw_008 p16 (0.593)",
+        "mw_008 p10 (0.592)"
+      ],
+      "route": "model: mw_008",
+      "parsed": "brand=whirlpool category=microwave models=mw_008:8 codes=-",
+      "search_text": "My microwave shows Cool On after cooking and keeps running. Why?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n012",
+      "category": "router",
+      "type": "how-to",
+      "question": "How do I create a guest Wi-Fi network on my TP-Link Archer AX23?",
+      "expected": "rt_006 p[39]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_006 p39 (0.768)",
+        "rt_006 p38 (0.744)",
+        "rt_006 p40 (0.713)",
+        "rt_006 p40 (0.694)",
+        "rt_006 p22 (0.648)"
+      ],
+      "route": "model: rt_006",
+      "parsed": "brand=tp-link category=router models=rt_003:6,rt_006:10 codes=-",
+      "search_text": "How do I create a guest Wi-Fi network on my router?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n013",
+      "category": "router",
+      "type": "how-to",
+      "question": "I forgot the login password for the web page of my Mercusys MR60X router. What can I do?",
+      "expected": "rt_010 p[89]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_010 p89 (0.771)",
+        "rt_010 p92 (0.732)",
+        "rt_010 p91 (0.727)",
+        "rt_010 p80 (0.724)",
+        "rt_010 p62 (0.713)"
+      ],
+      "route": "model: rt_010",
+      "parsed": "brand=mercusys category=router models=rt_010:5 codes=-",
+      "search_text": "I forgot the login password for the web page of my router. What can I do?"
+    },
+    {
+      "dense_rank": null,
+      "id": "n014",
+      "category": "router",
+      "type": "error-code",
+      "question": "The light on my TP-Link Deco X20 is pulsing red. What does that mean?",
+      "expected": "rt_007 p[4]",
+      "rank": 1,
+      "manual_in_top5": true,
+      "top5": [
+        "rt_007 p4 (0.654)",
+        "rt_007 p24 (0.517)",
+        "rt_007 p27 (0.515)",
+        "rt_007 p27 (0.515)",
+        "rt_007 p26 (0.510)"
+      ],
+      "route": "model: rt_007",
+      "parsed": "brand=tp-link category=router models=rt_007:7 codes=-",
+      "search_text": "The light on my router is pulsing red. What does that mean?"
+    }
+  ]
+}

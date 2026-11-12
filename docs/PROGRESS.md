@@ -4,18 +4,19 @@ This file is the single place to see where the project is and how to continue.
 Claude: read this file at the start of every chat (via the folder access to D:\Projects\manualmate),
 and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
 
-## ▶ START HERE — next chat (5.3): new test questions for the new manuals (step 2b)
+## ▶ START HERE — next chat (5.3): Hindi/Telugu questions (week 4 step 3)
 Claude: do these steps with Furqan, about 5 per batch, one command at a time, and say where to run each and what to expect.
 NEW (chat 5.2): Claude now runs in Claude Code inside VS Code → it CAN run PowerShell on the laptop itself (parser, chunker, checks). Use `& "D:\Projects\manualmate\.conda\python.exe" <script>` (= the activated env). Embedding + evals still run on Colab (Furqan runs, pastes output).
-0. Check: `git status; git log --oneline -1` → clean, last commit = "Week 4: 48 manuals parsed, chunked, embedded + eval (chat 5.2)".
-1. Step 2b: write ~10–15 new test questions for the NEW manuals, in a NEW file (e.g. eval/text_queries_new.jsonl; do not touch the 50). Same format as eval/text_queries.jsonl, labeled manual + page, Claude reads the pages in data/processed/ to label. Indian models first: Blue Star MDVRYO (ac_012), LG TS-Q19YNZE (ac_009); NOT Panasonic AKY ac_005 (mostly images, see Week 4 step 2 notes). Include questions that name the MODEL (routing to 1 manual) and some that name only the brand (router must ask / pick).
-2. Colab 7e on the new file (may need a `--queries` option in run_eval.py; check first) → this is the fairer test than the 50.
-3. Then step 3: 20 Hindi/Telugu questions (eval/multilingual_queries.jsonl).
+Agreed order (chat 5.2): finish week 4 (step 3 Hindi/Telugu, step 4 Gemini answer check) → week 6 (FastAPI, Gradio, Docker, HF Spaces, latency) → light week 5 (label photo → model number → manual, ~30 photos) only if time.
+0. Check: `git status; git log --oneline -1` → clean, last commit = "Week 4 step 2b: results on the new questions + PROGRESS".
+1. Step 3: 20 Hindi/Telugu questions in eval/multilingual_queries.jsonl (same format as text_queries.jsonl + a "language" field). Mix: old 20 manuals and new ones; brand/model names stay in Latin script (as Indian users type them). Furqan checks the Hindi/Telugu wording (he reads them; Claude writes the drafts). Check routing on the laptop (query_parser must find brand/model inside Hindi/Telugu text).
+2. Colab: run_eval with `--queries eval/multilingual_queries.jsonl` (routed + rerank, add a 7g cell). Compare with English R@5 0.98.
+3. Optional: Furqan spot-checks 3–4 of the 14 new questions (eval/text_queries_new.jsonl).
 
 ## ▶ CURRENT STATUS (update every chat)
 - Date: 2026-11-12 (chat 5.2)
 - Last commit: "Week 4: 48 manuals parsed, chunked, embedded + eval (chat 5.2)". Before: cb30f92 (router batch, 48), 5badb88, 507a9ab, aadb9f4, 7097dd3, 32abf60 (week-4 step 1 closed).
-- Week: 4 IN PROGRESS. Step 1 (section chunking) DONE. Step 2 DONE in chat 5.2: 48 manuals parsed (3,220 pages, 93 low_text), chunked (8,134 section chunks, 0 in safe mode; old 20 = 4,159 unchanged), embedded on Colab (Neon = 8,134 chunks), retrieval eval R@5 0.98 kept (see "Week 4 results — 48 manuals"). Next: step 2b (new test questions).
+- Week: 4 IN PROGRESS. Step 1 (section chunking) DONE. Step 2 DONE in chat 5.2: 48 manuals parsed (3,220 pages, 93 low_text), chunked (8,134 section chunks, 0 in safe mode; old 20 = 4,159 unchanged), embedded on Colab (Neon = 8,134 chunks), retrieval eval R@5 0.98 kept (see "Week 4 results — 48 manuals"). Step 2b DONE: 14 new questions on the new manuals → rerank R@1 0.93, R@5 1.00, MRR 0.96. Next: step 3 (Hindi/Telugu questions).
 - Counts: AC 9, washing machine 11, refrigerator 9, microwave 9, router 10 = 48. Decided: keep 48 (no trimming to 9 each, no padding to 50); resume says "48 manuals".
 - Chat 5.1 notes: see "Week 4 step 2 — manual collection (chat 5.1)" below (download script, drops, trims, scanned files, gotchas).
 - From chat 4.1 (still true):
@@ -175,6 +176,16 @@ Dense baseline misses (week 1): 7 wrong brand on top (fixed mainly by routing), 
 - eval/out_of_scope.jsonl: 30 Qs (8 price, 6 near_miss, 4 compare, 4 smart_home, 3 off_topic, 2 local, 2 opinion, 1 unsafe); router check 28/28.
 - scripts/run_answer_eval.py: text 50 + oos 30 + clarify 10; gate 1 off during the run, top score saved, threshold sweep in the summary; --limit, --summarize, --sleep.
 - Laptop smoke test: q001 answered from [ac_001 p9], citations ok; price question refused.
+
+## Week 4 results — new questions on the new manuals (step 2b, Colab, 2026-11-12_0855 / _0856, chat 5.2)
+Files: eval/text_queries_new.jsonl (14 questions n001–n014, Claude wrote them after reading the pages; Furqan has not spot-checked them yet), eval/results/2026-11-12_0855_new_routed_issue.json, 2026-11-12_0856_new_routed_rerank_issue.json. Notebook section 7f. run_eval.py has a new `--queries` option.
+Manuals: ac_012 ×2, ac_009 ×2, ac_006, wm_008, wm_009, rf_009, rf_007, mw_010, mw_008, rt_006, rt_010, rt_007 (not ac_005: image pages). 4 name only a brand that has one manual in the category; all 14 route to one manual.
+| method | R@1 | R@3 | R@5 | R@10 | MRR@10 | route_single |
+| routed dense, issue | 0.86 | 1.00 | 1.00 | 1.00 | 0.92 | 1.00 |
+| **routed + rerank (issue)** | **0.93** | 1.00 | **1.00** | 1.00 | **0.96** | 1.00 |
+Rerank time on T4: avg 308 ms, p95 676 ms. Rank changes: n002 2→1, n010 3→1, n003 1→2. No misses.
+- Caveat: only 14 questions; the writer had read the pages, so some wording may match the headings (easier than real users). No brand-only questions with 2 manuals (those are covered by the 50). Good sign that the pipeline works on manuals it was never tuned on; do not claim more.
+- Resume: keep "R@5 0.98 (50 questions, 48 manuals)" as the main number; this set is a check, not a headline.
 
 ## Week 4 results — 48 manuals (Colab, 2026-11-12_0705 / _0706, chat 5.2)
 Files: eval/results/2026-11-12_0705_routed_issue.json, 2026-11-12_0706_routed_rerank_issue_rr-issue_c20.json. Neon: 8,134 section chunks (48 manuals, 3,220 pages). Same 50 questions (they cover only the old 20 manuals).
