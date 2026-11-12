@@ -76,6 +76,8 @@ def main() -> None:
     parser.add_argument("--rewrites", action="store_true",
                         help="routed methods: add Gemini's manual words from "
                              "eval/rewrites.jsonl to the search text")
+    parser.add_argument("--queries", type=Path, default=QUERIES_PATH,
+                        help="question file (default: eval/text_queries.jsonl)")
     args = parser.parse_args()
     routed = args.method.startswith("routed")
     reranked = args.method == "routed_rerank"
@@ -88,7 +90,7 @@ def main() -> None:
     if args.rewrites and not routed:
         parser.error("--rewrites works only with the routed methods")
 
-    with open(QUERIES_PATH, encoding="utf-8") as f:
+    with open(args.queries, encoding="utf-8") as f:
         queries = [json.loads(line) for line in f if line.strip()]
     rewrites = {}
     if args.rewrites:

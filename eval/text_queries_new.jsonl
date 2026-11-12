@@ -1,0 +1,14 @@
+{"id": "n001", "question": "Can I run my Blue Star split AC at a lower cooling capacity, like 60%, to save power?", "manual_id": "ac_012", "pages": [7], "category": "ac", "type": "feature"}
+{"id": "n002", "question": "How often should I clean the filter of my Blue Star AC, and can I wash it with soap?", "manual_id": "ac_012", "pages": [10], "category": "ac", "type": "maintenance"}
+{"id": "n003", "question": "My LG TS-Q19YNZE indoor unit keeps running after I switch it off. Is something wrong?", "manual_id": "ac_009", "pages": [40], "category": "ac", "type": "troubleshooting"}
+{"id": "n004", "question": "How do I reset the learned room information on my LG TS-Q19YNZE AC?", "manual_id": "ac_009", "pages": [26], "category": "ac", "type": "how-to"}
+{"id": "n005", "question": "How can I make the outdoor unit of my Mitsubishi MSZ-AP35VGKD quieter at night and stop the beeps?", "manual_id": "ac_006", "pages": [10], "category": "ac", "type": "feature"}
+{"id": "n006", "question": "There is too much foam in my Haier HWF85AN1 washing machine and it does not spin. What should I do?", "manual_id": "wm_008", "pages": [25], "category": "washing-machine", "type": "troubleshooting"}
+{"id": "n007", "question": "My Electrolux front loader does not fill with water. What should I check?", "manual_id": "wm_009", "pages": [30], "category": "washing-machine", "type": "troubleshooting"}
+{"id": "n008", "question": "How do I use quick freezing on my Panasonic NR-BX471H fridge, and when does it turn off?", "manual_id": "rf_009", "pages": [17], "category": "refrigerator", "type": "how-to"}
+{"id": "n009", "question": "My LG LRTNC0915 fridge makes gurgling and popping sounds. Is that normal?", "manual_id": "rf_007", "pages": [26], "category": "refrigerator", "type": "troubleshooting"}
+{"id": "n010", "question": "Why is there moisture inside my Sharp microwave after cooking?", "manual_id": "mw_010", "pages": [26], "category": "microwave", "type": "other"}
+{"id": "n011", "question": "My Whirlpool AMW509IX microwave shows Cool On after cooking and keeps running. Why?", "manual_id": "mw_008", "pages": [12], "category": "microwave", "type": "feature"}
+{"id": "n012", "question": "How do I create a guest Wi-Fi network on my TP-Link Archer AX23?", "manual_id": "rt_006", "pages": [39], "category": "router", "type": "how-to"}
+{"id": "n013", "question": "I forgot the login password for the web page of my Mercusys MR60X router. What can I do?", "manual_id": "rt_010", "pages": [89], "category": "router", "type": "how-to"}
+{"id": "n014", "question": "The light on my TP-Link Deco X20 is pulsing red. What does that mean?", "manual_id": "rt_007", "pages": [4], "category": "router", "type": "error-code"}
