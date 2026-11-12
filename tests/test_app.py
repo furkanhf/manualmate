@@ -41,8 +41,11 @@ class FakeGemini:
         self.calls = []
         self.fail = False
 
-    def __call__(self, system, user, model=None, retries=3):
+    def __call__(self, system, user, model=None, retries=3, wait=5.0, stats=None):
         self.calls.append(user)
+        self.retries = retries
+        if stats is not None:
+            stats["attempts"] = retries if self.fail else 1
         if self.fail:
             return None
         question = user.split("QUESTION about", 1)[-1]
@@ -57,8 +60,9 @@ class FakeTranslator:
         self.calls = []
         self.fail = False
 
-    def __call__(self, question, retries=3):
+    def __call__(self, question, retries=3, wait=5.0):
         self.calls.append(question)
+        self.wait = wait
         return "" if self.fail else TRANSLATIONS.get(question, question)
 
 
@@ -202,6 +206,18 @@ def test_gemini_failure_is_error_message(service, fakes):
         gemini.fail = False
     assert r.action == "error" and "try again" in r.text
     assert h.action == "error" and re.search(r"[\u0900-\u097f]", h.text)
+    assert r.timings.gemini_tries == 2 and gemini.retries == 2   # the app: 2 tries, not 3
+
+
+def test_app_retries_are_short(service, fakes):
+    from manualmate.api.ui import format_answer
+
+    gemini, translator = fakes
+    ask(service, "\u092e\u0947\u0930\u0947 Samsung split AC \u0915\u093e \u092b\u093c\u093f\u0932\u094d\u091f\u0930 \u0915\u093f\u0924\u0928\u0940 \u092c\u093e\u0930 \u0927\u094b\u0928\u093e \u091a\u093e\u0939\u093f\u090f?")
+    assert gemini.retries == 2 and translator.wait <= 1.0
+    r = ask(service, "How often should I wash the filter of my Samsung split AC?")
+    r.timings.gemini_tries = 2
+    assert "(2 tries)" in format_answer(r)
 
 
 def test_translation_failure_falls_back_to_question(service, fakes):

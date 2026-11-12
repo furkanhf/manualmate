@@ -36,13 +36,21 @@ Rules:
 - Do not answer the question. Do not add information that is not in the question."""
 
 
-def translate(question: str, retries: int = 3) -> str:
-    """Return the question in English, or "" if Gemini fails after all retries."""
+TIMEOUT_MS = 15_000     # a one-line translation; a stuck call must not hang the chat
+
+
+def translate(question: str, retries: int = 3, wait: float = 5.0) -> str:
+    """Return the question in English, or "" if Gemini fails after all retries.
+
+    wait: seconds before try 2 (x2 before try 3). The app uses 2 tries, 1 s apart.
+    """
     from google.genai import types
 
     prompt = PROMPT.format(question=question.strip())
-    config = types.GenerateContentConfig(temperature=0.0, max_output_tokens=256)
+    config = types.GenerateContentConfig(temperature=0.0, max_output_tokens=256,
+                                         http_options=types.HttpOptions(timeout=TIMEOUT_MS))
     for attempt in range(1, retries + 1):
+        t0 = time.perf_counter()
         try:
             response = get_client().models.generate_content(
                 model=MODEL_NAME, contents=prompt, config=config)
@@ -50,8 +58,9 @@ def translate(question: str, retries: int = 3) -> str:
             line = text.splitlines()[0].strip().strip('"').strip() if text else ""
             if line:
                 return line
-        except Exception as exc:                       # network, quota, ...
-            print(f"Gemini failed (attempt {attempt}/{retries}): {exc}")
+        except Exception as exc:                       # network, quota, timeout, ...
+            print(f"Translation failed (try {attempt}/{retries}, "
+                  f"{time.perf_counter() - t0:.1f} s): {str(exc)[:300]}")
         if attempt < retries:
-            time.sleep(5 * attempt)
+            time.sleep(wait * attempt)
     return ""

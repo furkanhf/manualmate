@@ -70,6 +70,8 @@ def format_answer(r: AskResponse) -> str:
         parts.append("**Sources**\n" + "\n".join(lines))
     t = r.timings
     timing = f"search {_seconds(t.retrieve_ms)} · answer {_seconds(t.gemini_ms)}"
+    if t.gemini_tries > 1:
+        timing += f" ({t.gemini_tries} tries)"
     if t.translate_ms is not None:
         timing = f"translate {_seconds(t.translate_ms)} · " + timing
     parts.append(f"<sub>{r.language} · {timing} · total {_seconds(t.total_ms)}</sub>")

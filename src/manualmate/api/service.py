@@ -96,5 +96,6 @@ def to_response(a: Answer) -> AskResponse:
         citations_ok=a.citations.get("ok") if a.citations else None,
         top_score=a.top_score,
         timings=Timings(translate_ms=a.translate_ms, retrieve_ms=a.retrieve_ms,
-                        gemini_ms=a.gemini_ms, total_ms=a.total_ms),
+                        gemini_ms=a.gemini_ms, gemini_tries=a.gemini_tries,
+                        total_ms=a.total_ms),
     )

@@ -37,6 +37,7 @@ MODEL_NAME = "gemini-3.5-flash-lite"   # same model as the query rewriter; pinne
 TOP_K = 5                              # chunks that Gemini reads
 CANDIDATES = 20                        # dense results that the reranker reads
 MAX_OUTPUT_TOKENS = 1024
+APP_RETRIES, APP_WAIT = 2, 1.0         # the chat: 2 Gemini tries, 1 s apart (eval: 3, 5 s)
 
 
 @dataclass
@@ -60,6 +61,7 @@ class Answer:
     citations: dict = field(default_factory=dict)
     sources: list = field(default_factory=list)
     gemini_ms: float | None = None
+    gemini_tries: int = 1              # > 1 = Gemini failed and was retried
     # Filled by ask() (the app path); the eval leaves them empty.
     language: str = "English"
     search_text: str = ""          # the text the search used (English translation or the question)
@@ -79,23 +81,38 @@ def get_client():
     return genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 
+GEMINI_TIMEOUT_MS = 30_000             # one call; a stuck call must not hang the chat
+
+
 def call_gemini(system: str, user: str, model: str = MODEL_NAME,
-                retries: int = 3) -> str | None:
-    """Send the prompt to Gemini. Return its text, or None if it fails."""
+                retries: int = 3, wait: float = 5.0,
+                stats: dict | None = None) -> str | None:
+    """Send the prompt to Gemini. Return its text, or None if it fails.
+
+    retries/wait: the eval waits long (5 s, then 10 s) so a night run survives
+    rate limits; the app (ask) uses 2 tries, 1 s apart (chat 5.4: one retry
+    chain made a 29.5 s answer). Every failed try is logged with its error.
+    stats: if given, gets "attempts" (how many tries were made).
+    """
     from google.genai import types
 
-    config = types.GenerateContentConfig(system_instruction=system, temperature=0.0,
-                                         max_output_tokens=MAX_OUTPUT_TOKENS)
+    config = types.GenerateContentConfig(
+        system_instruction=system, temperature=0.0, max_output_tokens=MAX_OUTPUT_TOKENS,
+        http_options=types.HttpOptions(timeout=GEMINI_TIMEOUT_MS))
     for attempt in range(1, retries + 1):
+        if stats is not None:
+            stats["attempts"] = attempt
+        t0 = time.perf_counter()
         try:
             response = get_client().models.generate_content(
                 model=model, contents=user, config=config)
             return (response.text or "").strip()
-        except Exception as error:          # rate limit, network, ...
+        except Exception as error:          # rate limit, network, timeout, ...
+            print(f"  Gemini failed (try {attempt}/{retries}, "
+                  f"{time.perf_counter() - t0:.1f} s): {str(error)[:300]}")
             if attempt == retries:
-                print(f"  Gemini failed: {error}")
                 return None
-            time.sleep(5 * attempt)          # wait 5 s, then 10 s
+            time.sleep(wait * attempt)       # eval: 5 s, then 10 s; app: 1 s
     return None
 
 
@@ -108,7 +125,8 @@ def _sources(chunks: list[dict]) -> list[dict]:
 def generate(question: str, chunks: list[dict], route=None,
              language: str = "English", model: str = MODEL_NAME,
              refuse_below: float | None = None,
-             clarify_below: float | None = None) -> Answer:
+             clarify_below: float | None = None,
+             retries: int = 3, wait: float = 5.0) -> Answer:
     """Gate 1 -> Gemini -> gate 2 -> citation check.
 
     question: the FULL user question.
@@ -127,23 +145,24 @@ def generate(question: str, chunks: list[dict], route=None,
                       sources=_sources(chunks))
 
     system, user = build_prompt(question, chunks, language)
-    start = time.perf_counter()
-    raw = call_gemini(system, user, model)
+    start, stats = time.perf_counter(), {}
+    raw = call_gemini(system, user, model, retries=retries, wait=wait, stats=stats)
     gemini_ms = round((time.perf_counter() - start) * 1000)
+    tries = stats.get("attempts", 1)
     if raw is None:
         return Answer(question, "error", "gemini_error", message("gemini_error", language),
                       top_score=before.top_score, sources=_sources(chunks),
-                      gemini_ms=gemini_ms)
+                      gemini_ms=gemini_ms, gemini_tries=tries)
 
     after = gate_after(raw, before.top_score)
     if not after.answers:
         return Answer(question, after.action, after.reason, after.message, raw=raw,
                       top_score=before.top_score, sources=_sources(chunks),
-                      gemini_ms=gemini_ms)
+                      gemini_ms=gemini_ms, gemini_tries=tries)
 
     return Answer(question, "answer", "ok", raw, raw=raw, top_score=before.top_score,
                   citations=check(raw, chunks), sources=_sources(chunks),
-                  gemini_ms=gemini_ms)
+                  gemini_ms=gemini_ms, gemini_tries=tries)
 
 
 def retrieve(question: str, conn, manual_id: str | None = None) -> tuple[list[dict], object]:
@@ -363,7 +382,7 @@ def ask(question: str, conn=None, manual_id: str | None = None,
     search_text, translate_ms = question, None
     if language != "English":
         t0 = time.perf_counter()
-        search_text = translate(question, retries=2) or question
+        search_text = translate(question, retries=APP_RETRIES, wait=APP_WAIT) or question
         translate_ms = round((time.perf_counter() - t0) * 1000)
 
     if manual_id and not keeps_manual(search_text, manual_id):
@@ -376,7 +395,8 @@ def ask(question: str, conn=None, manual_id: str | None = None,
         chunks, r = retrieve(search_text, conn, manual_id)
     retrieve_ms = round((time.perf_counter() - t0) * 1000)
 
-    a = generate(question, chunks, route=r, language=language)
+    a = generate(question, chunks, route=r, language=language,
+                 retries=APP_RETRIES, wait=APP_WAIT)
     if a.action != "answer":                 # "Which model?", refusals: user's language
         reason, fill = a.reason, {}
         if reason == "ask_model":

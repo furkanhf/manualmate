@@ -41,6 +41,7 @@ class Timings(BaseModel):
     translate_ms: float | None
     retrieve_ms: float | None
     gemini_ms: float | None
+    gemini_tries: int = 1    # > 1: Gemini failed and was retried (shows why an answer was slow)
     total_ms: float | None
 
 
