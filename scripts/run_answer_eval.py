@@ -14,6 +14,11 @@ the saved results, with no new Gemini calls. We pick the threshold from data.
 Run on Colab (needs torch for bge-m3 + reranker, and GEMINI_API_KEY):
     python scripts/run_answer_eval.py
     python scripts/run_answer_eval.py --limit 5          # quick test, 5 per set
+Other in-scope questions (only this set runs, no oos/clarify):
+    python scripts/run_answer_eval.py --queries eval/text_queries_new.jsonl
+    python scripts/run_answer_eval.py --queries eval/multilingual_queries.jsonl --translations
+      --translations: search with the saved English translation (eval/translations.jsonl),
+      but Gemini gets the ORIGINAL question and answers in its language (hi/te field).
 Recount a saved run (laptop, no torch, no Gemini):
     python scripts/run_answer_eval.py --summarize eval/results/<file>.jsonl
 
@@ -31,6 +36,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVAL = ROOT / "eval"
+LANGUAGES = {"en": "English", "hi": "Hindi", "te": "Telugu"}
 THRESHOLDS = [0.0, 0.02, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]
 
 
@@ -40,16 +46,30 @@ def load(name: str) -> list[dict]:
             if line.strip()]
 
 
-def run(limit: int | None, sleep: float) -> Path:
+def run(limit: int | None, sleep: float, queries: Path | None = None,
+        translations: bool = False) -> Path:
     from manualmate.generate.answer import generate, retrieve
     from manualmate.index.db import get_connection
     from manualmate.retrieve.query_parser import parse
     from manualmate.retrieve.router import route
 
-    sets = {"text": load("text_queries.jsonl"), "oos": load("out_of_scope.jsonl"),
-            "clarify": load("clarify_queries.jsonl")}
+    if queries:
+        sets = {"text": [json.loads(line) for line in
+                         queries.read_text(encoding="utf-8").splitlines() if line.strip()]}
+    else:
+        sets = {"text": load("text_queries.jsonl"), "oos": load("out_of_scope.jsonl"),
+                "clarify": load("clarify_queries.jsonl")}
+    english = {}
+    if translations:
+        english = {r["id"]: r["translation"] for r in load("translations.jsonl")}
+        missing = [q["id"] for q in sets["text"] if not english.get(q["id"])]
+        if missing:
+            raise SystemExit(f"No translation for: {', '.join(missing)} "
+                             "(run scripts/make_translations.py on the laptop)")
+        print(f"Translations: {len(english)} loaded")
     stamp = datetime.now().strftime("%Y-%m-%d_%H%M")
-    out_path = EVAL / "results" / f"{stamp}_answers.jsonl"
+    tag = f"_{queries.stem}" if queries else ""
+    out_path = EVAL / "results" / f"{stamp}_answers{tag}.jsonl"
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     with get_connection() as conn, out_path.open("w", encoding="utf-8") as out:
@@ -59,6 +79,12 @@ def run(limit: int | None, sleep: float) -> Path:
             for q in queries:
                 row = {"set": set_name, "id": q["id"], "question": q["question"],
                        "expect": q.get("expect", "answer" if set_name == "text" else "refuse")}
+                language = LANGUAGES.get(q.get("language", "en"), "English")
+                search_text = english.get(q["id"], q["question"])   # translation or original
+                if "language" in q:
+                    row["language"] = q["language"]
+                if q["id"] in english:
+                    row["search_text"] = search_text
                 if set_name == "clarify":          # router only, no Gemini
                     r = route(parse(q["question"]))
                     row.update(action="ask" if r.ask else "answer",
@@ -66,15 +92,15 @@ def run(limit: int | None, sleep: float) -> Path:
                                manual_ids=r.manual_ids)
                 else:
                     start = time.perf_counter()
-                    chunks, r = retrieve(q["question"], conn)
+                    chunks, r = retrieve(search_text, conn)
                     if set_name == "text" and r.ask:
                         # In-scope question, router asks "Which model?" (e.g. FTKS is in
                         # both Daikin K and L manuals). Act like the user: pick the
                         # labeled manual, then answer. Counted as asked_first.
                         row["asked_first"] = True
-                        chunks, r = retrieve(q["question"], conn, manual_id=q["manual_id"])
+                        chunks, r = retrieve(search_text, conn, manual_id=q["manual_id"])
                     retrieve_ms = round((time.perf_counter() - start) * 1000)
-                    a = generate(q["question"], chunks, route=r,
+                    a = generate(q["question"], chunks, route=r, language=language,
                                  refuse_below=0.0, clarify_below=0.0)
                     row.update(action=a.action, reason=a.reason, top_score=a.top_score,
                                raw=a.raw, citations=a.citations,
@@ -159,6 +185,13 @@ def summarize(path: Path) -> dict:
             "correct": pct(sum(r["action"] == ("ask" if r["expect"] == "ask" else "answer")
                                for r in clar), len(clar)),
         },
+        "by_language": {
+            lang: {"n": len(rs),
+                   "answered": pct(sum(r["action"] == "answer" for r in rs), len(rs)),
+                   "gold_page_cited": pct(sum(r.get("gold_cited", False) for r in rs), len(rs))}
+            for lang in sorted({r["language"] for r in text if "language" in r})
+            for rs in [[r for r in text if r.get("language") == lang]]
+        },
         "gemini_ms_avg": round(sum(r["gemini_ms"] for r in rows if r.get("gemini_ms"))
                                / max(1, sum(1 for r in rows if r.get("gemini_ms")))),
         "thresholds": [],
@@ -180,6 +213,9 @@ def summarize(path: Path) -> dict:
     print(f"  citations ok {s['text']['citations_ok']}, precision "
           f"{s['text']['citation_precision']}, answers with a made-up tag "
           f"{s['text']['answers_with_invalid_tag']}")
+    for lang, b in s["by_language"].items():
+        print(f"  {lang}: n {b['n']}, answered {b['answered']}, gold page cited "
+              f"{b['gold_page_cited']}")
     print(f"Out-of-scope ({s['oos']['n']}): refused or asked {s['oos']['refused_or_asked']}  "
           f"answered: {s['oos']['answered_ids']}")
     print(f"Clarify ({s['clarify']['n']}): correct {s['clarify']['correct']}")
@@ -200,9 +236,13 @@ def main() -> None:
     parser.add_argument("--limit", type=int, help="only the first N questions of each set")
     parser.add_argument("--sleep", type=float, default=2.0,
                         help="seconds to wait after each Gemini call (rate limit)")
+    parser.add_argument("--queries", type=Path,
+                        help="run ONLY this in-scope question file (no oos/clarify)")
+    parser.add_argument("--translations", action="store_true",
+                        help="search with eval/translations.jsonl (Hindi/Telugu questions)")
     parser.add_argument("--summarize", type=Path, help="recount a saved answers .jsonl")
     args = parser.parse_args()
-    path = args.summarize or run(args.limit, args.sleep)
+    path = args.summarize or run(args.limit, args.sleep, args.queries, args.translations)
     summarize(path)
 
 

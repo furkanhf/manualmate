@@ -1,5 +1,5 @@
 {"id": "c01", "question": "My fridge makes a clicking noise. Is that normal?", "expect": "ask", "manual_ids": ["rf_001", "rf_002", "rf_003", "rf_004"]}
-{"id": "c02", "question": "My Samsung washer is not draining. What should I check?", "expect": "answer", "manual_ids": ["wm_002"]}
+{"id": "c02", "question": "My Samsung washer is not draining. What should I check?", "expect": "ask", "manual_ids": ["wm_002", "wm_011"]}
 {"id": "c03", "question": "My Bosch fridge has ice build-up in the freezer. What can I do?", "expect": "ask", "manual_ids": ["rf_002", "rf_004"]}
 {"id": "c04", "question": "How do I reset my router to factory settings?", "expect": "ask", "manual_ids": ["rt_001", "rt_002", "rt_003", "rt_004"]}
 {"id": "c05", "question": "My LG microwave does not heat the food. What is wrong?", "expect": "answer", "manual_ids": ["mw_003"]}
