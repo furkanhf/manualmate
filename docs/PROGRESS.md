@@ -4,7 +4,16 @@ This file is the single place to see where the project is and how to continue.
 Claude: read this file at the start of every chat (via the folder access to D:\Projects\manualmate),
 and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
 
-## ▶ START HERE — next chat (5.4): week 6 (FastAPI + Gradio + Docker + HF Spaces + latency)
+## ▶ START HERE — next chat (5.5): week 6 step 4 (answer check) + step 5 (Docker)
+Week 6 steps 1–3 DONE in chat 5.4 (API + Gradio UI + bug sweep + 58 tests), see "Week 6 — chat 5.4".
+0. Check: `git status; git log --oneline -1` → clean, last commit = the PROGRESS commit of chat 5.4 (code: 4032425 or newer).
+1. Step 4 (Furqan, Colab or Kaggle, needs a GPU + Gemini not overloaded): Runtime → Restart session → sections 1–4 (section 2 prints the hash) → new cell = the 7k code (GEMINI_API_KEY + pip gradio/fastapi/uvicorn + `!python scripts/run_app_eval.py --limit 3`), then the full run (`!python scripts/run_app_eval.py`, 124 questions, ~150 Gemini calls). Paste from `=== RESULT` down. Compare with week 4 (gold cited ~0.88, Hindi/Telugu 0.85–0.95, oos refused 1.00). Gemini errors = run again, not a bug.
+   Colab stopped in chat 5.4 (probably the free GPU limit after a long day) and Gemini was overloaded (503 high demand, one-word answers 5–30 s) → step 4 moved to the next chat.
+2. Step 5 (Claude, laptop): Dockerfile for HF Spaces (CPU torch, bge-m3 + reranker: in the image or downloaded at start, port 7860, `uvicorn manualmate.api.main:app`). Step 6: Furqan creates the HF Space (Docker, free CPU) + secrets DATABASE_URL, GEMINI_API_KEY; Claude pushes. Step 7: check it works + measure latency ONCE (agreed chat 5.4: free tiers make timing unreliable → write the honest number, no tuning). Step 8: PROGRESS + resume.
+3. After deploy: week 5 light = label photo → model number → manual with **Gemini vision** (decided chat 5.4, not PaddleOCR: no Docker change, better on phone photos). Furqan collects ~30 label photos (own appliances + web photos of our 48 models).
+4. Small open items (Furqan): check the Hindi/Telugu wording in src/manualmate/generate/refusal.py (MESSAGES_BY_LANGUAGE); decide romanized question → romanized or Devanagari answer (now Devanagari).
+
+## (old) START HERE — chat 5.4: week 6 (FastAPI + Gradio + Docker + HF Spaces + latency) — steps 1–3 DONE
 Week 4 is DONE (step 4 answer check done in chat 5.3, see "Week 4 results — answer check (step 4)").
 0. Check: `git status; git log --oneline -1` → clean, last commit = "Week 4 step 4 done: answer check results + PROGRESS".
 1. Optional before week 6 (Gemini quota): RAGAS faithfulness on the new answers (`scripts/run_ragas.py` on eval/results/2026-11-12_1021_answers.jsonl; check first that it takes the file as an option). The resume number 0.97 is from the week-3 answers (old chunks). Re-run only if the resume should show the 48-manual system; not required by the stop rule.
@@ -32,6 +41,19 @@ Agreed order (chat 5.2): finish week 4 (step 3 Hindi/Telugu, step 4 Gemini answe
 3. Optional: Furqan spot-checks 3–4 of the 14 new questions (eval/text_queries_new.jsonl).
 
 ## ▶ CURRENT STATUS (update every chat)
+- Date: 2026-11-12 (chat 5.4, Claude Code in VS Code). Week 6 steps 1–3 DONE (API, UI, bug sweep). Next: step 4 answer check (Colab/Kaggle), step 5 Dockerfile.
+- Chat 5.4 commits: a63cf5f (API + UI), fbed3c4, fab93ce, cd3ea9f, 12e0570, e2d06a5 (bug sweep + tests), 4e7a926 (Gemini timeouts/retries), 4032425 (run_app_eval + Colab 7k), then the PROGRESS commit.
+
+## Week 6 — chat 5.4 (API + UI)
+- Run on the laptop (light search, no torch): `$env:MANUALMATE_SEARCH = "bm25"; & "D:\Projects\manualmate\.conda\python.exe" -m uvicorn manualmate.api.main:app --port 7860` → http://127.0.0.1:7860 (chat), /docs (API). Light search = router + BM25: good for testing the UI, NOT for answer quality ("how many modes" missed page 9 with BM25).
+- Real search (dense + rerank) only on Colab/HF: Colab section 9/7j = the UI with a public gradio.live link; 7k = answer check.
+- Tests: `& "D:\Projects\manualmate\.conda\python.exe" -m pytest tests/test_app.py -q` → 58 pass (~10 s). Fake Gemini + translator; real Neon, parser, router, BM25, gates, chat state. pytest is dev-only (not in requirements.txt).
+- Code: answer.ask() = the app path (language: script or romanized words → Gemini translation for hi/te → router → search → generate; fixed messages in the user's language). api/: schemas, service (Neon connection + search mode, reconnects), routes (/health, /ask), ui (Chat class = chat rules without Gradio; build_ui = wiring), main (UI mounted at /). Versions: fastapi 0.162.5, uvicorn 0.54.0, gradio 6.31.0.
+- Chat rules (found by testing, all fixed): the manual a question used is kept for follow-ups ("how do I clean it?"); a question about another brand/product/model drops it (keeps_manual); a product-only reply ("LG") to "Which washing machine?" is joined to the waiting question (follow_up); model in 2 manuals (FTKS: Daikin K + L) → "fits more than one manual (different series), check the label"; category only → lists our brands; "Daikin fridge" → "no manual for a Daikin refrigerator" + our brands; no product → lists our 5 product types; "hi"/"thanks"/"धन्यवाद" → short reply, no search; romanized Hindi/Telugu detected from common words (0/104 English wrongly flagged, 20/20 hi/te right).
+- Gemini: app uses 2 tries, 1 s apart, 30 s timeout per call (eval keeps 3 tries, 5 s + 10 s); every failed try is logged; the timing line shows "(N tries)". Chat 5.4 saw a 29.5 s answer = Gemini overloaded (503 high demand, 504 deadline), not our code.
+- First real-search number (Colab T4): search 0.8 s for one English question. Light-search totals on the laptop (Gemini normal): English 1.8–2.6 s, Hindi 2.7–3.6 s (translation +1–2 s).
+- Known limitations (written down, not tuned — stop rule): "How many modes…" questions get low reranker scores (0.07 vs 0.89 for "What operation modes…", same pages) → near gate 1 (0.05), can be refused; some button labels are long (manual names from aliases.yaml).
+- Decided: Gradio (not Streamlit: one container with FastAPI on HF Spaces); laptop keeps no torch/models (no 5 GB download): laptop = UI/logic, Colab = real answers, HF Spaces = public demo; latency measured once on HF, not tuned; week 5 = Gemini vision, after deploy.
 - Date: 2026-11-12 (chat 5.3). Week 4 DONE: step 4 answer check on the 48-manual chunks (see "Week 4 results — answer check (step 4)"). Next: week 6.
 - Chat 5.3 commits: d760755 (run_answer_eval --queries/--translations, Colab 7i, c02 label), then "Week 4 step 4 done" (checker fix + results + PROGRESS).
 - (chat 5.2 status below, still true)
