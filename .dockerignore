@@ -1,0 +1,9 @@
+# Allow-list: the image gets only what the app needs.
+# (No .env, data/, eval/, notebooks/ or the conda env in the image.)
+*
+!requirements-app.txt
+!configs/
+!src/
+**/__pycache__
+**/*.pyc
+**/*.egg-info

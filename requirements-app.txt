@@ -1,0 +1,16 @@
+# Libraries the RUNNING APP needs (Docker image for Hugging Face Spaces).
+# requirements.txt = everything (parsing, eval, RAGAS); this file = only the app.
+# torch is installed before this file, as the CPU build (see Dockerfile).
+# Versions = the ones tested on the laptop (chat 5.4) and Colab.
+
+python-dotenv==1.2.4
+pyyaml==6.0.3
+numpy==2.4.6
+psycopg[binary]==3.3.8
+pgvector==0.5.1
+google-genai==2.34.0
+rank-bm25==0.2.2
+sentence-transformers==6.2.0
+fastapi==0.162.5
+uvicorn==0.54.0
+gradio==6.31.0
