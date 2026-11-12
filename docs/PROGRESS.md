@@ -4,18 +4,18 @@ This file is the single place to see where the project is and how to continue.
 Claude: read this file at the start of every chat (via the folder access to D:\Projects\manualmate),
 and update it at the end of every chat (status, sessions, next steps). Furqan commits it with the other files.
 
-## ▶ START HERE — next chat (5.5): answer check + latency on the LIVE Space
-**LIVE: https://huggingface.co/spaces/furqan2131/manualmate** (Gradio SDK, ZeroGPU, public; deployed chat 5.4).
-Week 6 steps 1–6 DONE in chat 5.4, see "Week 6 — chat 5.4" and "Week 6 — HF Space (chat 5.4)".
-0. Check: `git status; git log --oneline -1` → clean, last commit = the PROGRESS commit of chat 5.4 (code: d51352f or newer).
-NOTE: steps 2 (Docker) and 6 (create Space) below are DONE differently: free HF accounts cannot host Docker/CPU Spaces any more (PRO needed) → ZeroGPU Gradio Space (space/app.py). The Dockerfile stays for a paid/self-hosted setup.
-1. Step 4 (Furqan, Colab or Kaggle, needs a GPU + Gemini not overloaded): Runtime → Restart session → sections 1–4 (section 2 prints the hash) → new cell = the 7k code (GEMINI_API_KEY + pip gradio/fastapi/uvicorn + `!python scripts/run_app_eval.py --limit 3`), then the full run (`!python scripts/run_app_eval.py`, 124 questions, ~150 Gemini calls). Paste from `=== RESULT` down. Compare with week 4 (gold cited ~0.88, Hindi/Telugu 0.85–0.95, oos refused 1.00). Gemini errors = run again, not a bug.
-   Colab stopped in chat 5.4 (probably the free GPU limit after a long day) and Gemini was overloaded (503 high demand, one-word answers 5–30 s) → step 4 moved to the next chat.
-2. Step 5 (Claude, laptop): Dockerfile for HF Spaces (CPU torch, bge-m3 + reranker: in the image or downloaded at start, port 7860, `uvicorn manualmate.api.main:app`). Step 6: Furqan creates the HF Space (Docker, free CPU) + secrets DATABASE_URL, GEMINI_API_KEY; Claude pushes. Step 7: check it works + measure latency ONCE (agreed chat 5.4: free tiers make timing unreliable → write the honest number, no tuning). Step 8: PROGRESS + resume.
-3. Week 5 light (label photo → model number → manual, **Gemini vision**) is BUILT and LIVE (chat 5.4, commit e5f7f37): vision/preprocess.py, ocr.py, image_to_query.py; UI photo upload/webcam; POST /read-label; 13 tests. Real check on 4 synthetic labels: 4/4 right (Daikin FTKS35KVMA → K series, Samsung MC28H5025VK/TL → mw_002, Voltas → no manual, no label → unreadable); live Space check: Daikin label → K series ✅.
-   TODO: Furqan collects ~30 REAL label photos (own appliances + web photos of our 48 models) → eval/image_queries/ (+ labels.jsonl: file, manual_id, model_number) → measure model number + manual correct; baseline = OpenCV crop (idea from Furqan's "OCR (umber plate)" notebook: grey → bilateral → Canny → largest 4-corner contour) + Tesseract, vs Gemini vision. Resume: replace "OCR 91%" / "image query 84% of 100" with the measured numbers.
-   Security note for Furqan: C:\Users\Furqan\Python VS\gemini ai\gemini intro.ipynb has a Gemini API key in plain text → replace with os.environ, rotate if ever shared.
-4. Small open items (Furqan): check the Hindi/Telugu wording in src/manualmate/generate/refusal.py (MESSAGES_BY_LANGUAGE); decide romanized question → romanized or Devanagari answer (now Devanagari).
+## ▶ START HERE — next chat (5.5): measure the live app, README, resume
+**LIVE: https://huggingface.co/spaces/furqan2131/manualmate** (Gradio SDK, ZeroGPU, public). The app is DONE: chat en/hi/te, model buttons, page citations, refusals, label photo reader. 72 tests pass.
+What is left is MEASURING (real numbers for the resume) and the GitHub README. Details: "Week 6 — HF Space (chat 5.4)", "Week 6 — chat 5.4 (API + UI)".
+0. Check: `git status; git log --oneline -1` → clean, last commit = "PROGRESS: chat 5.4 end ..." (code: c965b84 or newer). Space: open the link (wakes in ~1 min) or `hf spaces info furqan2131/manualmate`.
+1. Answer check, 124 questions with the REAL search (Claude explains, Furqan runs on Colab; needs a free GPU + Gemini not overloaded): Runtime → Restart session → sections 1–4 (section 2 prints the hash) → cell 7k (`!python scripts/run_app_eval.py --limit 3`, then without --limit: ~150 Gemini calls, 10–20 min). Paste from `=== RESULT` down. Compare with week 4 (gold cited ~0.88, Hindi/Telugu 0.85–0.95, out-of-scope refused 1.00). Gemini errors = run again, not a bug. (Not run in chat 5.4: Colab GPU limit reached and Gemini overloaded: 503/504, one-word answers 5–30 s.)
+2. Latency ONCE on the live Space (Claude, laptop, gradio_client against furqan2131/manualmate, ~30 English questions): p50/p95 of total, search, Gemini. Agreed chat 5.4: free tiers → write the honest number, no tuning. Known: search 0.4 s warm / ~7 s cold on ZeroGPU; Gemini is the slow part.
+3. GitHub README (Claude): what it does, demo link, architecture (router → bge-m3/pgvector → reranker → Gemini → refusal gates), languages, label photo, results table (from 1, 2, 4), how to run (laptop light mode, tests, scripts/deploy_space.py).
+4. Label photo accuracy (Furqan takes ~30 REAL label photos: own appliances + web photos of our 48 models → eval/image_queries/ + labels.jsonl: file, manual_id, model_number; Claude writes the eval): model number correct + manual correct, Gemini vision vs baseline OpenCV crop + Tesseract (idea from Furqan's "OCR (umber plate)" notebook: grey → bilateral → Canny → largest 4-corner contour).
+5. Resume (together, after 1, 2, 4): "48 manuals", "Hugging Face Spaces (ZeroGPU)" instead of Render, the real numbers. Until measured, do NOT claim "OCR 91%", "image query 84% of 100", "p95 2.4 s".
+Optional: RAGAS faithfulness re-run on the 48-manual answers (0.97 is from week 3); Furqan checks the Hindi/Telugu wording in src/manualmate/generate/refusal.py (MESSAGES_BY_LANGUAGE); romanized question → romanized or Devanagari answer (now Devanagari); a per-user limit if the public demo burns the Gemini quota (500/day).
+Outside this project (chat 5.4): API keys in the "Python VS" folder were moved out of the code into per-folder .env files (gemini ai, langchain, prompting, smolagents; the code uses load_dotenv). Still in code there: langchain/furqangpt.py (OpenAI + LangSmith), langgraph/langgraph.ipynb (Groq + LangSmith) — Furqan to decide.
+NOTE: the old plan's "Docker on HF CPU" step was done differently: free HF accounts cannot host Docker/CPU Spaces any more (PRO needed) → ZeroGPU Gradio Space (space/app.py). The Dockerfile stays for a paid/self-hosted setup.
 
 ## (old) START HERE — chat 5.4: week 6 (FastAPI + Gradio + Docker + HF Spaces + latency) — steps 1–3 DONE
 Week 4 is DONE (step 4 answer check done in chat 5.3, see "Week 4 results — answer check (step 4)").
@@ -45,8 +45,8 @@ Agreed order (chat 5.2): finish week 4 (step 3 Hindi/Telugu, step 4 Gemini answe
 3. Optional: Furqan spot-checks 3–4 of the 14 new questions (eval/text_queries_new.jsonl).
 
 ## ▶ CURRENT STATUS (update every chat)
-- Date: 2026-11-12 (chat 5.4, Claude Code in VS Code). Week 6 steps 1–3 DONE (API, UI, bug sweep). Next: step 4 answer check (Colab/Kaggle), step 5 Dockerfile.
-- Chat 5.4 commits: a63cf5f (API + UI), fbed3c4, fab93ce, cd3ea9f, 12e0570, e2d06a5 (bug sweep + tests), 4e7a926 (Gemini timeouts/retries), 4032425 (run_app_eval + Colab 7k), then the PROGRESS commit.
+- Date: 2026-11-12 (chat 5.4, Claude Code in VS Code). Weeks 5 (light) + 6 DONE: API + UI + bug sweep + tests, live on Hugging Face (ZeroGPU), label photo reader. Next: measure (answer check, latency, photos), README, resume.
+- Chat 5.4 commits: a63cf5f (API + UI), fbed3c4, fab93ce, cd3ea9f, 12e0570, e2d06a5 (bug sweep + tests), 4e7a926 (Gemini timeouts/retries), 4032425 (run_app_eval + Colab 7k), eb0e886 (PROGRESS), 2ea61b5 (Dockerfile), d51352f (ZeroGPU Space), 2e8d2aa (PROGRESS), e5f7f37 (label photo reader), c965b84 (PROGRESS), then the chat-end PROGRESS commit.
 
 ## Week 6 — HF Space (chat 5.4)
 - Space: furqan2131/manualmate, Gradio SDK 6.31.0, python 3.12, hardware zero-a10g (ZeroGPU), public. Secrets DATABASE_URL + GEMINI_API_KEY set from .env by script (values never printed). HF login on the laptop: `hf auth login` (browser code), user furqan2131 (isPro False, canPay False).
