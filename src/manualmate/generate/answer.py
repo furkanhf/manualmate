@@ -12,6 +12,8 @@ Two parts:
                               Runs on the laptop (Gemini is an API call).
   answer(question, conn)      parser + router + dense + rerank + generate().
                               Needs torch (bge-m3 + reranker) -> Colab for now.
+  ask(question, ...)          the app path (week 6): language + translation +
+                              the user's manual pick + timings, then the above.
 
 Run this file on the laptop: it takes real chunks from Neon (no search,
 we pick the page by hand) and asks Gemini 2 questions:
@@ -22,13 +24,14 @@ we pick the page by hand) and asks Gemini 2 questions:
 from __future__ import annotations
 
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from functools import lru_cache
 
 from manualmate.generate.citations import check
 from manualmate.generate.prompts import build_prompt, tag
-from manualmate.generate.refusal import gate_after, gate_before
+from manualmate.generate.refusal import gate_after, gate_before, message
 
 MODEL_NAME = "gemini-3.5-flash-lite"   # same model as the query rewriter; pinned
 TOP_K = 5                              # chunks that Gemini reads
@@ -57,6 +60,13 @@ class Answer:
     citations: dict = field(default_factory=dict)
     sources: list = field(default_factory=list)
     gemini_ms: float | None = None
+    # Filled by ask() (the app path); the eval leaves them empty.
+    language: str = "English"
+    search_text: str = ""          # the text the search used (English translation or the question)
+    route_reason: str = ""
+    translate_ms: float | None = None
+    retrieve_ms: float | None = None
+    total_ms: float | None = None
 
 
 @lru_cache(maxsize=1)
@@ -89,7 +99,8 @@ def call_gemini(system: str, user: str, model: str = MODEL_NAME,
 
 
 def _sources(chunks: list[dict]) -> list[dict]:
-    return [{"tag": tag(c), "brand": c.get("brand"), "model": c.get("model"),
+    return [{"tag": tag(c), "manual_id": c["manual_id"],
+             "brand": c.get("brand"), "model": c.get("model"),
              "page": int(c["page"]), "score": c.get("score")} for c in chunks]
 
 
@@ -119,8 +130,7 @@ def generate(question: str, chunks: list[dict], route=None,
     raw = call_gemini(system, user, model)
     gemini_ms = round((time.perf_counter() - start) * 1000)
     if raw is None:
-        return Answer(question, "error", "gemini_error",
-                      "Sorry, the answer service is not available now. Please try again.",
+        return Answer(question, "error", "gemini_error", message("gemini_error", language),
                       top_score=before.top_score, sources=_sources(chunks),
                       gemini_ms=gemini_ms)
 
@@ -155,10 +165,109 @@ def retrieve(question: str, conn, manual_id: str | None = None) -> tuple[list[di
     return reranker.rerank(issue, candidates, top_k=TOP_K), r   # reranker reads issue text
 
 
+def retrieve_light(question: str, bm25, manual_id: str | None = None) -> tuple[list[dict], object]:
+    """Like retrieve(), but BM25 instead of dense + rerank: no torch.
+
+    For laptop tests of the API and UI only (MANUALMATE_SEARCH=bm25). It is a
+    real search, but weaker, and BM25 scores are not 0..1 like rerank scores,
+    so gate 1 (REFUSE_BELOW) only refuses when no chunk matches at all.
+    """
+    from manualmate.retrieve.query_parser import parse
+    from manualmate.retrieve.router import route as route_question, route_to
+
+    parsed = parse(question)
+    r = route_to(manual_id) if manual_id else route_question(parsed)
+    if r.ask:
+        return [], r
+    return bm25.search(parsed.issue or question, k=TOP_K, manual_ids=r.manual_ids), r
+
+
 def answer(question: str, conn, language: str = "English") -> Answer:
-    """The full pipeline for one question."""
+    """The full pipeline for one question (eval path: no translation)."""
     chunks, r = retrieve(question, conn)
     return generate(question, chunks, route=r, language=language)
+
+
+LANGUAGES = ("English", "Hindi", "Telugu")
+
+
+# Common romanized Hindi / Telugu words (chat 5.4: "mera daikin ac bhot awaaz
+# karta hai kya karu?" was read as English -> no translation -> refused).
+# Words that are also English ("me", "ho", "to", "band", "na", "lo") are left out.
+# 2+ hits = that language; checked against all English test questions (0 hits >= 2).
+ROMAN_HINDI = frozenset("""
+hai hain tha thi kya kyu kyun kyon kaise kaisa kab kitna kitni kitne kaun kahan
+mera meri mere mujhe hamara apna apne karta karti karte karu karun karein kare karo
+karna kiya nahi nahin nhi raha rahi rahe hota hoti hote ka ki ke mein mai
+aur bahut bhot bohot bahot chahiye sakta sakti sakte batao bataiye bataye wala wali
+kuch abhi toh yeh ye woh wo baad pehle saaf awaaz aawaz pani paani thanda garam chal
+chalta chalti ruk raha jaata jata jaati
+""".split())
+ROMAN_TELUGU = frozenset("""
+enti emiti emi ela elaa cheyali cheyyali chesthundi chestundi cheyyadam ledu ledhu
+undi unnadi unnayi nenu naaku maa mee meeru enduku avutundi avtundi vastundi
+ostundi raavatledu ravatledu kaavali kavali gurinchi chala chaala
+cheyyatledu panicheyyatledu cheppandi cheppu adi idi ekkada eppudu entha
+naa chesina chesanu tarvata taruvata kuda kooda edaina emaina aithe ayithe
+""".split())
+WORD_RE = re.compile(r"[a-z]+")
+
+
+def detect_language(text: str) -> str:
+    """Hindi or Telugu from the script or from common romanized words, else English.
+
+    The UI dropdown can still force a language if this guesses wrong.
+    """
+    devanagari = sum("ऀ" <= ch <= "ॿ" for ch in text)
+    telugu = sum("ఀ" <= ch <= "౿" for ch in text)
+    if max(devanagari, telugu) > 0:
+        return "Hindi" if devanagari >= telugu else "Telugu"
+    words = WORD_RE.findall(text.lower())
+    hindi = sum(w in ROMAN_HINDI for w in words)
+    telugu_words = sum(w in ROMAN_TELUGU for w in words)
+    if max(hindi, telugu_words) >= 2:
+        return "Hindi" if hindi >= telugu_words else "Telugu"
+    return "English"
+
+
+def ask(question: str, conn=None, manual_id: str | None = None,
+        language: str | None = None, bm25=None) -> Answer:
+    """The app path (API and UI): translate -> search -> generate, with timings.
+
+    manual_id: the manual the user picked after "Which model?" (or None).
+    language:  "English" | "Hindi" | "Telugu", or None = detect from the script.
+    bm25:      a BM25Index -> light search (laptop, no torch); None -> dense + rerank.
+
+    Hindi/Telugu: the search uses Gemini's English translation (the eval did the
+    same with saved translations); Gemini answers the ORIGINAL question in the
+    user's language. If the translation fails, the search uses the question.
+    """
+    from manualmate.retrieve.translator import translate
+
+    start = time.perf_counter()
+    language = language if language in LANGUAGES else detect_language(question)
+
+    search_text, translate_ms = question, None
+    if language != "English":
+        t0 = time.perf_counter()
+        search_text = translate(question, retries=2) or question
+        translate_ms = round((time.perf_counter() - t0) * 1000)
+
+    t0 = time.perf_counter()
+    if bm25 is not None:
+        chunks, r = retrieve_light(search_text, bm25, manual_id)
+    else:
+        chunks, r = retrieve(search_text, conn, manual_id)
+    retrieve_ms = round((time.perf_counter() - t0) * 1000)
+
+    a = generate(question, chunks, route=r, language=language)
+    if a.action != "answer":                 # "Which model?", refusals: user's language
+        reason = "ask_product" if a.reason == "ask_model" and not a.options else a.reason
+        a.text = message(reason, language) or a.text
+    a.language, a.search_text, a.route_reason = language, search_text, r.reason
+    a.translate_ms, a.retrieve_ms = translate_ms, retrieve_ms
+    a.total_ms = round((time.perf_counter() - start) * 1000)
+    return a
 
 
 def chunks_for_pages(conn, manual_id: str, pages: list[int]) -> list[dict]:

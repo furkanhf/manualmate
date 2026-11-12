@@ -30,3 +30,8 @@ ragas==0.4.3
 instructor>=1.9
 langchain-community<0.4
 openai              # async client for Gemini's OpenAI-compatible endpoint (RAGAS judge)
+
+# --- Week 6: API + UI (FastAPI with the Gradio chat UI mounted on it) ---
+fastapi==0.162.5
+uvicorn==0.54.0
+gradio==6.31.0

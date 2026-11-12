@@ -51,7 +51,55 @@ MESSAGES = {
                   "how to use, clean, set up or troubleshoot the product."),
     "not_in_manual": ("The manual does not answer this question. "
                       "Please contact the brand's service centre."),
+    "gemini_error": "Sorry, the answer service is not available now. Please try again.",
+    "pick": "Pick your model below.",
+    # "ask_model" with too many manuals for buttons (no brand/product in the question):
+    "ask_product": ("Which product is this about? Please add the brand and type to your "
+                    "question, for example \"Daikin AC\" or \"LG microwave\"."),
 }
+
+# The same messages in Hindi and Telugu (chat 5.4): a Hindi question gets
+# "Which model?" / the refusal in Hindi too. Brand/manual words stay English,
+# as Indian users write them. Drafts by Claude; Furqan checks the wording.
+MESSAGES_BY_LANGUAGE = {
+    "English": MESSAGES,
+    "Hindi": {
+        "ask_model": "आपके पास कौन-सा मॉडल है? मुझे एक से ज़्यादा manual मिले जो फिट होते हैं।",
+        "clarify": ("मुझे पक्का नहीं पता कि आपको manual का कौन-सा हिस्सा चाहिए। "
+                    "क्या आप समस्या के बारे में थोड़ा और बता सकते हैं? "
+                    "जैसे: डिस्प्ले पर क्या दिख रहा है, या उपकरण क्या कर रहा है।"),
+        "low_score": ("मुझे यह manual में नहीं मिला। कृपया brand के service centre से संपर्क करें, "
+                      "या product को इस्तेमाल करने, साफ़ करने, सेट-अप करने या "
+                      "समस्या ठीक करने के बारे में पूछें।"),
+        "not_in_manual": ("Manual में इस सवाल का जवाब नहीं है। "
+                          "कृपया brand के service centre से संपर्क करें।"),
+        "gemini_error": "माफ़ कीजिए, अभी जवाब देने वाली सेवा उपलब्ध नहीं है। कृपया फिर से कोशिश करें।",
+        "pick": "नीचे से अपना मॉडल चुनें।",
+        "ask_product": ("यह किस product के बारे में है? कृपया अपने सवाल में brand और product "
+                        "का नाम लिखें, जैसे \"Daikin AC\" या \"LG microwave\"।"),
+    },
+    "Telugu": {
+        "ask_model": "మీ దగ్గర ఏ మోడల్ ఉంది? సరిపోయే manuals ఒకటి కంటే ఎక్కువ దొరికాయి.",
+        "clarify": ("మీకు manual లో ఏ భాగం కావాలో నాకు సరిగ్గా అర్థం కాలేదు. "
+                    "సమస్య గురించి ఇంకొంచెం వివరంగా చెప్పగలరా? "
+                    "ఉదాహరణకు: డిస్‌ప్లేలో ఏం కనిపిస్తోంది, లేదా ఉపకరణం ఏం చేస్తోంది."),
+        "low_score": ("ఇది manual లో నాకు దొరకలేదు. దయచేసి brand service centre ను సంప్రదించండి, "
+                      "లేదా product ను ఎలా వాడాలి, శుభ్రం చేయాలి, సెటప్ చేయాలి లేదా "
+                      "సమస్యలు ఎలా సరిచేయాలి అని అడగండి."),
+        "not_in_manual": ("ఈ ప్రశ్నకు manual లో సమాధానం లేదు. "
+                          "దయచేసి brand service centre ను సంప్రదించండి."),
+        "gemini_error": "క్షమించండి, ప్రస్తుతం సమాధానం ఇచ్చే సేవ అందుబాటులో లేదు. దయచేసి మళ్ళీ ప్రయత్నించండి.",
+        "pick": "కింద మీ మోడల్‌ను ఎంచుకోండి.",
+        "ask_product": ("ఇది ఏ product గురించి? దయచేసి మీ ప్రశ్నలో brand మరియు product పేరు "
+                        "రాయండి, ఉదాహరణకు \"Daikin AC\" లేదా \"LG microwave\"."),
+    },
+}
+
+
+def message(reason: str, language: str = "English") -> str:
+    """The fixed message for a reason, in the user's language (English if unknown)."""
+    table = MESSAGES_BY_LANGUAGE.get(language, MESSAGES)
+    return table.get(reason) or MESSAGES.get(reason, "")
 
 
 @dataclass
