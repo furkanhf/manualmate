@@ -165,6 +165,25 @@ def generate(question: str, chunks: list[dict], route=None,
                   gemini_ms=gemini_ms, gemini_tries=tries)
 
 
+def plan(question: str, manual_id: str | None = None) -> tuple[str, object]:
+    """Parser + router (no torch): (issue text for the search, route)."""
+    from manualmate.retrieve.query_parser import parse
+    from manualmate.retrieve.router import route as route_question, route_to
+
+    parsed = parse(question)
+    r = route_to(manual_id) if manual_id else route_question(parsed)
+    return parsed.issue or question, r
+
+
+def search(issue: str, conn, manual_ids: list[str]) -> list[dict]:
+    """Dense top 20 -> rerank -> top 5 (needs torch). Plain dicts out (picklable:
+    the ZeroGPU Space runs this in a separate GPU process)."""
+    from manualmate.retrieve import dense, reranker
+
+    candidates = dense.search(conn, issue, k=CANDIDATES, manual_ids=manual_ids)
+    return reranker.rerank(issue, candidates, top_k=TOP_K)   # reranker reads issue text
+
+
 def retrieve(question: str, conn, manual_id: str | None = None) -> tuple[list[dict], object]:
     """Parser + router + dense + rerank: the week-2 pipeline (needs torch).
 
@@ -172,17 +191,10 @@ def retrieve(question: str, conn, manual_id: str | None = None) -> tuple[list[di
     the chunk list is empty.
     manual_id: the user's answer to "Which model?" -> search only that manual.
     """
-    from manualmate.retrieve import dense, reranker
-    from manualmate.retrieve.query_parser import parse
-    from manualmate.retrieve.router import route as route_question, route_to
-
-    parsed = parse(question)
-    r = route_to(manual_id) if manual_id else route_question(parsed)
+    issue, r = plan(question, manual_id)
     if r.ask:
         return [], r
-    issue = parsed.issue or question
-    candidates = dense.search(conn, issue, k=CANDIDATES, manual_ids=r.manual_ids)
-    return reranker.rerank(issue, candidates, top_k=TOP_K), r   # reranker reads issue text
+    return search(issue, conn, r.manual_ids), r
 
 
 def retrieve_light(question: str, bm25, manual_id: str | None = None) -> tuple[list[dict], object]:
@@ -192,14 +204,10 @@ def retrieve_light(question: str, bm25, manual_id: str | None = None) -> tuple[l
     real search, but weaker, and BM25 scores are not 0..1 like rerank scores,
     so gate 1 (REFUSE_BELOW) only refuses when no chunk matches at all.
     """
-    from manualmate.retrieve.query_parser import parse
-    from manualmate.retrieve.router import route as route_question, route_to
-
-    parsed = parse(question)
-    r = route_to(manual_id) if manual_id else route_question(parsed)
+    issue, r = plan(question, manual_id)
     if r.ask:
         return [], r
-    return bm25.search(parsed.issue or question, k=TOP_K, manual_ids=r.manual_ids), r
+    return bm25.search(issue, k=TOP_K, manual_ids=r.manual_ids), r
 
 
 def answer(question: str, conn, language: str = "English") -> Answer:
@@ -358,12 +366,15 @@ def detect_language(text: str) -> str:
 
 
 def ask(question: str, conn=None, manual_id: str | None = None,
-        language: str | None = None, bm25=None) -> Answer:
+        language: str | None = None, bm25=None, searcher=None) -> Answer:
     """The app path (API and UI): translate -> search -> generate, with timings.
 
     manual_id: the manual the user picked after "Which model?" (or None).
     language:  "English" | "Hindi" | "Telugu", or None = detect from the script.
     bm25:      a BM25Index -> light search (laptop, no torch); None -> dense + rerank.
+    searcher:  searcher(issue, manual_ids) -> chunks, instead of search(issue, conn, ...):
+               the ZeroGPU Space runs dense + rerank in a GPU process (space/app.py).
+               Only called when the router does not ask "Which model?" (no GPU use then).
 
     Hindi/Telugu: the search uses Gemini's English translation (the eval did the
     same with saved translations); Gemini answers the ORIGINAL question in the
@@ -391,6 +402,9 @@ def ask(question: str, conn=None, manual_id: str | None = None,
     t0 = time.perf_counter()
     if bm25 is not None:
         chunks, r = retrieve_light(search_text, bm25, manual_id)
+    elif searcher is not None:
+        issue, r = plan(search_text, manual_id)
+        chunks = [] if r.ask else searcher(issue, r.manual_ids)
     else:
         chunks, r = retrieve(search_text, conn, manual_id)
     retrieve_ms = round((time.perf_counter() - t0) * 1000)

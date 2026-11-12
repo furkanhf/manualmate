@@ -248,6 +248,26 @@ def test_picked_manual_dropped_for_other_product(service):
     assert "Wi-Fi router" in r.text
 
 
+def test_searcher_hook_used_and_skipped_on_ask(service):
+    """The ZeroGPU Space plugs its GPU search in as service.searcher (space/app.py)."""
+    from manualmate.api.schemas import AskRequest
+    from manualmate.api.service import Service
+
+    calls = []
+
+    def searcher(issue, manual_ids):
+        calls.append((issue, manual_ids))
+        return service.bm25.search(issue, k=5, manual_ids=manual_ids)
+
+    s = Service("full")                  # no start(): no models; the hook does the search
+    s.searcher, s._conn = searcher, service.conn()
+    r = s.ask(AskRequest(question="How often should I wash the filter of my Samsung split AC?"))
+    assert r.action == "answer" and calls == [(calls[0][0], ["ac_001"])]
+    assert "Samsung" not in calls[0][0]                  # the issue text, brand removed
+    r = s.ask(AskRequest(question="My Daikin AC is noisy at night"))
+    assert r.action == "ask" and len(calls) == 1          # "Which model?": no GPU call
+
+
 # --- the chat rules (what the UI does) ------------------------------------------
 def test_chat_pick_button_then_follow_up(chat):
     c, rec = chat

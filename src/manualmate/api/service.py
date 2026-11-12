@@ -35,6 +35,7 @@ class Service:
             raise ValueError(f"MANUALMATE_SEARCH must be one of {SEARCH_MODES}, not {search!r}")
         self.search = search
         self.bm25 = None
+        self.searcher = None              # set by space/app.py: dense + rerank on ZeroGPU
         self.n_chunks = 0
         self._conn: psycopg.Connection | None = None
         self._lock = threading.Lock()     # one request at a time uses the connection
@@ -70,12 +71,15 @@ class Service:
     def ask(self, req: AskRequest) -> AskResponse:
         language = None if req.language == "auto" else req.language
         with self._lock:
+            def run():
+                return ask(req.question, self.conn(), req.manual_id, language,
+                           bm25=self.bm25, searcher=self.searcher)
             try:
-                a = ask(req.question, self.conn(), req.manual_id, language, self.bm25)
+                a = run()
             except psycopg.OperationalError:
                 # Neon dropped the connection (sleep): open a new one, try once more.
                 self._conn = None
-                a = ask(req.question, self.conn(), req.manual_id, language, self.bm25)
+                a = run()
         return to_response(a)
 
 
