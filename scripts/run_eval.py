@@ -48,6 +48,7 @@ from manualmate.retrieve.router import route
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 QUERIES_PATH = PROJECT_ROOT / "eval" / "text_queries.jsonl"
 REWRITES_PATH = PROJECT_ROOT / "eval" / "rewrites.jsonl"
+TRANSLATIONS_PATH = PROJECT_ROOT / "eval" / "translations.jsonl"
 RESULTS_DIR = PROJECT_ROOT / "eval" / "results"
 KS = [1, 3, 5, 10]
 METHODS = ["dense", "bm25", "hybrid", "routed", "routed_hybrid", "routed_rerank"]
@@ -78,6 +79,9 @@ def main() -> None:
                              "eval/rewrites.jsonl to the search text")
     parser.add_argument("--queries", type=Path, default=QUERIES_PATH,
                         help="question file (default: eval/text_queries.jsonl)")
+    parser.add_argument("--translations", action="store_true",
+                        help="search with Gemini's English translation of each question "
+                             "from eval/translations.jsonl (Hindi/Telugu questions)")
     args = parser.parse_args()
     routed = args.method.startswith("routed")
     reranked = args.method == "routed_rerank"
@@ -87,6 +91,8 @@ def main() -> None:
             args.name += f"_rr-{args.rerank_text}_c{args.candidates}"
         if args.rewrites:
             args.name += "_rw"
+        if args.translations:
+            args.name += "_tr"
     if args.rewrites and not routed:
         parser.error("--rewrites works only with the routed methods")
 
@@ -95,6 +101,16 @@ def main() -> None:
     if not queries:
         raise SystemExit(f"No questions in {args.queries}. Old code? Run 'git pull' "
                          "(notebook section 2) and check the commit hash.")
+    if args.translations:
+        with open(TRANSLATIONS_PATH, encoding="utf-8") as f:
+            translations = {r["id"]: r["translation"] for r in map(json.loads, f) if r}
+        missing = [q["id"] for q in queries if not translations.get(q["id"])]
+        if missing:
+            raise SystemExit(f"No translation for: {', '.join(missing)} "
+                             "(run scripts/make_translations.py on the laptop)")
+        for q in queries:                  # router, dense and reranker read the English text
+            q["original"], q["question"] = q["question"], translations[q["id"]]
+        print(f"Translations: {len(translations)} loaded")
     rewrites = {}
     if args.rewrites:
         with open(REWRITES_PATH, encoding="utf-8") as f:
@@ -157,6 +173,7 @@ def main() -> None:
                 "category": query["category"],
                 "type": query["type"],
                 "question": query["question"],
+                **({"original": query["original"]} if "original" in query else {}),
                 "expected": f"{query['manual_id']} p{query['pages']}",
                 "rank": rank,
                 "manual_in_top5": any(r["manual_id"] == query["manual_id"]
@@ -227,6 +244,8 @@ def main() -> None:
             "method": args.method,
             "query_text": args.query_text if routed else None,
             "rewrites": args.rewrites,
+            "translations": args.translations,
+            "queries_file": str(Path(args.queries).name),
             "reranker": ({"model": reranker.MODEL_NAME, "candidates": args.candidates,
                           "rerank_text": args.rerank_text} if reranked else None),
             "model": MODEL_NAME,
